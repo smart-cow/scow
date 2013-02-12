@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+
+<schema targetNamespace="http://www.wiredwidgets.org/rem2/schema"
+    xmlns:ns="http://www.wiredwidgets.org/rem2/schema" xmlns="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified">
+
+    <!-- Global elements -->
+    <element name="rem2" type="ns:Rem2"/>
+    <element name="node" type="ns:Node"/>
+    <element name="nodes" type="ns:Nodes"/>
+    <element name="nodeType" type="ns:NodeType"/>
+    <element name="nodeTypes" type="ns:NodeTypes"/>
+    <element name="namespace" type="ns:Namespace"/>
+    <element name="namespaces" type="ns:Namespaces"/>
+
+    <!-- Global complex types -->
+    <complexType name="Rem2">
+        <attribute name="version" type="string"/>
+    </complexType>
+
+    <complexType name="Node">
+        <sequence maxOccurs="1" minOccurs="1">
+            <element name="property" type="ns:Property" maxOccurs="unbounded" minOccurs="0"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="node" type="ns:Node"/>
+        </sequence>
+        <attribute name="name" type="string" use="required"/>
+        <attribute name="type" type="string"/>
+        <attribute name="path" type="string"/>
+    </complexType>
+
+    <complexType name="Property">
+        <sequence>
+            <element maxOccurs="1" minOccurs="0" name="values" type="ns:Values"/>
+        </sequence>
+        <attribute name="name" type="string" use="required"/>
+        <attribute name="value" type="string">
+            <annotation>
+                <documentation>A string representation of the value, which will be converted to the property's actual data type.</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="encoding" type="string">
+            <annotation>
+                <documentation>A value of "base64" indicates that the value should be interpreted as base64 encoded binary data.  </documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
+    <complexType name="NodeType">
+        <annotation>
+            <documentation>The structure of this type follows the structure of the Jackrabbit custom_nodetypes.xml configuration file.  This leads to some unfortunate method naming in JAXB generateed code, such as isIsQueryable().</documentation>
+        </annotation>
+        <sequence>
+            <element maxOccurs="unbounded" name="childNode" nillable="false"
+                type="ns:NodeDefinition" minOccurs="0"/>
+            <element maxOccurs="1" minOccurs="0" name="supertypes" type="ns:Supertypes"/>
+            <element name="propertyDefinition" maxOccurs="unbounded" minOccurs="0"
+                type="ns:PropertyDefinition"/>
+        </sequence>
+        <attribute name="name" type="string" use="required"/>
+        <attribute name="primaryItemName" type="string"/>
+        <attribute name="hasOrderableChildNodes" type="boolean" default="false"/>
+        <attribute name="isAbstract" type="boolean" default="false"/>
+        <attribute name="isMixin" type="boolean" default="false"/>
+        <attribute name="isQueryable" type="boolean" default="false"/>
+    </complexType>
+
+    <complexType name="NodeDefinition">
+        <complexContent>
+            <extension base="ns:ItemDef">
+                <sequence>
+                    <element name="allowSameNameSiblings" type="boolean" default="false"/>
+                    <element maxOccurs="1" minOccurs="1" name="defaultPrimaryType" type="string"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="requiredPrimaryType"
+                        type="string"/>
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="PropertyDefinition">
+        <complexContent>
+            <extension base="ns:ItemDef">
+                <sequence>
+                    <element maxOccurs="unbounded" minOccurs="0" name="queryOperator" type="string"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="defaultValue" type="string"/>
+                    <element maxOccurs="unbounded" minOccurs="0" name="valueConstraint"
+                        type="string"/>
+                </sequence>
+                <attribute name="requiredType" type="string" use="required"/>
+                <attribute name="multiple" type="boolean" default="false"/>
+                <attribute name="isQueryOrderable" type="boolean" default="true"/>
+                <attribute name="isFullTextSearchable" type="boolean" default="false"/>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="ItemDef">
+        <attribute name="name"/>
+        <attribute name="mandatory" type="boolean" default="false"/>
+        <attribute name="autoCreated" type="boolean" default="false"/>
+        <attribute name="protected" type="boolean" default="false"/>
+        <attribute name="onParentVersion" type="string" use="optional" default="COPY"/>
+    </complexType>
+
+    <complexType name="Value">
+        <attribute name="value" type="string"/>
+        <attribute name="type" type="string"/>
+    </complexType>
+
+    <complexType name="Values">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="value" type="string"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Supertypes">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="supertype" type="string"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="NodeTypes">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" ref="ns:nodeType"/>
+        </sequence>
+    </complexType>
+    <complexType name="Nodes">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="node" type="ns:Node"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Namespace">
+        <attribute name="prefix" type="string" use="required"/>
+        <attribute form="unqualified" name="URI" type="anyURI" use="required"/>
+    </complexType>
+    <complexType name="Namespaces">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" ref="ns:namespace"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ACL">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" ref="ns:aclEntry"/>
+        </sequence>
+    </complexType>
+    <complexType name="ACLEntry">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="privilege">
+                <complexType>
+                    <attribute name="name"/>
+                </complexType>
+            </element>
+        </sequence>
+        <attribute name="principal"/>
+        <attribute name="allow" type="boolean" default="true" />
+    </complexType>
+    <element name="aclEntry" type="ns:ACLEntry"/>
+    <element name="acl" type="ns:ACL"/>
+</schema>

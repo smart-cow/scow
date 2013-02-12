@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : applicationContext.xml
+    Created on : November 17, 2011, 1:59 PM
+    Author     : RYANMILLER
+    Description: drives the spring connection settings for the restful client
+                 to connect to the BPM (COW) server.
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:oxm="http://www.springframework.org/schema/oxm"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/oxm
+       http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd">
+
+    <!-- Enables support for annotations such as @Autowired -->
+    <context:annotation-config/>
+
+    <!-- Specify packages containing JAXB generated classes for marshalling/unmarshalling -->
+    <oxm:jaxb2-marshaller id="jaxb-marshaller" contextPath="org.wiredwidgets.cow.server.api.model.v2:org.wiredwidgets.cow.server.api.service" />
+
+    <!-- Define HTTP Message Converters used by the REST API -->
+
+    <bean id="bpmClient" class="org.wiredwidgets.cow.ac.util.server.client.BpmClient">
+        <constructor-arg ref="restTemplate"/>
+    </bean>
+
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.xml.SourceHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+                <bean id="marshallingHttpMessageConverter"
+                      class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+                    <property name="marshaller" ref="jaxb-marshaller" />
+                    <property name="unmarshaller" ref="jaxb-marshaller" />
+                        <!-- By default, this converter supports MediaType application/*+xml -->
+                        <!-- This causes problems when invoked from IE, which accepts application/xaml+xml -->
+                        <!-- thus causing the service to return application/xaml+xml, which IE then tries to handle as a WPF application -->
+                    <property name="supportedMediaTypes" value="application/xml" />
+                </bean>
+            </list>
+        </property>
+        <property name="errorHandler"  ref="bpmClientErrorHandler"/>
+    </bean>
+ 
+    <bean id="bpmClientErrorHandler" class="org.wiredwidgets.cow.ac.util.server.BpmClientErrorHandler"/>
+
+</beans>

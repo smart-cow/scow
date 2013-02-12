@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.wiredwigets.cow.ac.libs
+OpenIDE-Module-Implementation-Version: 2
+OpenIDE-Module-Localizing-Bundle: org/wiredwigets/cow/ac/libs/Bundle.properties
+

@@ -1,0 +1,252 @@
+/**
+ * Approved for Public Release: 10-4800. Distribution Unlimited.
+ * Copyright 2011 The MITRE Corporation,
+ * Licensed under the Apache License,
+ * Version 2.0 (the "License");
+ *
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under the License.
+ */
+.bigLabel {
+	font-size: 200%;
+}
+.linkLabel {
+	font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color: blue;
+	cursor: hand; cursor:pointer;
+	border-top: 1px solid #FAFAFA;
+	border-bottom: 1px solid #EDEDED;
+	background-color:#ffffff;
+	
+}
+
+.linkLabelDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color: blue;
+	cursor: hand; cursor:pointer;
+	border-top: 1px solid #FAFAFA;
+	background-color:#fafafa;
+	border-bottom: 1px solid #EDEDED;
+}
+.linkLabelOver,
+.linkLabelOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color: blue;
+	cursor: hand; cursor:pointer;
+	background-color:#daecff;
+    border-top: 1px dotted #c5e0ff;
+    border-bottom: 1px dotted #c5e0ff;  
+}
+.linkLabelSelected,
+.linkLabelSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color: blue;
+	cursor: hand; cursor:pointer;
+    background:#d9e4f6;
+    border-top: 1px dotted #9fb7e9;
+    border-bottom: 1px dotted #9fb7e9;    
+}
+.linkLabelSelectedOver,
+.linkLabelSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color: blue;
+	cursor: hand; cursor:pointer;
+	background-color:#bfdcf9;
+    border-top: 1px dotted #c5e0ff;
+    border-bottom: 1px dotted #c5e0ff; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.completed,
+.completedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffc0; border-top:1px solid #c0ffc0;*/
+    background-color:#99FF99;
+}
+.completedOver,
+.completedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0c0c0; border-top:1px solid #c0c0c0;*/
+    background-color:#BFFFBF;
+}
+.completedSelected,
+.completedSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffff; border-top:1px solid #c0ffff;*/
+    background-color:#82D882;
+}
+.completedSelectedOver,
+.completedSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #a0a0a0; border-top:1px solid #a0a0a0;*/
+    background-color:#B8D8B8;
+}
+
+.open,
+.openDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffc0; border-top:1px solid #c0ffc0;*/
+    background-color:#FFFF99;
+}
+.openOver,
+.openOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0c0c0; border-top:1px solid #c0c0c0;*/
+    background-color:#FFFFD8;
+}
+.openSelected,
+.openSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffff; border-top:1px solid #c0ffff;*/
+    background-color:#D8D882;
+}
+.openSelectedOver,
+.openSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #a0a0a0; border-top:1px solid #a0a0a0;*/
+    background-color:#D8D8B8;
+}
+
+.notStarted,
+.notStartedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffc0; border-top:1px solid #c0ffc0;*/
+    background-color:#E5E5E5;
+}
+.notStartedOver,
+.notStartedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0c0c0; border-top:1px solid #c0c0c0;*/
+    background-color:#F2F2F2;
+}
+.notStartedSelected,
+.notStartedSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffff; border-top:1px solid #c0ffff;*/
+    background-color:#CCCCCC;
+}
+.notStartedSelectedOver,
+.notStartedSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #a0a0a0; border-top:1px solid #a0a0a0;*/
+    background-color:#D8D8D8;
+}
+
+
+
+.planned,
+.plannedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffc0; border-top:1px solid #c0ffc0;*/
+    background-color:#9999ff;
+}
+.plannedOver,
+.plannedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0c0c0; border-top:1px solid #c0c0c0;*/
+    background-color:#8080ff;
+}
+.plannedSelected,
+.plannedSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffff; border-top:1px solid #c0ffff;*/
+    background-color:#6666ff;
+}
+.plannedSelectedOver,
+.plannedSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #a0a0a0; border-top:1px solid #a0a0a0;*/
+    background-color:#4d4dff;
+}
+
+.contingent,
+.contingentDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffc0; border-top:1px solid #c0ffc0;*/
+    background-color:#E5E5E5;
+}
+.contingentOver,
+.contingentOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0c0c0; border-top:1px solid #c0c0c0;*/
+    background-color:#F2F2F2;
+}
+.contingentSelected,
+.contingentSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffff; border-top:1px solid #c0ffff;*/
+    background-color:#CCCCCC;
+}
+.contingentSelectedOver,
+.contingentSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #a0a0a0; border-top:1px solid #a0a0a0;*/
+    background-color:#D8D8D8;
+}
+
+.precluded,
+.precludedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffc0; border-top:1px solid #c0ffc0;*/
+    background-color:#000000;
+}
+.precludedOver,
+.precludedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0c0c0; border-top:1px solid #c0c0c0;*/
+    background-color:#000000;
+}
+.precludedSelected,
+.precludedSelectedDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #c0ffff; border-top:1px solid #c0ffff;*/
+    background-color:#000000;
+}
+.precludedSelectedOver,
+.precludedSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:11px; text-overflow:ellipsis;
+    color:black;
+    /*border-bottom:1px solid #a0a0a0; border-top:1px solid #a0a0a0;*/
+    background-color:#000000;
+}

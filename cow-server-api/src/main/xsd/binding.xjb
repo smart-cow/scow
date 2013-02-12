@@ -1,0 +1,12 @@
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb" version="2.1">
+	<bindings namespace="http://www.wiredwidgets.org/cow/server/schema/service" schemaLocation="cow-service.xsd" >
+		<schemaBindings>
+			<package name="org.wiredwidgets.cow.server.api.service"/>
+		</schemaBindings>
+	</bindings>
+	<bindings namespace="http://www.wiredwidgets.org/cow/server/schema/model-v2" schemaLocation="cow-model.xsd" >
+		<schemaBindings>
+			<package name="org.wiredwidgets.cow.server.api.model.v2"/>
+		</schemaBindings>
+	</bindings>	
+</bindings>

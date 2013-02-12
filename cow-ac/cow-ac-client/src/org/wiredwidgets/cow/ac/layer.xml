@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="Window">
+            <file name="org-wiredwidgets-cow-ChicletAction.instance">
+                <attr name="component" methodvalue="org.wiredwidgets.cow.ac.workflowsummary.ui.ChicletTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="org.wiredwidgets.cow.ac.workflowsummary.ui.Bundle#CTL_ChicletAction"/>
+                <attr name="iconBase" stringvalue="org/wiredwidgets/cow/ac/client/images/cowicon16x16.png"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
+            <file name="org-wiredwidgets-cow-CowAction.instance">
+                <attr name="component" methodvalue="org.wiredwidgets.cow.ac.client.ui.CowTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="org.wiredwidgets.cow.ac.client.ui.Bundle#CTL_CowAction"/>
+                <attr name="iconBase" stringvalue="org/wiredwidgets/cow/ac/client/images/cowicon16x16.png"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="ChicletAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-wiredwidgets-cow-ChicletAction.instance"/>
+            </file>
+            <file name="CowAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/org-wiredwidgets-cow-CowAction.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="ChicletTopComponent.settings" url="ChicletTopComponentSettings.xml"/>
+            <file name="CowTopComponent.settings" url="CowTopComponentSettings.xml"/>            
+        </folder>
+        <folder name="Modes">
+            <folder name="output">
+                <file name="ChicletTopComponent.wstcref" url="ChicletTopComponentWstcref.xml"/>
+                <file name="CowTopComponent.wstcref" url="CowTopComponentWstcref.xml"/>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>

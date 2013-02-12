@@ -1,0 +1,67 @@
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- The HTML 4.01 Transitional DOCTYPE declaration-->
+<!-- above set at the top of the file will set     -->
+<!-- the browser's rendering engine into           -->
+<!-- "Quirks Mode". Replacing this declaration     -->
+<!-- with a "Standards Mode" doctype is supported, -->
+<!-- but may lead to some differences in layout.   -->
+
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+        <!--                                                               -->
+        <!-- Consider inlining CSS to reduce the number of requested files -->
+        <!--                                                               -->
+        <link type="text/css" rel="stylesheet" href="cow-webapp.css">
+        <link rel="shortcut icon" href="images/SmartCow_Logo.ico" />
+
+        <!--                                           -->
+        <!-- Any title is fine                         -->
+        <!--                                           -->
+        <title>COW MITRE/ESC GOTS</title>
+
+        <!--                                           -->
+        <!-- This script loads your compiled module.   -->
+        <!-- If you add any GWT meta tags, they must   -->
+        <!-- be added before this line.                -->
+        <!--    -->
+
+    </head>
+
+    <!--                                           -->
+    <!-- The body can have arbitrary html, or      -->
+    <!-- you can leave the body empty if you want  -->
+    <!-- to create a completely dynamic UI.        -->
+    <!--                                           -->
+    <body>
+
+        <div id="main"/>
+        <script type="text/javascript">var isPopup = false;
+        function viewWorkflowIFrame(workflow) {
+			var frame = document.frames ? document.frames['bpm'] : document.getElementById('bpm').contentWindow;
+			frame.viewWorkflow(workflow);
+        }
+        </script>
+        <script type="text/javascript" language="javascript" src="bpm/bpm.nocache.js"></script>
+
+    </body>
+
+</html>

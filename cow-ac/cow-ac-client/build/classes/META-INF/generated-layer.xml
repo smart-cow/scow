@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN"
+                            "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="OptionsDialog">
+        <folder name="CowSettings">
+            <file name="org-wiredwidgets-cow-ac-options-CowSettingsOptionsPanelController.instance">
+                <!--org.wiredwidgets.cow.ac.options.CowSettingsOptionsPanelController-->
+                <attr
+                    methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory" name="instanceCreate"/>
+                <attr name="controller" newvalue="org.wiredwidgets.cow.ac.options.CowSettingsOptionsPanelController"/>
+                <attr
+                    bundlevalue="org.wiredwidgets.cow.ac.options.Bundle#AdvancedOption_DisplayName_CowSettings" name="displayName"/>
+                <attr
+                    bundlevalue="org.wiredwidgets.cow.ac.options.Bundle#AdvancedOption_Keywords_CowSettings" name="keywords"/>
+                <attr name="keywordsCategory" stringvalue="CowSettings/CowSettings"/>
+            </file>
+            <!--org.wiredwidgets.cow.ac.options-->
+            <attr intvalue="0" name="position"/>
+        </folder>
+        <file name="CowSettings.instance">
+            <!--org.wiredwidgets.cow.ac.options-->
+            <attr
+                methodvalue="org.netbeans.spi.options.OptionsCategory.createCategory" name="instanceCreate"/>
+            <attr name="advancedOptionsFolder" stringvalue="OptionsDialog/CowSettings"/>
+            <attr
+                bundlevalue="org.wiredwidgets.cow.ac.options.Bundle#OptionsCategory_Name_CowSettings" name="categoryName"/>
+            <attr name="iconBase" stringvalue="org/wiredwidgets/cow/ac/options/cowicon32x32.png"/>
+            <attr
+                bundlevalue="org.wiredwidgets.cow.ac.options.Bundle#OptionsCategory_Keywords_CowSettings" name="keywords"/>
+            <attr name="keywordsCategory" stringvalue="CowSettings"/>
+        </file>
+    </folder>
+    <folder name="xml">
+        <folder name="entities">
+            <folder name="org_wiredwidgets_cow_ac_client_ui">
+                <file name="Cow" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
+                    <!--org.wiredwidgets.cow.ac.client.ui.CowTopComponent-->
+                    <attr name="hint.originalPublicID" stringvalue="-//org.wiredwidgets.cow.ac.client.ui//Cow//EN"/>
+                </file>
+            </folder>
+            <folder name="org_wiredwidgets_cow_ac_workflowsummary_ui">
+                <file name="Chiclet" url="nbres:/org/netbeans/modules/settings/resources/properties-1_0.dtd">
+                    <!--org.wiredwidgets.cow.ac.workflowsummary.ui.ChicletTopComponent-->
+                    <attr name="hint.originalPublicID" stringvalue="-//org.wiredwidgets.cow.ac.workflowsummary.ui//Chiclet//EN"/>
+                </file>
+            </folder>
+        </folder>
+        <folder name="memory">
+            <folder name="org">
+                <folder name="wiredwidgets">
+                    <folder name="cow">
+                        <folder name="ac">
+                            <folder name="client">
+                                <folder name="ui">
+                                    <file name="CowTopComponent">
+                                    <!--org.wiredwidgets.cow.ac.client.ui.CowTopComponent-->
+                                    <attr
+                                    name="settings.providerPath" stringvalue="xml/lookups//org_wiredwidgets_cow_ac_client_ui/Cow.instance"/>
+                                    </file>
+                                </folder>
+                            </folder>
+                            <folder name="workflowsummary">
+                                <folder name="ui">
+                                    <file name="ChicletTopComponent">
+                                    <!--org.wiredwidgets.cow.ac.workflowsummary.ui.ChicletTopComponent-->
+                                    <attr
+                                    name="settings.providerPath" stringvalue="xml/lookups//org_wiredwidgets_cow_ac_workflowsummary_ui/Chiclet.instance"/>
+                                    </file>
+                                </folder>
+                            </folder>
+                        </folder>
+                    </folder>
+                </folder>
+            </folder>
+        </folder>
+        <folder name="lookups">
+            <folder name="org_wiredwidgets_cow_ac_client_ui">
+                <file name="Cow.instance">
+                    <!--org.wiredwidgets.cow.ac.client.ui.CowTopComponent-->
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.create" name="instanceCreate"/>
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.properties" name="settings.convertor"/>
+                    <attr name="settings.instanceClass" stringvalue="org.wiredwidgets.cow.ac.client.ui.CowTopComponent"/>
+                    <attr name="settings.instanceOf" stringvalue="org.wiredwidgets.cow.ac.client.ui.CowTopComponent"/>
+                    <attr boolvalue="true" name="xmlproperties.preventStoring"/>
+                </file>
+            </folder>
+            <folder name="org_wiredwidgets_cow_ac_workflowsummary_ui">
+                <file name="Chiclet.instance">
+                    <!--org.wiredwidgets.cow.ac.workflowsummary.ui.ChicletTopComponent-->
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.create" name="instanceCreate"/>
+                    <attr
+                        methodvalue="org.netbeans.api.settings.Factory.properties" name="settings.convertor"/>
+                    <attr name="settings.instanceClass" stringvalue="org.wiredwidgets.cow.ac.workflowsummary.ui.ChicletTopComponent"/>
+                    <attr name="settings.instanceOf" stringvalue="org.wiredwidgets.cow.ac.workflowsummary.ui.ChicletTopComponent"/>
+                    <attr boolvalue="true" name="xmlproperties.preventStoring"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+
+<xsd:schema elementFormDefault="qualified" attributeFormDefault="unqualified"
+	xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+	targetNamespace="http://www.omg.org/spec/BPMN/20100524/MODEL">
+
+	<xsd:import namespace="http://www.omg.org/spec/BPMN/20100524/DI" schemaLocation="BPMNDI.xsd"/>
+	<xsd:include schemaLocation="Semantic.xsd"/>
+
+	<xsd:element name="definitions" type="tDefinitions"/>
+	<xsd:complexType name="tDefinitions">
+		<xsd:sequence>
+			<xsd:element ref="import" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="extension" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="rootElement" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="bpmndi:BPMNDiagram" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element ref="relationship" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="id" type="xsd:ID" use="optional"/>
+		<xsd:attribute name="name" type="xsd:string"/>
+		<xsd:attribute name="targetNamespace" type="xsd:anyURI" use="required"/>
+		<xsd:attribute name="expressionLanguage" type="xsd:anyURI" use="optional" default="http://www.w3.org/1999/XPath"/>
+		<xsd:attribute name="typeLanguage" type="xsd:anyURI" use="optional" default="http://www.w3.org/2001/XMLSchema"/>
+		<xsd:attribute name="exporter" type="xsd:string"/>
+		<xsd:attribute name="exporterVersion" type="xsd:string"/>
+		<xsd:anyAttribute namespace="##other" processContents="lax"/>
+	</xsd:complexType>
+
+	<xsd:element name="import" type="tImport"/>
+	<xsd:complexType name="tImport">
+		<xsd:attribute name="namespace" type="xsd:anyURI" use="required"/>
+		<xsd:attribute name="location" type="xsd:string" use="required"/>
+		<xsd:attribute name="importType" type="xsd:anyURI" use="required"/>
+	</xsd:complexType>
+
+</xsd:schema>

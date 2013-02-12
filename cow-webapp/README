@@ -1,0 +1,58 @@
+==================================
+COW Webapp
+https://bitbucket.org/wjk5828/wiredwidgets-cow-webapp
+==================================
+
+Approved for Public Release: 10-4800. Distribution Unlimited.
+Copyright 2011 The MITRE Corporation,
+Licensed under the Apache License,
+Version 2.0 (the "License");
+See COPYRIGHT.txt for additional information
+
+View the changlog at http://www.wiredwidgets.org/cow/cow-webapp-changelog
+
+Overview
+========
+
+For information about the Composible Operational Workflows project, see http://www.wiredwidgets.org/cow
+
+The COW webapp is a web GUI designed to be used in conjunction with the REST services procided by the COW server (see https://bitbucket.org/wjk5828/wiredwidgets-cow-server and https://bitbucket.org/wjk5828/wiredwidgets-cow-server-api). The application is built using SmartGWT (http://code.google.com/p/smartgwt/), a variant of GWT (Google Web Toolkit). GWT allows code to be written with a subset of Java and compiles into Javascript with multi-browser compatibility, and will compile into both a standard web page and an OpenSocial gadget with minimal code changes.
+
+The COW webapp is designed to demonstrate as many features that the COW server provides as possible. This includes creating and editing workflows, executing workflows and tracking their progress, completing tasks created from workflows in execution, and more.
+
+
+Building and Deployment
+=======================
+
+Build Requirements:
+* Maven (Eclipse plugin: http://www.eclipse.org/m2e/)
+* JDK 1.6
+* gwt-gadgets-1.2.jar (http://code.google.com/p/gwt-google-apis/downloads/detail?name=gwt-gadgets-1.2.0.zip&can=2&q=)
+
+Deploy Requirements:
+* Tomcat 6 (for webpage)
+* OpenSocial gadget container (for gadget)
+
+Build Steps:
+* Unzip gwt-gadgets.zip and rename the gwt-gadgets.jar file to gwt-gadgets-1.2.jar
+* Place gwt-gadgets-1.2.jar in your local maven repository at %MAVEN_REPO%\repository\com\google\gwt\google-apis\gwt-gadgets\1.2
+* Open Eclipse and install the m2e plugin if not already installed
+* Import pom.xml in root folder (File->Import->Maven->Existing Maven Project, select root directory and choose the pom.xml file)
+* Adjust the url to the COW server in %CODE_DIR%/cow-webapp/war/WEB-INF/applicationContext.xml, identified through the baseUrl property of the bpmService bean
+* If compiling as a gadget, make the necessary changes detailed in %CODE_DIR%/cow-webapp/GWTToGadget.txt
+* Run Maven generate-sources (Right click on project->Run As->Maven generate-sources
+* Run Maven install (Right click on project->Run As->Maven install)
+
+Deploy Steps:
+* The generated WAR file is located at %CODE_DIR%/cow-webapp/target/cow-webapp.war
+* If compiling as a gadget, import the WAR file as described in your gadget container's documentation
+* Otherwise, place the WAR file in the %TOMCAT_HOME%/webapps/ directory
+* Run Tomcat
+* Open a browser and point it to http://localhost:yourTomcatPort/cow-webapp and ensure the application is running
+
+
+Support and FAQ
+===============
+For questions or support, contact any of the authors via BitBucket's profile page, or email dev@WiredWidgets.org to get put in direct contact with a developer.
+
+See the combined FAQ/troubleshooting page for the COW effort at http://www.wiredwidgets.org/cow/faq

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+
+<schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+    targetNamespace="http://www.wiredwidgets.org/cow/server/schema/service"
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://www.wiredwidgets.org/cow/server/schema/service"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:model="http://www.wiredwidgets.org/cow/server/schema/model-v2"
+    xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+
+    <import namespace="http://www.wiredwidgets.org/cow/server/schema/model-v2"
+        schemaLocation="cow-model.xsd"/>
+
+    <!-- Global Elements -->
+
+    <element name="cow" type="tns:Cow"/>
+
+    <element name="processDefinition" type="tns:ProcessDefinition"/>
+
+    <element name="processDefinitions" type="tns:ProcessDefinitions"/>
+
+    <element name="tasks" type="tns:Tasks"/>
+
+    <element name="processInstances" type="tns:ProcessInstances"/>
+
+    <element name="deployments" type="tns:Deployments"/>
+
+    <element name="deployment" type="tns:Deployment"/>
+
+    <element name="resourceNames" type="tns:ResourceNames"/>
+
+    <element name="processInstance" type="tns:ProcessInstance"/>
+
+    <element name="task" type="tns:Task"/>
+
+    <element name="user" type="tns:User"/>
+
+    <element name="group" type="tns:Group"/>
+
+    <element name="users" type="tns:Users"/>
+
+    <element name="groups" type="tns:Groups"/>
+
+    <element name="historyTasks" type="tns:HistoryTasks"/>
+
+    <element name="historyTask" type="tns:HistoryTask"/>
+
+    <element name="historyActivity" type="tns:HistoryActivity"/>
+
+    <element name="historyActivities" type="tns:HistoryActivities"/>
+
+    <element name="participations" type="tns:Participations"/>
+
+    <element name="membership" type="tns:Membership"/>
+
+    <!-- Complex Types -->
+
+    <complexType name="Cow">
+        <annotation>
+            <documentation>The COW system.  Used to provide the current server version.</documentation>
+        </annotation>
+        <attribute name="version" type="string"/>
+    </complexType>
+
+    <complexType name="Tasks">
+        <sequence>
+            <element minOccurs="0" maxOccurs="unbounded" ref="tns:task"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Task">
+        <annotation>
+            <documentation>A workflow Human Task</documentation>
+        </annotation>
+        <sequence>
+            <element name="assignee" type="string" minOccurs="0"/>
+            <element name="createTime" type="dateTime" minOccurs="0"/>
+            <element name="state" type="string" minOccurs="0"/>
+            <element name="activityName" type="string" minOccurs="0">
+                <annotation>
+                    <documentation>The task name taken directly from the underlying process engine.  This may be a system generated value and is intended for programmatic use rather than display to users.</documentation>
+                </annotation>
+            </element>
+            <element name="priority" nillable="false" type="int" minOccurs="0"/>
+            <element name="name" type="string" minOccurs="0">
+                <annotation>
+                    <documentation>A short name suitable for display in the user interface.  Not necessarily the same as the task name in the underlying process engine.</documentation>
+                </annotation>
+            </element>
+            <element name="dueDate" type="dateTime" minOccurs="0"/>
+            <element name="description" type="string" minOccurs="0">
+                <annotation>
+                    <documentation>A longer description of the task.  For workflows converted fom COW XML, this is taken from the 'documentation' element.</documentation>
+                </annotation>
+            </element>
+            <element name="duration" type="long" minOccurs="0"/>
+            <element name="endTime" type="dateTime" minOccurs="0"/>
+            <element name="outcome" type="string" minOccurs="0" maxOccurs="unbounded"/>
+            <element name="processInstanceId" type="string" minOccurs="0">
+                <annotation>
+                    <documentation>The id of the process instance within which this task is running.  This process instance may be a subprocess within another process.</documentation>
+                </annotation>
+            </element>
+            <element name="processInstanceUrl" type="string" minOccurs="0"/>
+            <element minOccurs="0" name="progress" type="int"/>
+            <element minOccurs="0" name="variables" type="tns:Variables"/>
+        </sequence>
+        <attribute name="id" type="string"/>
+    </complexType>
+
+    <complexType name="ProcessInstance">
+        <annotation>
+            <documentation>A runtime instance of a workflow process.</documentation>
+        </annotation>
+        <sequence>
+            <element name="priority" type="int" minOccurs="0"/>
+            <element name="name" type="string" minOccurs="0"/>
+            <element name="processDefinitionId" type="string" minOccurs="0"/>
+            <element name="startTime" type="dateTime" minOccurs="0"/>
+            <element name="endTime" type="dateTime" minOccurs="0"/>
+            <element name="duration" type="long" minOccurs="0"/>
+            <element name="state" type="string" minOccurs="0"/>
+            <element minOccurs="0" name="key" type="string"/>
+            <element minOccurs="0" name="id" type="string"/>
+            <element minOccurs="0" name="parentId" type="string">
+                <annotation>
+                    <documentation>The ID of the outermost process instance in the nested structure. Same as the id if this process instance is itself the outermost one.</documentation>
+                </annotation>
+            </element>
+            <element maxOccurs="1" minOccurs="0" name="variables" type="tns:Variables"/>
+            <element name="processDefinitionKey" type="string"/>
+            <element minOccurs="0" maxOccurs="unbounded" name="task" type="tns:Task"/>
+            <element minOccurs="0" name="process" type="model:Process"/>
+            <element name="statusSummary" type="tns:StatusSummary" maxOccurs="unbounded" minOccurs="0"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ProcessInstances">
+        <annotation>
+            <documentation>A set of ProcessInstance objects</documentation>
+        </annotation>
+        <sequence>
+            <element minOccurs="0" maxOccurs="unbounded" ref="tns:processInstance"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Deployment">
+        <annotation>
+            <documentation>A container for ProcessDefinition versions.  A new Deployment and a new ProcessInstance are created each time a workflow is saved to the server.</documentation>
+        </annotation>
+        <sequence>
+            <element name="id" type="string"/>
+            <element name="name" type="string"/>
+            <element name="state" type="string"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Deployments">
+        <annotation>
+            <documentation>A set of Deployment objects</documentation>
+        </annotation>
+        <sequence>
+            <element minOccurs="0" maxOccurs="unbounded" ref="tns:deployment"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ResourceNames">
+        <sequence>
+            <element minOccurs="0" maxOccurs="unbounded" name="name" type="string"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Variable">
+        <annotation>
+            <documentation>A name/value pair.</documentation>
+        </annotation>
+        <attribute name="name" type="string"/>
+        <attribute name="value" type="string"/>
+    </complexType>
+
+    <complexType name="Variables">
+        <annotation>
+            <documentation>A set of Variable objects</documentation>
+        </annotation>
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="variable" type="tns:Variable"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ProcessDefinition">
+        <annotation>
+            <documentation>A version of a workflow.  Many operations only consider the most recent version of each workflow, but past versions are available if requested.  Each ProcessDefinition is linked to the Deployment that created it.</documentation>
+        </annotation>
+        <sequence>
+            <element name="deploymentId" type="string"/>
+            <element name="description" type="string"/>
+            <element name="key" type="string"/>
+            <element name="name" type="string"/>
+            <element name="version" type="int"/>
+            <element default="false" name="suspended" type="boolean"/>
+        </sequence>
+        <attribute name="id" type="string" use="optional"/>
+    </complexType>
+
+    <complexType name="ProcessDefinitions">
+        <annotation>
+            <documentation>A set of ProcessDefinition objects</documentation>
+        </annotation>
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" ref="tns:processDefinition"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="User">
+        <annotation>
+            <documentation>A user of the workflow system; typically someone who can be assigned Tasks.</documentation>
+        </annotation>
+        <sequence>
+            <element name="id" type="string"/>
+            <element name="lastName" type="string"/>
+            <element name="firstName" type="string"/>
+            <element name="email" type="string"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="membership" type="tns:Membership"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Group">
+        <annotation>
+            <documentation>A group or role containing users as members.  A user's group(s) determines whether he is a 'candidate' for a task.</documentation>
+        </annotation>
+        <sequence>
+            <element name="id" type="string"/>
+            <element name="name" type="string"/>
+            <element minOccurs="0" name="type" type="string"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Membership">
+        <annotation>
+            <documentation>Ths assignment of a user to a group</documentation>
+        </annotation>
+        <attribute name="group" type="string" use="required"/>
+    </complexType>
+
+    <complexType name="Users">
+        <annotation>
+            <documentation>A set of User objects</documentation>
+        </annotation>
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="user" type="tns:User"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Groups">
+        <annotation>
+            <documentation>A set of Group objects</documentation>
+        </annotation>
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="group" type="tns:Group"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Participation">
+        <attribute name="type" type="string" use="required"/>
+        <attribute name="id" type="string" use="required"/>
+        <attribute name="user" type="string" use="optional"/>
+        <attribute name="group" type="string"/>
+    </complexType>
+
+    <complexType name="Participations">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" name="participation"
+                type="tns:Participation"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="HistoryTask">
+        <annotation>
+            <documentation>A task that has been completed.</documentation>
+        </annotation>
+        <sequence>
+            <element minOccurs="0" name="assignee" type="string"/>
+            <element name="createTime" type="dateTime"/>
+            <element name="duration" type="long"/>
+            <element minOccurs="0" name="endTime" type="dateTime"/>
+            <element minOccurs="0" name="executionId" type="string"/>
+            <element minOccurs="0" name="outcome" type="string"/>
+            <element minOccurs="0" name="state" type="string"/>
+        </sequence>
+        <attribute name="id" type="string" use="required"/>
+    </complexType>
+
+    <complexType name="HistoryTasks">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" ref="tns:historyTask"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Execution">
+        <sequence/>
+        <attribute name="newAttribute"/>
+    </complexType>
+    <complexType name="DynamicTask">
+        <sequence>
+            <element name="assignee" type="string"/>
+            <element name="notifyVia"/>
+        </sequence>
+    </complexType>
+    <complexType name="HistoryActivity">
+        <annotation>
+            <documentation>An Activity that has been completed.  Similar to HistoryTsak but with different attributes.  </documentation>
+        </annotation>
+        <sequence>
+            <element name="activityName" type="string"/>
+            <element minOccurs="0" name="duration" type="long"/>
+            <element minOccurs="0" name="endTime" type="dateTime"/>
+            <element name="executionId" type="string"/>
+            <element name="startTime" type="dateTime"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="transitionName" type="string"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="HistoryActivities">
+        <sequence>
+            <element ref="tns:historyActivity" maxOccurs="unbounded" minOccurs="0"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="StatusSummary">
+        <sequence>
+            <element maxOccurs="unbounded" minOccurs="0" ref="model:task"/>
+        </sequence>
+        <attribute name="type" type="string" />
+        <attribute name="name" type="string" />
+        <attribute name="status" type="string"/>
+        <attribute name="count" type="int"/>
+    </complexType>
+
+</schema>

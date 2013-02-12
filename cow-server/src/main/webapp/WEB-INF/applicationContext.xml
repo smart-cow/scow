@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:jbpm="http://drools.org/schema/drools-spring"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security-3.1.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.1.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+       http://www.springframework.org/schema/oxm
+       http://www.springframework.org/schema/oxm/spring-oxm-3.1.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+       http://www.springframework.org/schema/util 
+       http://www.springframework.org/schema/util/spring-util-3.1.xsd
+       http://www.springframework.org/schema/jee
+       http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+       http://www.springframework.org/schema/mvc 
+       http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+       http://drools.org/schema/drools-spring 
+       http://drools.org/schema/drools-spring.xsd
+       http://www.springframework.org/schema/data/jpa
+       http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"
+       default-init-method="init">
+
+    <!-- Enables support for annotations such as @Autowired -->
+    <context:annotation-config/>
+    
+    <!-- properties file used to provide values for ${property} expressions -->
+    <context:property-placeholder location="classpath:cow-server.properties" />
+    
+    <!-- scan and load annotated components -->
+    <context:component-scan base-package=
+       "org.wiredwidgets.cow.server.completion, 
+    	org.wiredwidgets.cow.server.convert, 
+    	org.wiredwidgets.cow.server.service,
+    	org.wiredwidgets.cow.server.transform" /> 
+    
+    <!--<bean id="cow" class="org.wiredwidgets.cow.server.api.service.Cow" >
+        <property name="version" value="${project.version}" />
+    </bean>   -->
+    
+    <!-- Note that individual converters are loaded via component scanning -->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
+    
+    <bean id="myDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${datasource.driverClassName}" />
+        <property name="url" value="${datasource.url}" />
+        <property name="username" value="${datasource.username}" />
+        <property name="password" value="${datasource.password}" />
+    </bean>
+    
+    <bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="myDataSource"/>
+        <property name="persistenceUnitName" value="org.drools.persistence.jpa.local"/>
+        <property name="jpaProperties">
+	        <props>
+	        	<!-- Properties can go here instead of in persistence.xml -->
+	        	<prop key="hibernate.show_sql">false</prop>      	
+      			<prop key="hibernate.max_fetch_depth">3</prop>
+      			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+      			<prop key="hibernate.connection.autocommit">true</prop>
+      			
+      			<!-- use "create" to clear out the DB on system startup -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+	        </props>
+        </property>
+    </bean>
+    
+    <bean id="sel" class="org.drools.SystemEventListenerFactory" factory-method="getSystemEventListener" />
+    
+    <bean id="jbpmTaskService" class="org.jbpm.task.service.TaskService" c:emf-ref="emf" c:systemEventListener-ref="sel"/>
+    
+    <!--<bean id="userGroups" class="java.util.HashMap" />-->
+    
+    <!--<bean id="userGroupCallback" class="org.jbpm.task.identity.LDAPUserGroupCallbackImpl" />-->
+    
+    <bean id="taskServiceSessionManager" class="org.wiredwidgets.cow.server.manager.TaskServiceSessionManagerImpl" init-method="init" >
+        <property name="jbpmTaskService" ref="jbpmTaskService" />
+        <property name="ldapHelper" ref="ldapHelper" />
+        <!--<property name="userGroups" ref="userGroups" />
+        <property name="groups" ref="groups" />-->
+    </bean>
+      
+    <bean id="minaTaskServer" class="org.jbpm.task.service.mina.MinaTaskServer" c:service-ref="jbpmTaskService" destroy-method="stop" />
+ 
+    <bean id="minaTaskServerManager" class="org.wiredwidgets.cow.server.manager.MinaTaskServerManager" init-method="init" >
+        <property name="minaTaskServer" ref="minaTaskServer" />
+        <!--<property name="userGroupCallback" ref="userGroupCallback" />-->
+    </bean>
+    
+    <bean id="minaTaskClientHandler" class="org.jbpm.task.service.mina.MinaTaskClientHandler" c:systemEventListener-ref="sel"/>
+    
+    <bean id="minaTaskClientConnector" class="org.jbpm.task.service.mina.MinaTaskClientConnector">
+        <constructor-arg type="java.lang.String" value="client 1" />
+        <constructor-arg ref="minaTaskClientHandler" />
+    </bean>
+    
+    <!--<bean id="minaTaskClient" class="org.jbpm.task.service.mina.AsyncMinaTaskClient" />-->
+    
+    <bean id="taskClient" class="org.jbpm.task.service.TaskClient" c:connector-ref="minaTaskClientConnector" />
+    
+    <bean id="taskClientManager" class="org.wiredwidgets.cow.server.manager.TaskClientManager" init-method="init" >
+        <property name="taskClient" ref="taskClient" />
+    </bean>
+    
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    
+    <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="emf"/>
+        <property name="dataSource" ref="myDataSource" />
+        <property name="jpaDialect" ref="jpaDialect" />
+    </bean>
+    
+    <tx:annotation-driven transaction-manager="txManager" />
+
+    <jbpm:grid-node id="node1"/>
+
+    <jbpm:kbase id="kBase" node="node1"/>
+    
+    <bean id="knowledgeSessionFactory" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" />
+   
+    <bean id="kSession" factory-bean="knowledgeSessionFactory" factory-method="createInstance" />
+    
+    <bean id="logger" class="org.jbpm.process.audit.JPAWorkingMemoryDbLogger" c:session-ref="kSession" destroy-method="dispose" />
+    
+    <bean id="restServiceTaskHandler" class="org.wiredwidgets.cow.server.manager.RestServiceTaskHandler" />
+        
+    <bean id="workItemHandler" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" factory-method="createInstance"> <!--c:session-ref="kSession" c:handle-ref="restServiceTaskHandler" >-->
+        <constructor-arg ref="kSession" />
+        <constructor-arg ref="restServiceTaskHandler" />
+    </bean>
+    
+    <bean id="jpmnProcessEventListener" class="org.wiredwidgets.cow.server.listener.JbpmProcessEventListener">
+        <property name="sessionProcessListener" ref="kSession" />
+    </bean>
+    
+    <bean id="ldapHelper" class="org.wiredwidgets.cow.server.helper.LDAPHelper"/>
+    
+    <!-- AMQP integration -->
+   	<bean id="amqpNotifier" class="org.wiredwidgets.cow.server.listener.AmqpNotifier" init-method="init" >
+   		<property name="host" value="${amqp.host}" />
+   		<property name="port" value="${amqp.port}" />
+   	</bean>
+
+    <!-- Specify packages containing JAXB generated classes for marshalling/unmarshalling -->
+    <oxm:jaxb2-marshaller id="jaxb-marshaller" contextPath="org.omg.spec.bpmn._20100524.model:org.wiredwidgets.cow.server.api.service:org.wiredwidgets.rem2.schema:org.wiredwidgets.cow.server.api.model.v2" />
+
+    <!-- The Jackson library provides support for JSON as an alternative to XML 
+         REST clients can request JSON by setting the Accept header to 'application/json' instead of 'application/xml' -->
+    <bean id="jacksonJaxbAnnotationIntrospector" class="org.codehaus.jackson.xc.JaxbAnnotationIntrospector" />
+
+    <bean id="jacksonObjectMapper" class="org.codehaus.jackson.map.ObjectMapper">
+        <property name="deserializationConfig.annotationIntrospector" ref="jacksonJaxbAnnotationIntrospector" />
+        <property name="serializationConfig.annotationIntrospector" ref="jacksonJaxbAnnotationIntrospector" />
+    </bean>
+
+    <!-- Define HTTP Message Converters used by the REST API -->
+    
+    <bean id="marshallingHttpMessageConverter"
+          class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+        <property name="marshaller" ref="jaxb-marshaller" />
+        <property name="unmarshaller" ref="jaxb-marshaller" />
+        <!-- By default, this converter supports MediaType application/*+xml -->
+        <!-- This causes problems when invoked from IE, which accepts application/xaml+xml -->
+        <!-- thus causing the service to return application/xaml+xml, which IE then tries to handle as a WPF application -->
+        <property name="supportedMediaTypes" value="application/xml" />
+    </bean>    
+    
+    <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" />
+
+    <bean id="sourceHttpMessageConverter" class="org.springframework.http.converter.xml.SourceHttpMessageConverter" />
+    
+    <bean id="rssHttpMessageConverter" class="org.springframework.http.converter.feed.RssChannelHttpMessageConverter" />
+
+    <bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+        <property name="objectMapper" ref="jacksonObjectMapper" />
+    </bean>
+   
+    <!-- Special instance of the stringMessageConverter that reads and writes application/xml content -->
+    <!-- this allows it to handle XML content stored in a String object -->
+    <bean id="xmlStringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" >
+        <property name="supportedMediaTypes" value="application/xml" />
+    </bean>
+       
+    <!-- Instance of RestTemplate, used by RestServiceInvoker -->
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" >
+        <property name="messageConverters">
+            <util:list>
+                <ref bean="marshallingHttpMessageConverter" />
+                <ref bean="xmlStringHttpMessageConverter" />
+                <ref bean="rssHttpMessageConverter" />
+                <ref bean="sourceHttpMessageConverter" />
+            </util:list>
+        </property>
+    </bean>
+    
+    
+    <!-- Spring Data JPA -->
+    <jpa:repositories base-package="org.wiredwidgets.cow.server.repo"
+    	entity-manager-factory-ref="emf" transaction-manager-ref="txManager" />
+    
+</beans>

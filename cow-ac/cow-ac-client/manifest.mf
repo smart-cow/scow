@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.wiredwidgets.cow.ac
+OpenIDE-Module-Implementation-Version: 2
+OpenIDE-Module-Layer: org/wiredwidgets/cow/ac/layer.xml
+OpenIDE-Module-Localizing-Bundle: org/wiredwidgets/cow/ac/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+

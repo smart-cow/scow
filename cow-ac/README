@@ -1,0 +1,60 @@
+==================================
+COW Agile Client (Netbeans) Plugin
+https://bitbucket.org/wjk5828/wired-widgets-cow-agile-client
+==================================
+
+Approved for Public Release: 10-4800. Distribution Unlimited.
+Copyright 2011 The MITRE Corporation,
+Licensed under the Apache License,
+Version 2.0 (the "License");
+See COPYRIGHT.txt for additional information
+
+View the changlog at http://www.wiredwidgets.org/cow/cow-agile-client-changelog
+
+Overview
+========
+
+For information about the Composible Operational Workflows project, see http://www.wiredwidgets.org/cow
+
+The COW Agile Client plugins are a representative prototype of a Netbeans-based client to manage workflows and complete assigned tasks.  It connects to a COW server (see https://bitbucket.org/wjk5828/wiredwidgets-cow-server) via REST calls defined by the COW Server API (https://bitbucket.org/wjk5828/wiredwidgets-cow-server-api). The plugins are designed to run in the AgileClient platform (a customized Netbeans 6.9.1 platform) but could be tweaked to work with any "vanilla" Netbeans platform.
+
+There are three Netbeans modules (NBMs) that are contained within a single module suite.  All three are needed to function.
+
+* cow-ac-client: the core module which contains all the source code for the actual client
+* cow-ac-libs: wraps dependency libraries needed for Spring, message handling, server notifications, logging, and so forth
+* cow-server-api: wraps the cow-server-api jar into a NBM which provides access to java and the REST calls in use by the server
+
+
+Building
+========
+
+Requirements:
+* Most easily built in Netbeans 7.1 
+* JDK 1.6
+* Agile Client 4.2.0.5 R2
+
+Additional environments will work with minimal adjustment, but the above is the development team's standard environment.
+
+Build Steps:
+* Open Netbeans
+* Open the Netbeans Module Suite project in Netbeans (File -> Open Project, browse to the location of the "cow-ac-suite" folder). Optionally open up each of the three modules in the suite.
+* Ensure that a JDK 1.6 Java Platform and the AgileClient Netbeans Platform are registered with Netbeans (Tools -> Java Platforms, Tools -> Netbeans Platforms).
+* Right-click the cow-ac-suite suite project and open the project "Properties".
+* Set the Java and Netbeans platforms under the "Libraries" setting.
+* Right-click the cow-ac-suite project and select "Clean and Build All". (There may be some project warnings, but should be no errors.)
+* Right-click the cow-ac-suite project and select "Package As -> NBMs" to build the nbm files. Note the location of the built files in the output window.
+
+Loading in Agile Client:
+* Open AgileClient and add all three created nbm files by using the plugin manager (Tools->Plugins, go to the "Downloaded" tab and click the "Add Plugins..." button).
+* Install the plugins, accepting the licensing agreement.
+
+The COW-related windows should now be available for activation from the "Window" Menu in AgileClient.  
+
+The server settings and user name must be set in "Tools -> Options" in the COW panel before use.
+
+
+Support and FAQ
+===============
+For questions or support, contact any of the authors via BitBucket's profile page, or email dev@WiredWidgets.org to get put in direct contact with a developer.
+
+See the combined FAQ/troubleshooting page for the COW effort at http://www.wiredwidgets.org/cow/faq

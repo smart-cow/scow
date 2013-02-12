@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE tc-ref PUBLIC "-//NetBeans//DTD Top Component in Mode Properties 2.0//EN" "http://www.netbeans.org/dtds/tc-ref2_0.dtd">
+<tc-ref version="2.0" >
+    <!-- reading the dtd, disabling the module line looks like it keeps the 
+         topcomponent present, which is needed for better stability of clients 
+         registering as worker handlers... I think.  -->
+    <!-- <module name="org.wiredwidgets.cow.ac" spec="0.5"/> -->
+    <tc-id id="CowTopComponent"/>
+    <state opened="false"/>
+</tc-ref>

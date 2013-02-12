@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-3.1.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <!-- Enables annotation based type conversion and formatting.
+         For example, the @DateTimeFormat annotation
+         See http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/validation.html#beans-beans-conversion -->
+         
+     <!-- NOTE: mvc:annotation-driven is not compatible with a custom defined AnnotationMethodHandlerAdapter!
+          this means that custom HttpMessageConverts cannot be defined if mvc:annotation-driven is used!
+          See https://jira.springframework.org/browse/SPR-7191
+          For now it seems the defeault set of HttpMessageConverters are sufficient for this project. -->         
+         
+    <mvc:annotation-driven conversion-service="conversionService" />
+
+<!--    <bean id="handlerMapping" class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+        <property name="alwaysUseFullPath" value="true" />
+    </bean>
+
+    <bean id="handlerAdapter" class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="alwaysUseFullPath" value="true"/>
+        <property name="messageConverters">
+            <util:list id="beanList">
+                <ref bean="stringHttpMessageConverter" />
+                <ref bean="marshallingHttpMessageConverter"/>
+                <ref bean="sourceHttpMessageConverter" />
+                <ref bean="jacksonMessageConverter" />
+            </util:list>
+        </property>
+    </bean>-->
+
+    <context:component-scan base-package="org.wiredwidgets.cow.server.web"/>
+
+</beans>

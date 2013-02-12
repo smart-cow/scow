@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> 
+<additionalHeaders> 
+    <my_html_style> 
+        <firstLine><![CDATA[<!--]]></firstLine> 
+        <beforeEachLine>    </beforeEachLine> 
+        <endLine><![CDATA[-->]]></endLine> 
+        <skipLine><![CDATA[^<\!DOCTYPE.*>$|^<\!doctype.*>$]]></skipLine> 
+        <firstLineDetectionPattern><![CDATA[(\s|\t)*<!--.*$]]></firstLineDetectionPattern> 
+        <lastLineDetectionPattern><![CDATA[.*-->(\s|\t)*$]]></lastLineDetectionPattern> 
+        <allowBlankLines>false</allowBlankLines> 
+        <isMultiline>true</isMultiline> 
+    </my_html_style> 
+</additionalHeaders>
