@@ -90,8 +90,8 @@
 	        	<!-- Properties can go here instead of in persistence.xml -->
 	        	<prop key="hibernate.show_sql">false</prop>      	
       			<prop key="hibernate.max_fetch_depth">3</prop>
-      			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
-      			<prop key="hibernate.connection.autocommit">true</prop>
+      			<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+      			<prop key="hibernate.connection.autocommit">false</prop>
       			
       			<!-- use "create" to clear out the DB on system startup -->
 				<prop key="hibernate.hbm2ddl.auto">update</prop>

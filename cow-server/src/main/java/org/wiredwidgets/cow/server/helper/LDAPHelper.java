@@ -272,9 +272,9 @@ public class LDAPHelper {
 
         for (Membership m : user.getMemberships()) {
             if (!usersGroups.containsKey(m.getGroup())) {
-                addUserToGroup(user.getId(), m.getGroup());
-                usersGroups.remove(m.getGroup());
+                addUserToGroup(user.getId(), m.getGroup());            
             }
+            usersGroups.remove(m.getGroup());
         }
 
         for (String deletedGroup : usersGroups.keySet()) {

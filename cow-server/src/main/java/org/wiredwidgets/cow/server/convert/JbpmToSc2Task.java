@@ -12,7 +12,6 @@ import org.wiredwidgets.cow.server.api.service.Task;
  *
  * @author FITZPATRICK
  */
-@Component
 public class JbpmToSc2Task extends AbstractConverter<org.jbpm.task.Task, Task>{
 
     @Override

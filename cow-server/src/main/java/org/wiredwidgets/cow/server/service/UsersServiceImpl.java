@@ -6,11 +6,14 @@ package org.wiredwidgets.cow.server.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +28,7 @@ import org.wiredwidgets.cow.server.helper.LDAPHelper;
  */
 @Transactional
 @Component
-public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersService {
+public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersService, ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     LDAPHelper ldapHelper;
@@ -34,6 +37,8 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
     private static TypeDescriptor JBPM_GROUP_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Group.class));
     private static TypeDescriptor COW_USER_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.wiredwidgets.cow.server.api.service.User.class));
     private static TypeDescriptor COW_GROUP_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.wiredwidgets.cow.server.api.service.Group.class));
+    
+   
 
     @Override
     public String createGroup(String groupName) {
@@ -59,14 +64,10 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
             }
         }
         
-        for (String ldapUser: users){
-            if (ldapUser.equals(user.getId())){
-                ldapHelper.updateUser(user);
-                userExists = true;
-                break;
-            }
+        if (users.contains(user.getId())) {
+        	ldapHelper.updateUser(user);
         }
-        if (!userExists){
+        else {
             ldapHelper.createUser(user);
         }
     }
@@ -101,6 +102,9 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
         for (String user: users){
             User temp = new User();
             temp.setId(user);
+            
+            addGroups(temp);
+            
             retUsers.add(temp);
         }
         return retUsers;
@@ -129,6 +133,8 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
         if (users.contains(id)){
             User retUser = new User();
             retUser.setId(id);
+            addGroups(retUser);  
+                     
             return retUser;
         }
         return null;
@@ -138,5 +144,53 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
     public boolean deleteGroup(String id) {
         return ldapHelper.deleteGroup(id);
     }
+    
+    private void addGroups(User user) {
+        Map<String, String> groups = ldapHelper.getUsersGroups(user.getId());
+        for (String key : groups.keySet()) {
+        	Membership m = new Membership();
+        	m.setGroup(key);
+        	user.getMemberships().add(m);
+        }        	
+    }
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		// Verify minimal required setup
+		
+		List<String> groups = ldapHelper.getLDAPGroups();
+		if (!groups.contains("user")) {
+			createGroup("user");
+			groups.add("user");
+		}
+		
+		User admin = findUser("Administrator");
+		if (admin == null) {
+			admin = new User();
+			admin.setId("Administrator");
+		}
+		
+		// get groups as a Set
+		Set<String> userGroups = getGroupSet(admin);
+		
+		for (String group : groups) {
+			if (!userGroups.contains(group)) {
+				Membership m = new Membership();
+				m.setGroup(group);
+				admin.getMemberships().add(m);
+			}
+		}
+		createOrUpdateUser(admin);
+		
+	}
+	
+	private Set<String> getGroupSet(User user) {
+		Set<String> groups = new HashSet<String>();
+		for (Membership m : user.getMemberships()) {
+			groups.add(m.getGroup());
+		}
+		return groups;
+	}
+	
     
 }

@@ -61,6 +61,9 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 	@Autowired
 	TaskRepository taskRepo;
 	
+	@Autowired
+	UsersService usersService;
+	
 	private static Logger log = Logger.getLogger(TaskServiceImpl.class);
 
     //private static TypeDescriptor JBPM_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.task.Participation.class));
@@ -78,6 +81,13 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     public List<Task> findPersonalTasks(String assignee) {
         List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
+        
+        // first check to see if the user is valid, otherwise JBPM is not happy
+        org.wiredwidgets.cow.server.api.service.User user = usersService.findUser(assignee);
+        if (user == null) {
+        	// not a user in the system, so cannot have any tasks!
+        	return new ArrayList<Task>();
+        }
         
         BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
         taskClient.getTasksAssignedAsPotentialOwner(assignee, "en-UK", taskSummaryResponseHandler);
@@ -129,13 +139,23 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     	assert(assignee != null);
     	
         log.debug(assignee + " starting task with ID: " + id);
-        
-        BlockingTaskOperationResponseHandler operationResponseHandler = new BlockingTaskOperationResponseHandler();
-        taskClient.start(id, assignee, operationResponseHandler);
          
         BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
         taskClient.getTask(id, getTaskResponseHandler);
         org.jbpm.task.Task task = getTaskResponseHandler.getTask();
+        
+        // convert to COW task so we can verify the decision
+        Task cowTask = converter.convert(task,  Task.class);
+        
+        if (cowTask.getOutcomes() != null && cowTask.getOutcomes().size() > 0) {
+        	// This is a decision task!
+        	if (outcome == null) {
+        		throw new RuntimeException("ERROR: no decision provided for a Decision task");
+        	}
+        	if (!cowTask.getOutcomes().contains(outcome)) {
+        		throw new RuntimeException("ERROR: decision value " + outcome + " is not a valid choice.");
+        	}
+        }
         
         BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
         taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler);        
@@ -199,15 +219,25 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	log.debug("Adding map to output");
         	outputMap.put(TASK_OUTPUT_VARIABLES_NAME, outputVarsMap);   
         }
+       
+        // start the task
+        if (task.getTaskData().getStatus().equals(org.jbpm.task.Status.Reserved)) {
+            BlockingTaskOperationResponseHandler operationResponseHandler = new BlockingTaskOperationResponseHandler();
+            // change status to InProgress
+            log.debug("Starting task...");
+            taskClient.start(id, assignee, operationResponseHandler);       
+            operationResponseHandler.waitTillDone(1000);
+        }        
         
         //kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), new HashMap<String,Object>());
         BlockingTaskOperationResponseHandler taskResponseHandler = new BlockingTaskOperationResponseHandler();
         // TODO: since we're passing the variables map further down, maybe we don't need to pass it here?  Test this.
-        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);      
+        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);
+        log.debug("Completing task...");
         taskClient.complete(id, assignee, contentData, taskResponseHandler);
         taskResponseHandler.waitTillDone(1000);
         
-        // note that we have to pass the variables again.
+        // note that we have to pass the variables again.        
         kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), outputMap);
         
         // update completed date
@@ -245,6 +275,14 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findGroupTasks(String user) {
+    	
+        // first check to see if the user is valid, otherwise JBPM is not happy
+        org.wiredwidgets.cow.server.api.service.User u = usersService.findUser(user);
+        if (u == null) {
+        	// not a user in the system, so cannot have any tasks!
+        	return new ArrayList<Task>();
+        }    	
+    	
         List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
