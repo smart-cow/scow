@@ -15,7 +15,7 @@ public class TaskClientManager {
     
     public void init(){
         //taskClient = new TaskClient(new MinaTaskClientConnector("client 1", new MinaTaskClientHandler(SystemEventListenerFactory.getSystemEventListener())));
-        taskClient.connect("127.0.0.1", 9123);
+        // taskClient.connect("127.0.0.1", 9123);
     }
     
     public void gettaskClient(){

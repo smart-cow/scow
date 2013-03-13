@@ -14,9 +14,5 @@ import org.wiredwidgets.cow.server.helper.LDAPHelper;
  * @author FITZPATRICK
  */
 public interface TaskServiceSessionManager {
-    void init();
-    TaskService getjbpmTaskService();
-    void setjbpmTaskService(TaskService jbpmTaskService);
-    LDAPHelper getldapHelper();
-    void setldapHelper(LDAPHelper ldapHelper);
+	public void initLdap();
 }

@@ -4,20 +4,33 @@
  */
 package org.wiredwidgets.cow.server.helper;
 
-import com.unboundid.ldap.sdk.*;
-import com.unboundid.ldif.LDIFException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
-import org.jbpm.task.identity.LDAPUserGroupCallbackImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Membership;
 import org.wiredwidgets.cow.server.api.service.User;
 
+import com.unboundid.ldap.sdk.AddRequest;
+import com.unboundid.ldap.sdk.DeleteRequest;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ModifyRequest;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.ldap.sdk.SearchScope;
+import com.unboundid.ldif.LDIFException;
+
 /**
  *
  * @author FITZPATRICK
  */
+@Component
 public class LDAPHelper {
 
     private static Logger log = Logger.getLogger(LDAPHelper.class);
@@ -38,7 +51,7 @@ public class LDAPHelper {
         List<String> ldapGroups = new ArrayList<String>();
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT);
+            LDAPConnection lc = getConnection();
 
             String baseDN = LDAP_ROLE_CONTEXT;
             String filter = "(&(objectClass=organizationalRole))";
@@ -67,7 +80,7 @@ public class LDAPHelper {
         List<String> ldapUsers = new ArrayList<String>();
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT);
+            LDAPConnection lc = getConnection();
 
             String baseDN = LDAP_USER_CONTEXT;
             String filter = "(&(objectClass=inetOrgPerson))";
@@ -100,7 +113,7 @@ public class LDAPHelper {
         };
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+            LDAPConnection lc = getAdminConnection();
 
             if (lc.isConnected()) {
                 lc.add(new AddRequest(ldifLines));
@@ -128,7 +141,7 @@ public class LDAPHelper {
         };
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+            LDAPConnection lc = getAdminConnection();
 
             if (lc.isConnected()) {
                 lc.add(new AddRequest(ldifLines));
@@ -162,7 +175,7 @@ public class LDAPHelper {
         };
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+            LDAPConnection lc = getAdminConnection();
 
             if (lc.isConnected()) {
                 lc.modify(new ModifyRequest(ldifLines));
@@ -182,7 +195,7 @@ public class LDAPHelper {
     public boolean deleteGroup(String groupName) {
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+            LDAPConnection lc = getAdminConnection();
 
             if (lc.isConnected()) {
                 lc.delete(new DeleteRequest("cn=" + groupName + "," + LDAP_ROLE_CONTEXT));
@@ -199,7 +212,7 @@ public class LDAPHelper {
 
     public boolean deleteUser(String userId) {
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+            LDAPConnection lc = getAdminConnection();
 
             if (lc.isConnected()) {
                 lc.delete(new DeleteRequest("uid=" + userId + "," + LDAP_USER_CONTEXT));
@@ -230,8 +243,8 @@ public class LDAPHelper {
         };
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
-
+            LDAPConnection lc = getAdminConnection();
+            
             if (lc.isConnected()) {
                 lc.modify(new ModifyRequest(ldifLines));
             }
@@ -253,7 +266,7 @@ public class LDAPHelper {
         };
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+            LDAPConnection lc = getAdminConnection();
 
             if (lc.isConnected()) {
                 lc.modify(new ModifyRequest(ldifLines));
@@ -286,8 +299,8 @@ public class LDAPHelper {
         Map<String, String> usersGroups = new HashMap<String, String>();
 
         try {
-            LDAPConnection lc = new LDAPConnection(LDAP_HOST, LDAP_PORT);
-
+            LDAPConnection lc = getConnection();
+            
             String baseDN = LDAP_ROLE_CONTEXT;
             String filter = "(&(roleOccupant=uid=" + userId + "," + LDAP_USER_CONTEXT + "))";
 
@@ -311,5 +324,28 @@ public class LDAPHelper {
         }
 
         return usersGroups;
+    }
+    
+    private LDAPConnection getConnection() throws LDAPException {
+    	return getConnection(false);
+    }
+    
+    private LDAPConnection getAdminConnection() throws LDAPException {
+    	return getConnection(true);
+    }
+    
+    private LDAPConnection getConnection(boolean admin) throws LDAPException {
+    	LDAPConnectionOptions options = new LDAPConnectionOptions();
+    	options.setConnectTimeoutMillis(1000);
+    	
+    	LDAPConnection lc = null;
+    	
+    	if (admin) {
+    		lc = new LDAPConnection(options, LDAP_HOST, LDAP_PORT, LDAP_ADMIN, LDAP_ADMIN_PASSWORD);
+    	}
+    	else {	
+    		lc = new LDAPConnection(options, LDAP_HOST, LDAP_PORT);
+    	}
+    	return lc;
     }
 }

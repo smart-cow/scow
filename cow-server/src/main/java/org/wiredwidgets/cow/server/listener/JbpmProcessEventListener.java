@@ -4,9 +4,17 @@
  */
 package org.wiredwidgets.cow.server.listener;
 
-import org.drools.event.process.*;
 import org.apache.log4j.Logger;
+import org.drools.event.process.ProcessCompletedEvent;
+import org.drools.event.process.ProcessEventListener;
+import org.drools.event.process.ProcessNodeLeftEvent;
+import org.drools.event.process.ProcessNodeTriggeredEvent;
+import org.drools.event.process.ProcessStartedEvent;
+import org.drools.event.process.ProcessVariableChangedEvent;
 import org.drools.runtime.StatefulKnowledgeSession;
+import org.jbpm.workflow.instance.node.HumanTaskNodeInstance;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  * @author FITZPATRICK
@@ -14,7 +22,10 @@ import org.drools.runtime.StatefulKnowledgeSession;
 public class JbpmProcessEventListener implements ProcessEventListener{
     
     private static Logger log = Logger.getLogger(JbpmProcessEventListener.class);
-
+    
+    @Autowired
+    AmqpTemplate amqp;
+    
     @Override
     public void beforeProcessStarted(ProcessStartedEvent event) {
         //throw new UnsupportedOperationException("Not supported yet.");
@@ -42,7 +53,23 @@ public class JbpmProcessEventListener implements ProcessEventListener{
 
     @Override
     public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	// Task task = taskService.getTask(event.getNodeInstance().getNodeId());
+    	
+    	if (event.getNodeInstance() instanceof HumanTaskNodeInstance) {
+    		HumanTaskNodeInstance ni = (HumanTaskNodeInstance)event.getNodeInstance();
+   
+				Long taskId = ni.getWorkItemId();
+    	
+				Long processInstanceId = ni.getProcessInstance().getId();
+				String processName = ni.getProcessInstance().getProcessName();
+				
+				String info = "eventType=TaskReady;processID="
+						+ processName + "." + processInstanceId + ";" + "taskID=" + taskId;
+				
+				log.info("sending message: " + info);
+				amqp.convertAndSend("amqp.topic", "process", info);
+    	}
+    	
     }
 
     @Override

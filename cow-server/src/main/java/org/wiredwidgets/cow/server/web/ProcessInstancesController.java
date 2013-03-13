@@ -60,7 +60,7 @@ import org.wiredwidgets.cow.server.service.TaskService;
  * @author FITZPATRICK
  */
 @Controller
-@RequestMapping("processInstances")
+@RequestMapping("/processInstances")
 public class ProcessInstancesController extends CowServerController{
     private static Logger log = Logger.getLogger(ProcessInstancesController.class);
     
@@ -69,9 +69,6 @@ public class ProcessInstancesController extends CowServerController{
     
     @Autowired
     ProcessInstanceService processInstanceService;
-    
-    @Autowired
-    StatefulKnowledgeSession kSession;
     
     @Autowired
     TaskService taskService;

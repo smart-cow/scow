@@ -110,7 +110,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     	return converter.convert(JPAProcessInstanceDbLog.findProcessInstance(id), ProcessInstance.class);
     }
 
-    @Transactional(readOnly = true)
+    //@Transactional(readOnly = true)
     @Override
     public List<ProcessInstance> findAllProcessInstances() {
         return this.getCOWProcessInstances();

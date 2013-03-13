@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.drools.runtime.StatefulKnowledgeSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -59,9 +58,8 @@ import org.wiredwidgets.cow.server.service.TaskService;
 public class TasksController {
 
     @Autowired
-    StatefulKnowledgeSession kSession;
-    @Autowired
     TaskService taskService;
+    
     @Autowired
     AmqpNotifier amqpNotifier;
     
@@ -165,8 +163,7 @@ public class TasksController {
 
         response.setStatus(SC_NO_CONTENT); // 204
 
-            //Task t = taskService.getTask(id);
-            amqpNotifier.amqpTaskPublish(task, "process", "TaskCompleted", id);
+        amqpNotifier.amqpTaskPublish(task, "process", "TaskCompleted", id);
         
     }
 
@@ -215,8 +212,6 @@ public class TasksController {
         } 
         this.taskService.updateTask(task);
         response.setStatus(SC_NO_CONTENT);
-       
-        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -355,13 +350,15 @@ public class TasksController {
      */
     @RequestMapping("/history/{id}")
     @ResponseBody
-    public HistoryTask getHistoryTask(@PathVariable("id") String id, HttpServletResponse response) {
-        /*
-         * HistoryTask task = taskService.getHistoryTask(id); if (task == null)
-         * { response.setStatus(HttpServletResponse.SC_NOT_FOUND); return null;
-         * } else { return task; }
-         */
-        return new HistoryTask();//throw new UnsupportedOperationException("Not supported yet.");
+    public HistoryTask getHistoryTask(@PathVariable("id") Long id, HttpServletResponse response) {
+        
+         HistoryTask task = taskService.getHistoryTask(id); 
+         if (task == null) {
+        	 response.setStatus(HttpServletResponse.SC_NOT_FOUND); 
+        	 return null;
+         } else{ 
+        	 return task; 
+         }
     }
 
     /**

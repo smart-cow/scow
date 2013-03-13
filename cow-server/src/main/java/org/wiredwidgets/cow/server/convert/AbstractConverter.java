@@ -45,7 +45,7 @@ public abstract class AbstractConverter<S, T> implements Converter<S, T>, Initia
     }
     
     protected <U> U convert(Object source, Class<U> targetType) {
-    	return converter.convert(source, targetType);
+    	return source==null ? null : converter.convert(source, targetType);
     }	
     
     protected XMLGregorianCalendar convert(Date date) {

@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
  *
  * @author FITZPATRICK
  */
-@Component
 public class AbstractCowServiceImpl {
 	
 	protected @Value("${rem2.url}") String REM2_URL;
@@ -39,8 +38,8 @@ public class AbstractCowServiceImpl {
     @Autowired
     protected StatefulKnowledgeSession kSession;
     
-    @Autowired
-    protected org.jbpm.task.service.TaskClient taskClient;
+    // @Autowired
+    // protected org.jbpm.task.service.TaskClient taskClient;
     
    // @Autowired
     //protected HashMap<String,List<String>> userGroups;

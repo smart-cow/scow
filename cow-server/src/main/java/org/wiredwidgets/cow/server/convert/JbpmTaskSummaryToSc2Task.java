@@ -23,6 +23,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.jbpm.task.Content;
+import org.jbpm.task.service.local.LocalTaskService;
 import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
 import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
 import org.jbpm.task.utils.ContentMarshallerHelper;
@@ -42,7 +43,8 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
 
     // NOTE: Autowiring does not work here!
     @Autowired
-    org.jbpm.task.service.TaskClient taskClient;
+    // org.jbpm.task.service.TaskClient taskClient;
+    LocalTaskService localService;
     
     //@Autowired
     //GenericHTWorkItemHandler workItemHandler;
@@ -80,13 +82,15 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
         
-        BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
-        taskClient.getTask(source.getId(), getTaskResponseHandler);        
-        org.jbpm.task.Task task = getTaskResponseHandler.getTask();
+        // BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
+        // taskClient.getTask(source.getId(), getTaskResponseHandler);        
+        // org.jbpm.task.Task task = getTaskResponseHandler.getTask();
+        org.jbpm.task.Task task = localService.getTask(source.getId());
         
-        BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
-        taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler); 
-        Content content = getContentResponseHandler.getContent();
+        //BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
+        //taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler); 
+        //Content content = getContentResponseHandler.getContent();
+        Content content = localService.getContent(task.getTaskData().getDocumentContentId());
         
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
         		content.getContent(),null);  

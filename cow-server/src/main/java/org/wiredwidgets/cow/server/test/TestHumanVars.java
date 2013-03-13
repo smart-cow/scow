@@ -4,19 +4,10 @@
  */
 package org.wiredwidgets.cow.server.test;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.drools.runtime.StatefulKnowledgeSession;
-import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
-import org.jbpm.task.Content;
 import org.jbpm.task.Task;
-import org.jbpm.task.query.TaskSummary;
-import org.jbpm.task.service.ContentData;
-import org.jbpm.task.service.SyncTaskServiceWrapper;
-import org.jbpm.task.service.mina.AsyncMinaTaskClient;
-import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -30,8 +21,8 @@ public class TestHumanVars {
     @Autowired
     protected org.jbpm.task.TaskService taskClient;
     
-    @Autowired
-    protected MinaHTWorkItemHandler minaWorkItemHandler;
+    // @Autowired
+    //protected MinaHTWorkItemHandler minaWorkItemHandler;
     
     public void testHumanVars(){
         /*Map<String, Object> params = new HashMap<String, Object>();

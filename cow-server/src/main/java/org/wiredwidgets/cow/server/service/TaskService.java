@@ -103,4 +103,6 @@ public interface TaskService {
 
     Activity getWorkflowActivity(String processInstanceId, String key);
 
+	public abstract HistoryTask getHistoryTask(Long id);
+
 }

@@ -17,9 +17,6 @@ import org.wiredwidgets.cow.server.manager.MinaTaskServerManager;
  */
 @Controller
 public class BpmServiceController {
-
-    @Autowired
-    MinaTaskServerManager minaTaskServerManager;
     
     static Logger log = Logger.getLogger(BpmServiceController.class);
 

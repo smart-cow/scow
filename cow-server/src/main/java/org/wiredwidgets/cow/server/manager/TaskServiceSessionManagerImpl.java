@@ -4,13 +4,16 @@
  */
 package org.wiredwidgets.cow.server.manager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.jbpm.task.Group;
 import org.jbpm.task.User;
 import org.jbpm.task.service.TaskService;
 import org.jbpm.task.service.TaskServiceSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.helper.LDAPHelper;
 
@@ -18,39 +21,23 @@ import org.wiredwidgets.cow.server.helper.LDAPHelper;
  *
  * @author FITZPATRICK
  */
+@Component
 @Transactional
 public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager {
 
     private static Logger log = Logger.getLogger(TaskServiceSessionManagerImpl.class);
     
+    @Autowired
     TaskService jbpmTaskService;
+    
     TaskServiceSession jbpmTaskServiceSession;
+    
+    @Autowired
     LDAPHelper ldapHelper;
 
-    @Override
-    public void init() {
+    public void initLdap() {
         jbpmTaskServiceSession = jbpmTaskService.createSession();
         addUserGroupToSession();
-    }
-
-    @Override
-    public TaskService getjbpmTaskService() {
-        return jbpmTaskService;
-    }
-
-    @Override
-    public void setjbpmTaskService(TaskService jbpmTaskService) {
-        this.jbpmTaskService = jbpmTaskService;
-    }
-    
-    @Override
-    public LDAPHelper getldapHelper() {
-        return ldapHelper;
-    }
-
-    @Override
-    public void setldapHelper(LDAPHelper ldapHelper) {
-        this.ldapHelper = ldapHelper;
     }
 
     private void addUserGroupToSession() {
