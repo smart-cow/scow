@@ -17,6 +17,7 @@
 package org.wiredwidgets.cow.webapp.client.page;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -31,7 +32,9 @@ import org.wiredwidgets.cow.webapp.client.bpm.Exit;
 import org.wiredwidgets.cow.webapp.client.bpm.Loop;
 import org.wiredwidgets.cow.webapp.client.bpm.Option;
 import org.wiredwidgets.cow.webapp.client.bpm.Parse;
+import org.wiredwidgets.cow.webapp.client.bpm.Script;
 import org.wiredwidgets.cow.webapp.client.bpm.ServiceTask;
+import org.wiredwidgets.cow.webapp.client.bpm.Signal;
 import org.wiredwidgets.cow.webapp.client.bpm.SubProcess;
 import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
@@ -328,7 +331,15 @@ public class EditWorkflow extends PageWidget {
         LayoutSpacer sidebarSpacer1 = new LayoutSpacer();
         sidebarSpacer1.setHeight(15);
 		sidebar.addMember(sidebarSpacer1);
+		sidebar.addMember(generateActivityImg("Signal", 50, 50));
+        LayoutSpacer sidebarSpacer5 = new LayoutSpacer();
+        sidebarSpacer5.setHeight(15);
+		sidebar.addMember(sidebarSpacer5);
 		sidebar.addMember(generateActivityImg("Copy", 50, 50));
+		LayoutSpacer sidebarSpacer6 = new LayoutSpacer();
+        sidebarSpacer6.setHeight(15);
+		sidebar.addMember(sidebarSpacer6);
+		sidebar.addMember(generateActivityImg("Script", 50, 50));
 		LayoutSpacer sidebarSpacer2 = new LayoutSpacer();
 		sidebarSpacer2.setHeight(15);
 		sidebar.addMember(sidebarSpacer2);
@@ -509,6 +520,8 @@ public class EditWorkflow extends PageWidget {
 						a = new Exit("Exit", "Exit");
 					} else if(target.getTitle().equals("ServiceTask")) {
 						a = new ServiceTask("ServiceTask " + counter, "ServiceTask " + counter++);
+					} else if(target.getTitle().equals("Script")) {
+						a = new Script("Script " + counter, "Script " + counter++);
 					} else if(target.getTitle().equals("List")) {
 						a = new Activities("List " + counter, "List " + counter++);
 					} else if(target.getTitle().equals("Loop")) {
@@ -519,7 +532,9 @@ public class EditWorkflow extends PageWidget {
 						((Decision)a).setTask(new Task());
 					} else if(target.getTitle().equals("SubProcess")) {
 						a = new SubProcess("SubProcess " + counter, "SubProcess " + counter++);
-					} else if(target.getTitle().equals("Copy")) {
+					} else if(target.getTitle().equals("Signal")) {
+						a = new Signal("Signal " + counter, "Signal " + counter++);
+					}else if(target.getTitle().equals("Copy")) {
 						copyParent = grid.getDropFolder() == null ? grid.getTree().getRoot() : grid.getDropFolder();
 						// if using the copy command, first grab a list of all existing workflow names
 						BpmServiceMain.sendGet("/processDefinitions", new AsyncCallback<String>() {
@@ -718,7 +733,59 @@ public class EditWorkflow extends PageWidget {
 						description.setValue(getSavedStringValue(e.getDescription()));
 						
 						form.setFields(basic, name, reason, description);
-					} else if(activity instanceof ServiceTask) {
+					}else if(activity instanceof Signal) {
+						Signal s = (Signal)activity;
+						name.setValue(s.getName());
+						bypass.setValue(s.getBypass());
+						
+						
+						TextItem signal = new TextItem("Signal");
+						signal.setTitle("<nobr>Signal ID</nobr>");
+						signal.setValue(getSavedStringValue(s.getSignalId()));
+						signal.setWidth(300);
+						
+						
+						description.setValue(getSavedStringValue(s.getDescription()));
+						
+						form.setFields(basic, name, signal, description,bypass);
+					}
+					
+					else if(activity instanceof Script) {
+						Script s = (Script)activity;
+						name.setValue(s.getName());
+						bypass.setValue(s.getBypass());
+						
+						
+						TextItem imports = new TextItem("Import");
+						imports.setTitle("<nobr>Imports (Comma Seperated) </nobr>");
+						imports.setValue(getSavedStringValue(s.getImportsCSV()));
+						imports.setWidth(300);
+						imports.setRequired(false);
+						
+						
+						
+						
+						ComboBoxItem format = new ComboBoxItem("Format");
+						format.setTitle("<nobr> Script Forrmat</nobr>");
+						format.setType("comboBox");
+						format.setValueMap("MVEL","http://www.java.com/java");
+						format.setValue(getSavedStringValue(s.getFormat()));
+						format.setRequired(true);
+						
+						TextAreaItem content = new TextAreaItem("Content");
+						content.setTitle("<nobr>Content</nobr>");
+						content.setValue(getSavedStringValue(s.getContent()));
+						content.setWidth(300);
+						
+						
+						description.setValue(getSavedStringValue(s.getDescription()));
+						
+						form.setFields(basic, name, format, imports,content, description,bypass);
+					}
+					
+					
+					
+					else if(activity instanceof ServiceTask) {
 						ServiceTask t = (ServiceTask)activity;
 						name.setValue(getSavedStringValue(t.getName()));
 						bypass.setValue(t.getBypass());
@@ -1235,6 +1302,12 @@ public class EditWorkflow extends PageWidget {
 			t.setDescription(form.getValueAsString("Description"));
 			t.setVariable(1, form.getValueAsString("AddInfo1"));
 			t.setVariable(2, form.getValueAsString("AddInfo2"));
+		}if(activity instanceof Signal) {
+			Signal s = (Signal)activity;
+			s.setName(form.getValueAsString("Name"));
+			s.setBypass(Boolean.parseBoolean(form.getValueAsString("Bypass")));
+			s.setDescription(form.getValueAsString("Description"));
+			s.setSignalId(form.getValueAsString("Signal"));
 		} else if(activity instanceof Exit) {
 			Exit e = (Exit)activity;
 			e.setReason(form.getValueAsString("Reason"));
@@ -1251,7 +1324,23 @@ public class EditWorkflow extends PageWidget {
 			t.setServiceUrl(form.getValueAsString("ServiceUrl"));
 			t.setVar(form.getValueAsString("Var"));
 			t.setDescription(form.getValueAsString("Description"));
-		} else if(activity instanceof Activities) {
+		} else if(activity instanceof Script) {
+			Script t = (Script)activity;
+			t.setName(form.getValueAsString("Name"));
+			t.setBypass(Boolean.parseBoolean(form.getValueAsString("Bypass")));
+			String im = form.getValueAsString("Import");
+			im = im.replaceAll("\\s","");
+			if (im.length() > 0) {
+				t.setImports(Arrays.asList(im.split("\\s*,\\s*")));			
+			}
+			else {
+				t.setImports(new ArrayList<String>());
+			}
+			t.setContent(form.getValueAsString("Content"));
+			t.setFormat(form.getValueAsString("Format"));
+			t.setDescription(form.getValueAsString("Description"));
+		}
+		else if(activity instanceof Activities) {
 			Activities a = (Activities)activity;
 			a.setName(form.getValueAsString("Name"));
 			a.setBypass(Boolean.parseBoolean(form.getValueAsString("Bypass")));

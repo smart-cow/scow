@@ -66,78 +66,7 @@ public abstract class PageWidget extends VLayout {
 		}
 		if(w != null)
 			addMember(w);
-		/*/MATT
-		History.addValueChangeHandler(new ValueChangeHandler() {
-			
-			public void onValueChange(ValueChangeEvent arg0) {
-
-				String[] args = arg0.getValue().toString().split("-ARG-");
-				Pages p = Pages.valueOf(args[0]);
-				
-				
-				BaseWidget b = null;
-				
-				switch (p){
-					case TEMPLATE:
-						b = new EditWorkflow(Window.Location.getParameter("template"));
-						break;
-					case TASK:
-						b = new Tasks();
-						break;
-					case LOGIN:
-						b = new Login();
-						break;
-					case WORKFLOW:
-							boolean a = Boolean.valueOf(args[2]);
-							b = new ViewWorkflow(args[1].toString(), a);
-
-						break;
-					case EDITWORKFLOWSTRING:
-						b = new EditWorkflow(args[1].toString());
-						break;	
-					case VIEWACTIVEWORKFLOWS:
-						b = new ViewActiveWorkflows();
-						break;	
-						
-					case ADMIN:
-						b = new Admin();
-						break;
-					case CREATENEWTASK:
-						b = new CreateNewTask();
-						break;
-					case EDITWORKFLOWBOOLEAN:
-						boolean a1 = Boolean.valueOf(args[2]);
-						b = new EditWorkflow(a1);
-						break;
-					case MANAGEWORKFLOWS2:
-						b = new ManageWorkflows2();
-						break;
-					case MANAGEWORKFLOWS:
-						b = new ManageWorkflows();
-						break;
-						
-					case VIEWWORKFLOW:
-						
-						if ((args.length > 2)){
-							boolean a11 = Boolean.valueOf(args[2]);					
-							b = new ViewWorkflow(args[1].toString(), a11);
-						}
-						else 
-							b = new ViewWorkflow(args[1].toString());
-						break;
-					default:
-						b = new Login();
-						break;
-						
-				}
-				
-				PageManager.getInstance().setPage(b);
-				
-
-				
-			}
-		});
-		*/
+		
 	}
 	
 	public abstract void refresh();
