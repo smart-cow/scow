@@ -44,10 +44,10 @@ public class Bpmn20SignalEventNodeBuilder extends Bpmn20FlowNodeBuilder<TInterme
     @Override
     protected void buildInternal() {
     	
+    	setId();
+    	
     	Signal signal = getActivity();
     	String eventType = null;
-
-        getNode().setId(getContext().generateId("_")); // JBPM ID naming convention uses underscore prefix + sequence
 
         Property outputVariableProperty = null;
         if (signal == null) {

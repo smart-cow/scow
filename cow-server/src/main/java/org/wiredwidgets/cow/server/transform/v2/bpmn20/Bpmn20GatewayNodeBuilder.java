@@ -41,7 +41,9 @@ public abstract class Bpmn20GatewayNodeBuilder<T extends TGateway, S extends Act
 
     @Override
     protected void buildInternal() {
-        getNode().setId(getContext().generateId("_"));
+    	
+        setId();
+        
         getNode().setName("gateway");
         getNode().setGatewayDirection(direction);
     }

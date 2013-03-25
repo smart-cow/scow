@@ -36,6 +36,8 @@ public abstract class AbstractProcessContext<T extends Object, T2 extends Object
     private Map<String, Integer> nodeCounter = new HashMap<String, Integer>();
     private Process source;
     private T2 target;
+    
+    private boolean revised = false; // new process or revised?
 
     protected AbstractProcessContext(Process source, T2 target) {
         this.source = source;
@@ -77,6 +79,26 @@ public abstract class AbstractProcessContext<T extends Object, T2 extends Object
         count = new Integer(count.intValue() + 1);
         nodeCounter.put(key, count);
         return (key + count.toString());
+    }
+    
+    @Override
+	public void setStartId(String key, int count) {
+    	nodeCounter.put(key, count);
+    }
+    
+    @Override
+	public int getId(String key) {
+    	return nodeCounter.get(key);
+    }
+    
+    @Override
+	public boolean isRevised() {
+    	return revised;
+    }
+    
+    @Override
+	public void setRevised(boolean revised) {
+    	this.revised = revised;
     }
 
 }

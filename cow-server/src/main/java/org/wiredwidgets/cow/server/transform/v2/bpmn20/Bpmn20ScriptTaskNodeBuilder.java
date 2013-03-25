@@ -45,7 +45,8 @@ public class Bpmn20ScriptTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TScriptTa
 
     @Override
     protected void buildInternal() {
-         getNode().setId(getContext().generateId("_"));
+         setId();
+         
          getNode().setName(getActivity().getName());
          
          // add imports at the process level;

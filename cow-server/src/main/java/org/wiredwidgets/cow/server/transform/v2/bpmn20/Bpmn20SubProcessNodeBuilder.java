@@ -42,11 +42,11 @@ public class Bpmn20SubProcessNodeBuilder extends Bpmn20ActivityNodeBuilder<TCall
 
     @Override
     protected void buildInternal() {
+    	
+    	setId();
 
         SubProcess source = getActivity();
         TCallActivity t = getNode();
-        t.setId(getContext().generateId("_"));
-        source.setKey(t.getId());
         t.setName(source.getName());
 
         // the process ID of the called process

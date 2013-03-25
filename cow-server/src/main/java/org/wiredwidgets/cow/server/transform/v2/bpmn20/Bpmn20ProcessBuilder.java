@@ -75,6 +75,13 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         
         Bpmn20ProcessContext context = new Bpmn20ProcessContext(source, definitions, process);
         
+        if (source.getMaxId() > 0) {
+        	context.setRevised(true);
+        }
+        
+        context.setStartId("_", source.getMaxId());
+      
+        
         // Every process has a Map for ad-hoc content
         context.addProcessVariable(VARIABLES_PROPERTY, "java.util.Map");
         
@@ -134,6 +141,8 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         	// link the main activity directly to the end node
         	builder.link(endBuilder);
         }
+        
+        source.setMaxId(context.getId("_"));
         
         return definitions;
     }
