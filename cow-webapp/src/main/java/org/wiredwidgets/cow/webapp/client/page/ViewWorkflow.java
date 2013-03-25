@@ -33,7 +33,9 @@ import org.wiredwidgets.cow.webapp.client.bpm.Exit;
 import org.wiredwidgets.cow.webapp.client.bpm.Loop;
 import org.wiredwidgets.cow.webapp.client.bpm.Option;
 import org.wiredwidgets.cow.webapp.client.bpm.Parse;
+import org.wiredwidgets.cow.webapp.client.bpm.Script;
 import org.wiredwidgets.cow.webapp.client.bpm.ServiceTask;
+import org.wiredwidgets.cow.webapp.client.bpm.Signal;
 import org.wiredwidgets.cow.webapp.client.bpm.SubProcess;
 import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
@@ -58,6 +60,7 @@ import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HeaderItem;
 import com.smartgwt.client.widgets.form.fields.StaticTextItem;
 import com.smartgwt.client.widgets.form.fields.SubmitItem;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.KeyPressEvent;
 import com.smartgwt.client.widgets.form.fields.events.KeyPressHandler;
@@ -101,6 +104,7 @@ public class ViewWorkflow extends PageWidget {
 				}
 				public void onSuccess(String result) {
 					generateBody(result, false);
+					
 					BpmServiceMain.sendGet("/processInstances/active/" + BpmServiceMain.urlEncode(name) + ".*", new AsyncCallback<String>() {
 						public void onFailure(Throwable arg0) {
 						}
@@ -126,6 +130,7 @@ public class ViewWorkflow extends PageWidget {
 							header.addMenuItem(active);
 						}
 					});
+					
 				}
 			});
 		}
@@ -161,9 +166,7 @@ public class ViewWorkflow extends PageWidget {
 	
 	protected void generateBody(String result, boolean instance) {
 		this.instance = instance;
-		
 		template = (result == null || result.equals("") ? new Template() : Parse.parseTemplate(result));
-		
 		// TEMPLATE NAME TEXTFIELD
 		Label templateName = new Label();
 		templateName.addStyleName("bigLabel");
@@ -267,6 +270,18 @@ public class ViewWorkflow extends PageWidget {
 					description.setValue(e.getHtmlDescription());
 
 					form.setFields(basic, name, reason, description);
+				}else if(activity instanceof Signal) {
+					Signal s = (Signal)activity;
+					name.setValue(s.getName());
+					bypass.setValue(s.getBypass() ? "Yes" : "No");
+					
+					StaticTextItem signal = new StaticTextItem("Signal");
+					signal.setTitle("<nobr>Signal ID</nobr>");
+					signal.setValue(s.getSignalId());
+					
+					description.setValue(s.getHtmlDescription());
+
+					form.setFields(basic, name, signal, description, bypass);
 				} else if(activity instanceof ServiceTask) {
 					ServiceTask s = (ServiceTask)activity;
 					name.setValue(s.getName());
@@ -291,7 +306,34 @@ public class ViewWorkflow extends PageWidget {
 					description.setValue(s.getHtmlDescription());
 					
 					form.setFields(basic, name, method, url, content, variable, description, advanced, bypass);
-				} else if(activity instanceof Activities) {
+				} else if(activity instanceof Script) {
+					Script s = (Script)activity;
+					name.setValue(s.getName());
+					bypass.setValue(s.getBypass());
+					
+					
+					StaticTextItem imports = new StaticTextItem("Import");
+					imports.setTitle("<nobr>Imports (Comma Seperated) </nobr>");
+					imports.setValue("<nobr>" + s.getImportsCSV() + "</nobr>");
+					imports.setWidth(300);		
+					
+					
+					
+					StaticTextItem format = new StaticTextItem("Format");
+					format.setTitle("<nobr> Script Forrmat</nobr>");
+					format.setValue("<nobr>" + s.getFormat() + "</nobr>");
+					format.setRequired(true);
+					
+					StaticTextItem content = new StaticTextItem("Content");
+					content.setTitle("<nobr>Content</nobr>");
+					content.setValue("<nobr>" + s.getContent() + "</nobr>");
+					content.setWidth(300);
+					
+					
+					description.setValue(s.getHtmlDescription());
+					
+					form.setFields(basic, name, format, imports,content, description,bypass);
+				}	else if(activity instanceof Activities) {
 					Activities a = (Activities)activity;
 					name.setValue(a.getName());
 					bypass.setValue(a.getBypass() ? "Yes" : "No");
@@ -388,6 +430,11 @@ public class ViewWorkflow extends PageWidget {
 					
 					form.setFields(basic, name, workflow, description, advanced, bypass);
 				}
+				else {
+					SC.say("Error: Unkown Activity Type");
+					
+					
+				}
 				
 				layoutContainer.addMember(form);
 			}
@@ -407,7 +454,7 @@ public class ViewWorkflow extends PageWidget {
 			edit.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
 				public void onClick(MenuItemClickEvent event) {
 					String[] args= {template.getName()};
-					PageManager.getInstance().setPageHistory(Pages.VIEWWORKFLOW, args );
+					PageManager.getInstance().setPageHistory(Pages.EDITWORKFLOWSTRING, args );
 				}
 			});
 			header.addMenuItem(edit);

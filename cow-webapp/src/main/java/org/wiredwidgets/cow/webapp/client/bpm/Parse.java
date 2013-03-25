@@ -58,7 +58,9 @@ public class Parse {
 		t.setKey(getAttributeValue(process, "key"));
 		ArrayList<Node> nodes = ((ArrayList<Node>)process.getChildNodes());
 		for(int i = 0; i < nodes.size(); i++) {
-			String name = nodes.get(i).getName();
+			String name = nodes.get(i).getName(); 
+			if (name == null)
+				name = "";
 			if(name.split(":").length > 1)
 				name = name.split(":")[1];
 			if(name.equals("activities"))
@@ -216,6 +218,21 @@ public class Parse {
 			}
 			e.setCompletion(parseCompletionState(activity));
 			return e;
+		}else if(name.equals("signal")) {
+			Signal x = new Signal(getAttributeValue(activity, "name"), getAttributeValue(activity, "key"));
+			x.setSignalId(getAttributeValue(activity, "signalId"));
+			for(Node n : (ArrayList<Node>)activity.getChildNodes()) {
+				String s = n.getName();
+				if(s.split(":").length > 1)
+					s = s.split(":")[1];
+				if(s.equals("description")) {
+					if(n.getChildNodes().size() > 0)
+						x.setDescription(getValue(n), true);
+				}
+			}
+			x.setBypass(bypass);
+			x.setCompletion(parseCompletionState(activity));
+			return x;
 		} else if(name.equals("serviceTask")) {
 			ServiceTask t = new ServiceTask(getAttributeValue(activity, "name"), getAttributeValue(activity, "key"));
 			for(Node n : (ArrayList<Node>)activity.getChildNodes()) {
@@ -238,7 +255,30 @@ public class Parse {
 			t.setBypass(bypass);
 			t.setCompletion(parseCompletionState(activity));
 			return t;
-		} else if(name.equals("decision")) {
+		}else if(name.equals("script")) {
+			Script t = new Script(getAttributeValue(activity, "name"), getAttributeValue(activity, "key"));
+			t.setFormat(getAttributeValue(activity, "scriptFormat"));
+			for(Node n : (ArrayList<Node>)activity.getChildNodes()) {
+				String s = n.getName();
+				if(s.split(":").length > 1)
+					s = s.split(":")[1];
+				if(s.equals("import")) {
+					t.addImport(getValue(n));
+				} else if(s.equals("content")) {
+					t.setContent(getValue(n));
+				} else if(s.equals("description")) {
+					if(n.getChildNodes().size() > 0)
+						t.setDescription(getValue(n), true);
+				}
+			}
+			t.setBypass(bypass);
+			t.setCompletion(parseCompletionState(activity));
+			return t;
+		} 
+		
+		
+		
+		else if(name.equals("decision")) {
 			Decision d = new Decision(getAttributeValue(activity, "name"), getAttributeValue(activity, "key"));
 			for(Node n : (ArrayList<Node>)activity.getChildNodes()) {
 				String s = n.getName();
@@ -353,6 +393,7 @@ public class Parse {
 					tasks.add(t);
 					t.set("id", getAttributeValue(task, "id"));
 					t.set("processName", name);
+					
 					for(int j = 0; j < task.getChildNodes().size(); j++) {
 						String s = children.get(j).getName();
 						if(s.split(":").length > 1)
@@ -369,10 +410,14 @@ public class Parse {
 							}
 						} else if(s.equals("outcome")) {
 							t.addOutcome(getValue(children.get(j)));
+						} else if (s.equals("assignee")){
+							t.set("assignee", getValue(children.get(j)));	
 						} else if(s.equals("variables")) {
 							ArrayList<Node> variables = children.get(j).getChildNodes();
 							for(int k = 0; k < variables.size(); k++) {
-								t.set(getAttributeValue(variables.get(k), "name"), getAttributeValue(variables.get(k), "value"));
+								String varname = getAttributeValue(variables.get(k), "name");
+								if (varname != "assignee")
+									t.set(varname, getAttributeValue(variables.get(k), "value"));
 							}
 						} else {
 							t.set(s, getValue(children.get(j)));

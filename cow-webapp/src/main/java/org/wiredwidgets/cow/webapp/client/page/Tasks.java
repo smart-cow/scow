@@ -132,7 +132,7 @@ public class Tasks extends PageWidget {
 				
 				
 				taskgrid.setFields(complete, new ListGridField("taskname", "Name"), new ListGridField("$#createTime", "Time"), new ListGridField("$#priority", "Priority"),
-						new ListGridField("$#assignee", "Assignee"), new ListGridField("$#activityName", "ActivityName"), processIntanceID);
+						new ListGridField("$#assignee", "Assignee"), processIntanceID);
 				sections[i].addItem(taskgrid);
 			} else {
 				CustomListGrid grid = new CustomListGrid();
@@ -385,11 +385,12 @@ public class Tasks extends PageWidget {
 		lgr.setAttribute("id", t.get("id"));
 		for (Map.Entry<String, String> entry : t.getFields().entrySet()) {
 			String key = entry.getKey();
-			if(key.equals("assigneeType"))
+			if(key.equals("assigneeType") || key.equals("assignee"))
 				continue;
 			String value = entry.getValue();
 			lgr.setAttribute("$#" + key, value);
 		}
+		lgr.setAttribute("$#assignee", t.get("assignee"));
 		if(history) {
 			if(t.getOutcomes().get(0).equals("jbpm_no_task_outcome_specified_jbpm"))
 				lgr.setAttribute("outcome", "N/A");
@@ -497,7 +498,7 @@ public class Tasks extends PageWidget {
 					if(contains(tasks, r.getAttributeAsString("id")) == -1)
 						removeRecordFromArray(records1, r);
 				}
-				((ListGrid)sections[0].getItems()[0]).setData(records1);
+				((MyTasksListGrid)sections[0].getItems()[0]).setData(records1);
 			}
 		});
 		
