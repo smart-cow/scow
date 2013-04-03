@@ -49,6 +49,7 @@
     <complexType name="Variable">
         <attribute name="name" type="string"/>
         <attribute name="value" type="string"/>
+        <attribute name="type" type="string" />
     </complexType>
 
     <complexType name="Variables">
@@ -70,7 +71,8 @@
         </sequence>
         <attribute name="name"/>
         <attribute name="key"/>
-        <attribute name="targetFormat" default="jpdl"/>
+        <attribute name="targetFormat" default="bpmn20"/>
+        <attribute name="maxId" type="int" default="0" />
     </complexType>
 
     <complexType name="Activity" abstract="true">

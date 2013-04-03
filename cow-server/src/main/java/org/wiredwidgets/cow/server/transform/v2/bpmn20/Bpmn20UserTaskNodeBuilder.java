@@ -57,12 +57,11 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TUserTa
 
     @Override
     protected void buildInternal() {
+    	setId();
 
         Task source = getActivity();
-        TUserTask t = getNode();
-        t.setId(getContext().generateId("_")); // JBPM ID naming convention uses underscore prefix + sequence                
+        TUserTask t = getNode();                
         t.setName(source.getName());
-        source.setKey(t.getId());
            
         t.setIoSpecification(ioSpec);     
         ioSpec.getInputSets().add(inputSet);       

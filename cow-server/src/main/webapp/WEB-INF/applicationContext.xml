@@ -51,8 +51,14 @@
 	<context:annotation-config />
 
 	<!-- properties file used to provide values for ${property} expressions -->
-	<context:property-placeholder location="classpath:cow-server.properties" />
-
+	<!--context:property-placeholder location="classpath:cow-server.properties" /-->
+        
+        <!-- 
+        Put the cow-server.properties file in c:\cow\cow-server\config\ folder
+        and set system variable COW_APPS_HOME=c:\cow
+        -->
+        <context:property-placeholder location="file:${COW_APPS_HOME}/cow-server/config/cow-server.properties" />
+        
 	<!-- scan and load annotated components -->
 	<context:component-scan base-package="org.wiredwidgets.cow.server">
 		<!-- Controllers are auto scanned from dispatcher-servlet.xml -->

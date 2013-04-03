@@ -44,7 +44,7 @@ public class Bpmn20EndNodeBuilder extends Bpmn20FlowNodeBuilder<TEndEvent, Activ
 
     @Override
     protected void buildInternal() {
-        getNode().setId(getContext().generateId("_"));
+        setId();
         getNode().setName("end");
         
         // NOTE: See JBPM documentation for the distinction between Terminating and

@@ -45,7 +45,8 @@ public class Bpmn20ExitNodeBuilder extends Bpmn20FlowNodeBuilder<TScriptTask, Ex
 
     @Override
     protected void buildInternal() {
-         getNode().setId(getContext().generateId("_"));
+         setId();
+         
          getNode().setName("exit " + getActivity().getState());
          
          Script script = new Script();         

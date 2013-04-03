@@ -112,5 +112,25 @@ public abstract class Bpmn20FlowNodeBuilder<T extends TFlowNode, V extends Activ
     protected void addOtherAttribute(String name, String value) {
         getNode().getOtherAttributes().put(new QName("http://www.jboss.org/drools", name), value);
     }
+    
+    protected void setId() {
+    	String id = null;
+    	// Legacy workflows created before the new ID system will have keys but the
+    	// maxID will not be set for the process.  So, we handle those as "new" workflows
+    	// the first time they are saved, in order to get the maxID set correctly.
+    	if (getContext().isRevised() && getActivity() != null && getActivity().getKey() != null) {
+    		id = getActivity().getKey();
+    	}
+    	else {
+    		id = getContext().generateId("_");
+    	}
+
+    	getNode().setId(id);
+    	
+    	if (getActivity() != null) {
+    		getActivity().setKey(id);  	
+    	}
+    }
+    
 
 }

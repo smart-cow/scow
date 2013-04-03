@@ -42,11 +42,11 @@ public class Bpmn20ServiceTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TTas
 
     @Override
     protected void buildInternal() {
+    	setId();
 
         ServiceTask source = getActivity();
         TTask t = getNode();
-        t.setId(getContext().generateId("_"));
-        source.setKey(t.getName());
+
         t.setName(source.getName());
    
         // this is the name JBPM uses to assign a work item handler

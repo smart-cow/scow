@@ -40,8 +40,21 @@
 
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>
 
-    <bean id="bpmService" class="org.wiredwidgets.cow.webapp.server.BpmServiceImpl">
+    <!--bean id="bpmService" class="org.wiredwidgets.cow.webapp.server.BpmServiceImpl">
         <property name="baseURL" value="http://scout3:8080/cow-server-new" />
-        <!--  property name="baseURL" value="http://scout:8080/cow-server" /-->
+        property name="baseURL" value="http://scout:8080/cow-server" />
+    </bean-->
+    
+    <!-- 
+    Put the cow-webapp.properties file in c:\cow\cow-webapp\config\ folder
+    and set system variable COW_APPS_HOME=c:\cow
+    -->      
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="location"><value>file:${COW_APPS_HOME}/cow-webapp/config/cow-webapp.properties</value></property>
     </bean>
+
+    <bean id="bpmService" class="org.wiredwidgets.cow.webapp.server.BpmServiceImpl">
+    <property name="baseURL"><value>${webapp.baseURL}</value></property>    
+    </bean> 
+    
 </beans>

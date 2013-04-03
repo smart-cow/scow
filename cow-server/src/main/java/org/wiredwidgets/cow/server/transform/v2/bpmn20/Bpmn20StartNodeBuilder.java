@@ -38,7 +38,7 @@ public class Bpmn20StartNodeBuilder extends Bpmn20FlowNodeBuilder<TStartEvent, A
 
     @Override
     protected void buildInternal() {
-        getNode().setId(getContext().generateId("_"));
+        setId();
         getNode().setName("start");
     }
 

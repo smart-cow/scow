@@ -46,4 +46,12 @@ public interface ProcessContext<T extends Object> {
 
     Process getSource();
 
+	public abstract void setStartId(String key, int count);
+
+	public abstract int getId(String key);
+
+	public abstract void setRevised(boolean revised);
+
+	public abstract boolean isRevised();
+
 }
