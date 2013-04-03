@@ -513,27 +513,27 @@ public class EditWorkflow extends PageWidget {
 				if(EventHandler.getDragTarget() instanceof Img) {
 					Img target = (Img)EventHandler.getDragTarget();
 					Activity a = null;
-					
-					if(target.getTitle().equals("Task")) {
-						a = new Task("Task " + counter, "Task " + counter++);
+					//TODO remove the key from this
+					if(target.getTitle().equals("Task")) {						
+						a = new Task("Task " + counter++, "");
 					} else if(target.getTitle().equals("Exit")) {
 						a = new Exit("Exit", "Exit");
 					} else if(target.getTitle().equals("ServiceTask")) {
-						a = new ServiceTask("ServiceTask " + counter, "ServiceTask " + counter++);
+						a = new ServiceTask("ServiceTask " + counter++, "");
 					} else if(target.getTitle().equals("Script")) {
-						a = new Script("Script " + counter, "Script " + counter++);
+						a = new Script("Script " + counter++, "");
 					} else if(target.getTitle().equals("List")) {
-						a = new Activities("List " + counter, "List " + counter++);
+						a = new Activities("List " + counter++, "");
 					} else if(target.getTitle().equals("Loop")) {
-						a = new Loop("Loop " + counter, "Loop " + counter++);
+						a = new Loop("Loop " + counter++, "");
 						((Loop)a).setTask(new Task());
 					} else if(target.getTitle().equals("Decision")) {
-						a = new Decision("Decision " + counter, "Decision " + counter++);
+						a = new Decision("Decision " + counter++, "");
 						((Decision)a).setTask(new Task());
 					} else if(target.getTitle().equals("SubProcess")) {
-						a = new SubProcess("SubProcess " + counter, "SubProcess " + counter++);
+						a = new SubProcess("SubProcess " + counter++, "");
 					} else if(target.getTitle().equals("Signal")) {
-						a = new Signal("Signal " + counter, "Signal " + counter++);
+						a = new Signal("Signal " + counter++, "");
 					}else if(target.getTitle().equals("Copy")) {
 						copyParent = grid.getDropFolder() == null ? grid.getTree().getRoot() : grid.getDropFolder();
 						// if using the copy command, first grab a list of all existing workflow names

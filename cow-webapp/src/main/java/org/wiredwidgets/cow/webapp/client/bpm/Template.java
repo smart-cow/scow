@@ -44,6 +44,8 @@ public class Template {
 	// The key of the Template
 	protected String key;
 	
+	protected Integer maxId;
+	
 	/**
 	 * Default constructor
 	 */
@@ -51,8 +53,17 @@ public class Template {
 		base = new BaseList();
 		name = "";
 		key = String.valueOf((new Date()).getTime());
+		maxId = 0;
 	}
 	
+	public Integer getMaxId() {
+		return maxId;
+	}
+
+	public void setMaxId(Integer maxId) {
+		this.maxId = maxId;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -110,7 +121,7 @@ public class Template {
 	 * Gets the XML description of this workflow
 	 */
 	public String toString() {
-		String out = "<process name=\"" + name + "\" key=\"" + name + "\" xmlns=\"" + BpmServiceMain.modelNamespace + "\">";
+		String out = "<process name=\"" + name + "\" key=\"" + key + "\" maxId=\"" + maxId + "\" xmlns=\"" + BpmServiceMain.modelNamespace + "\">";
 		out += "<bypassAssignee>admin</bypassAssignee>";
 		out += base.toString();
 		out += "</process>";
