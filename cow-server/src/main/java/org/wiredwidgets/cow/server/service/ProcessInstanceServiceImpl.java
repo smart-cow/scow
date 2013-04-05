@@ -170,7 +170,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 		ProcessInstanceInfo info = new ProcessInstanceInfo(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), 
 				getProcessInstanceVariables(processInstanceId));
 		
-		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(String.valueOf(processInstanceId), process, info);
+		String instanceId = process.getKey() + "." + processInstanceId;
+		
+		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(instanceId, process, info);
 		evaluator.evaluate();
 		
 		ProcessInstance pi = getProcessInstance(processInstanceId);

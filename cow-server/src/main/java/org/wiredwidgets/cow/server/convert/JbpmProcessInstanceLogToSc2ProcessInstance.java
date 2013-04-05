@@ -42,6 +42,11 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverte
         // for compatibility with REST API, preserve the JBPM 4.x convention
         // where the process instance ID = processID + "." + id
         target.setId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
+        long parentInstanceId = source.getParentProcessInstanceId();
+        if (parentInstanceId > 0) {
+        	ProcessInstanceLog parent = JPAProcessInstanceDbLog.findProcessInstance(parentInstanceId);
+        	target.setParentId(parent.getProcessId() + "." + parentInstanceId);
+        }
         target.setStartTime(convert(source.getStart(), XMLGregorianCalendar.class));
         target.setEndTime(convert(source.getEnd(), XMLGregorianCalendar.class));
         
