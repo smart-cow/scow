@@ -70,7 +70,7 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverte
         
         // process instance name
         // WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(source.getProcessInstanceId());
-        target.setName(getVariable(source.getId(), PROCESS_INSTANCE_NAME_PROPERTY));
+        target.setName(getVariable(source.getProcessInstanceId(), PROCESS_INSTANCE_NAME_PROPERTY));
                             
         return target;
     }
