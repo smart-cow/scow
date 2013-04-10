@@ -157,15 +157,11 @@ public class ViewActiveWorkflows extends PageWidget {
 					for(int i = 0; i < names.size(); i++) {
 						rs[i].setAttribute("activeWorkflow", names.get(i));
 						rs[i].setAttribute("id", ids.get(i));
-						
-						//
 						BpmServiceMain.sendGet("/processInstances/active/" + BpmServiceMain.urlEncode(ids.get(i)) + "/status", new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
 								SC.say("Error. Please ensure that you are connected to the Internet, and that the server is currently online.");
 							}
 							public void onSuccess(String result) {
-								
-								
 								Template template = (result == null || result.equals("") ? new Template() : Parse.parseTemplate(result));
 
 								

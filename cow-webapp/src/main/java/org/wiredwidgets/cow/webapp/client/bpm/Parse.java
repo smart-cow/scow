@@ -51,10 +51,11 @@ public class Parse {
 			process = nodes.get(6);
 			String processInstanceName = ((Node)nodes.get(5).getChildNodes().get(0)).getValue();
 			t.setName(processInstanceName);
+
 		}
 		
 		
-		
+		t.setMaxId(getAttributeValue(process, "maxId"));
 		t.setKey(getAttributeValue(process, "key"));
 		ArrayList<Node> nodes = ((ArrayList<Node>)process.getChildNodes());
 		for(int i = 0; i < nodes.size(); i++) {
@@ -77,6 +78,7 @@ public class Parse {
 		
 		Node process = (Node)((Document) doc.getChildren().get(0)).getChildren().get(6);
 		Template t = new Template();
+		t.setMaxId(getAttributeValue(process, "maxId"));
 		t.setName(getAttributeValue(process, "name"));
 		t.setKey(getAttributeValue(process, "key"));
 		ArrayList<Node> nodes = ((ArrayList<Node>)process.getChildNodes());
@@ -576,6 +578,10 @@ public class Parse {
 	
 	protected static String getAttributeValue(Node n, String attribute) {
 		String s = n.getAttribute(attribute);
+		if (s == null){
+			s = "";	
+			
+		}
 		//if(s != null)
 		//	s = BpmServiceMain.xmlDecode(s);
 		return s;
