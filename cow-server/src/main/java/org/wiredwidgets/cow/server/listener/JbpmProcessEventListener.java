@@ -53,22 +53,21 @@ public class JbpmProcessEventListener implements ProcessEventListener{
 
     @Override
     public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
-    	// Task task = taskService.getTask(event.getNodeInstance().getNodeId());
     	
-    	if (event.getNodeInstance() instanceof HumanTaskNodeInstance) {
-    		HumanTaskNodeInstance ni = (HumanTaskNodeInstance)event.getNodeInstance();
-   
-				Long taskId = ni.getWorkItemId();
-    	
-				Long processInstanceId = ni.getProcessInstance().getId();
-				String processName = ni.getProcessInstance().getProcessName();
-				
-				String info = "eventType=TaskReady;processID="
-						+ processName + "." + processInstanceId + ";" + "taskID=" + taskId;
-				
-				log.info("sending message: " + info);
-				amqp.convertAndSend("amqp.topic", "process", info);
-    	}
+//    	if (event.getNodeInstance() instanceof HumanTaskNodeInstance) {
+//    		HumanTaskNodeInstance ni = (HumanTaskNodeInstance)event.getNodeInstance();
+//   
+//				Long taskId = ni.getWorkItemId();
+//    	
+//				Long processInstanceId = ni.getProcessInstance().getId();
+//				String processName = ni.getProcessInstance().getProcessName();
+//				
+//				String info = "eventType=TaskReady;processID="
+//						+ processName + "." + processInstanceId + ";" + "taskID=" + taskId;
+//				
+//				log.info("sending message: " + info);
+//				amqp.convertAndSend("amqp.topic", "process", info);
+//    	}
     	
     }
 

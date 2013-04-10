@@ -47,7 +47,8 @@ public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
         List<ProcessInstance> openProcessInstances = processInstanceService.findProcessInstancesByKey(activity.getSubProcessKey());
               
         for (ProcessInstance processInstance : openProcessInstances) {
-            if (processInstance.getParentId().equals(processInstanceId)) {
+        	if (processInstance.getParentId() != null 
+        			&& processInstance.getParentId().equals(processInstanceId)) {
                 return CompletionState.OPEN;
             }
         }        

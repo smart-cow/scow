@@ -17,6 +17,8 @@
 package org.wiredwidgets.cow.server.convert;
 
 import org.apache.log4j.Logger;
+import org.jbpm.process.audit.JPAProcessInstanceDbLog;
+import org.jbpm.process.audit.ProcessInstanceLog;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
@@ -62,6 +64,14 @@ public class JbpmToSc2ProcessInstance extends AbstractConverter<org.drools.runti
         target.setName(source.getProcessName());
         target.setState(Integer.toString(source.getState()));
         target.setProcessDefinitionId(source.getProcessId());
+        
+        // get the parent process in case this is a subprocess
+        ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(source.getId());
+        if (pil.getParentProcessInstanceId() > 0) {	
+        	ProcessInstanceLog parent = JPAProcessInstanceDbLog.findProcessInstance(pil.getParentProcessInstanceId());
+        	target.setParentId(parent.getProcessId() + "." + parent.getId());
+        }
+        
         /*target.setPriority(source);
         target.setParentId(parentId);
         */
