@@ -63,6 +63,23 @@ public class Template {
 	public void setMaxId(Integer maxId) {
 		this.maxId = maxId;
 	}
+	
+	public void setMaxId(String sMaxID){
+		if (sMaxID == null || sMaxID.isEmpty()) {
+			this.maxId = 0;
+		} else {
+		   try {
+		     int num = Integer.parseInt(sMaxID);
+		     this.maxId = num;
+		   }
+		   catch (NumberFormatException e) {
+			   this.maxId = 0;
+		   }
+		}
+		
+		
+	}
+	
 
 	public String getName() {
 		return name;
@@ -121,7 +138,9 @@ public class Template {
 	 * Gets the XML description of this workflow
 	 */
 	public String toString() {
-		String out = "<process name=\"" + name + "\" key=\"" + key + "\" maxId=\"" + maxId + "\" xmlns=\"" + BpmServiceMain.modelNamespace + "\">";
+		//The key should be the same as the name for now.
+		//String out = "<process name=\"" + name + "\" key=\"" + name + "\" xmlns=\"" + BpmServiceMain.modelNamespace + "\">";
+		String out = "<process name=\"" + name + "\" key=\"" + name + "\" maxId=\"" + maxId.toString() + "\" xmlns=\"" + BpmServiceMain.modelNamespace + "\">";
 		out += "<bypassAssignee>admin</bypassAssignee>";
 		out += base.toString();
 		out += "</process>";
