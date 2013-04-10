@@ -138,7 +138,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         List<ProcessInstanceLog> procList = processInstanceLogRepo.findByProcessId(key);
         for (ProcessInstanceLog pil : procList) {
             try {
-                kSession.abortProcessInstance(pil.getId());
+                kSession.abortProcessInstance(pil.getProcessInstanceId());
             } catch (IllegalArgumentException e) {
                 log.error(e);
             }
