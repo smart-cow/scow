@@ -57,9 +57,8 @@ public class Bpmn20SignalEventNodeBuilder extends Bpmn20FlowNodeBuilder<TInterme
         }
         else {
         	eventType = signal.getSignalId();
-        	String varName = "signal_" + eventType;
         	// adds a new process variable to hold the output of the signal event
-        	outputVariableProperty = getContext().addProcessVariable(varName, "string");
+        	outputVariableProperty = getContext().addProcessVariable(getVarName(signal), "String");
         }        
         
         getNode().setName("Signal:" + eventType);
@@ -104,6 +103,10 @@ public class Bpmn20SignalEventNodeBuilder extends Bpmn20FlowNodeBuilder<TInterme
         doa.setTargetRef(prop);
   
         return dataOutput;    	
+    }
+    
+    public static String getVarName(Signal signal) {
+    	return ("signal_" + signal.getSignalId());
     }
     
     

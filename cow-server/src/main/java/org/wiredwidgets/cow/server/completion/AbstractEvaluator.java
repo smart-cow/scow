@@ -44,7 +44,7 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
 	        evaluateInternal();
 	        // activity.setPercentComplete(BigInteger.valueOf((long) percentComplete));
 	        activity.setCompletionState(completionState.getName());
-    	//}
+//    	}
     }
 
     /*

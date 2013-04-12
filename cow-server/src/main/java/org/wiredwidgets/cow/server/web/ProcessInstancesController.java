@@ -280,7 +280,7 @@ public class ProcessInstancesController extends CowServerController{
      * @param req 
      */ 
     @RequestMapping(value = "/active", method = POST, params = "execute")
-    public void startExecutionSimple(@RequestParam("execute") String execute, @RequestParam(value="name", required=false) String name, HttpServletResponse response, HttpServletRequest req) {
+    public void startExecutionSimple(@RequestParam("execute") String execute, @RequestParam("name") String name, HttpServletResponse response, HttpServletRequest req) {
         org.wiredwidgets.cow.server.api.service.ProcessInstance pi = new org.wiredwidgets.cow.server.api.service.ProcessInstance();
         pi.setProcessDefinitionKey(execute);
         pi.setName(name);
