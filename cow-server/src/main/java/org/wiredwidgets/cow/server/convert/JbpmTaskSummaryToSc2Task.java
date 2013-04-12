@@ -41,13 +41,8 @@ import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder
 @Component
 public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.query.TaskSummary, Task> {
 
-    // NOTE: Autowiring does not work here!
     @Autowired
-    // org.jbpm.task.service.TaskClient taskClient;
     LocalTaskService localService;
-    
-    //@Autowired
-    //GenericHTWorkItemHandler workItemHandler;
     
     private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
 
@@ -74,29 +69,31 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         if (source.getName() != null){
             String[] parts = source.getName().split("/");
             target.setActivityName(parts[0]);
-            target.setName(parts[1]);
+            if (parts.length == 2) {	
+            	target.setName(parts[1]);
+            }
+            else {
+            	log.error("Expecting task name in [key]/[name] format, but was: " + source.getName());
+            	target.setName(parts[0]); // something is broken here, not sure what to do.
+            }
         }
         
         target.setState(source.getStatus().name());
         
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
-        
-        // BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
-        // taskClient.getTask(source.getId(), getTaskResponseHandler);        
-        // org.jbpm.task.Task task = getTaskResponseHandler.getTask();
+
         org.jbpm.task.Task task = localService.getTask(source.getId());
-        
-        //BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
-        //taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler); 
-        //Content content = getContentResponseHandler.getContent();
+
         Content content = localService.getContent(task.getTaskData().getDocumentContentId());
         
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
-        		content.getContent(),null);  
+        		content.getContent(), null);  
         
-        for (String key : map.keySet()) {
-        	log.debug("Key: " + key);
+        if (log.isDebugEnabled()) {
+	        for (String key : map.keySet()) {
+	        	log.debug("Key: " + key);
+	        }
         }
         
         // add task outcomes using the "Options" variable from the task

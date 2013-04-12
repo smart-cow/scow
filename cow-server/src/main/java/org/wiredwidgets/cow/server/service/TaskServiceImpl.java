@@ -221,9 +221,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         List<TaskSummary> tempTasks;
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
-        //BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
-        //taskClient.getTasksAssignedAsPotentialOwner("Administrator", "en-UK", taskSummaryResponseHandler);
-        //tempTasks = taskSummaryResponseHandler.getResults();
         tempTasks = jbpmTaskService.getTasksAssignedAsPotentialOwner("Administrator", "en-UK");
         
         for (TaskSummary task : tempTasks){
@@ -249,9 +246,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
-        // BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
-        // taskClient.getTasksAssignedAsPotentialOwner(user, "en-UK", taskSummaryResponseHandler);
-        // tempTasks.addAll(taskSummaryResponseHandler.getResults());
         tempTasks.addAll(jbpmTaskService.getTasksAssignedAsPotentialOwner(user, "en-UK"));
         
         for (TaskSummary task : tempTasks){
@@ -265,8 +259,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Override
     public void takeTask(Long taskId, String userId) {
-        //BlockingTaskOperationResponseHandler operationResponseHandler = new BlockingTaskOperationResponseHandler();
-        //taskClient.claim(taskId, userId, operationResponseHandler);
     	jbpmTaskService.claim(taskId, userId);
     }
     
@@ -279,10 +271,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Override
     public List<Task> findAllTasksByProcessInstance(Long id) {
         List<Status> status = Arrays.asList(Status.Completed, Status.Created, Status.Error, Status.Exited, Status.Failed, Status.InProgress, Status.Obsolete, Status.Ready, Status.Reserved, Status.Suspended);
-        
-        // BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
-        // taskClient.getTasksByStatusByProcessId(id, status, "en-UK", taskSummaryResponseHandler);
-        // return this.convertTaskSummarys(taskSummaryResponseHandler.getResults());
         return this.convertTaskSummarys(jbpmTaskService.getTasksByStatusByProcessId(id, status, "en-UK"));
     }
 
@@ -396,9 +384,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
             newTask = true;
             target = new org.jbpm.task.Task();
         } else {
-            //BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
-            //taskClient.getTask(Long.valueOf(source.getId()), getTaskResponseHandler);
-            //target = getTaskResponseHandler.getTask();
         	target = jbpmTaskService.getTask(Long.valueOf(source.getId()));
         }
         if (target == null) {

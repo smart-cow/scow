@@ -4,6 +4,7 @@
  */
 package org.wiredwidgets.cow.server.service;
 
+import static org.drools.runtime.process.ProcessInstance.STATE_ACTIVE;
 import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
 
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.JAXBElement;
 
 import org.apache.log4j.Logger;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.wiredwidgets.cow.server.api.model.v2.*;
-import org.wiredwidgets.cow.server.api.model.v2.Task;
-import org.wiredwidgets.cow.server.api.service.*;
+import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.completion.Evaluator;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
@@ -135,7 +133,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Override
     public void deleteProcessInstancesByKey(String key) {
-        List<ProcessInstanceLog> procList = processInstanceLogRepo.findByProcessId(key);
+        List<ProcessInstanceLog> procList = processInstanceLogRepo.findByProcessIdAndStatus(key, STATE_ACTIVE);
         for (ProcessInstanceLog pil : procList) {
             try {
                 kSession.abortProcessInstance(pil.getProcessInstanceId());
