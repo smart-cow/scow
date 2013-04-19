@@ -26,7 +26,16 @@ import javax.xml.namespace.QName;
 import org.wiredwidgets.cow.server.transform.v2.Builder;
 import org.wiredwidgets.cow.server.transform.v2.NodeBuilder;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
+import org.omg.spec.bpmn._20100524.model.Assignment;
+import org.omg.spec.bpmn._20100524.model.DataInput;
+import org.omg.spec.bpmn._20100524.model.DataInputAssociation;
+import org.omg.spec.bpmn._20100524.model.DataOutput;
+import org.omg.spec.bpmn._20100524.model.DataOutputAssociation;
+import org.omg.spec.bpmn._20100524.model.InputSet;
+import org.omg.spec.bpmn._20100524.model.IoSpecification;
 import org.omg.spec.bpmn._20100524.model.ObjectFactory;
+import org.omg.spec.bpmn._20100524.model.OutputSet;
+import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TFlowNode;
 import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.omg.spec.bpmn._20100524.model.TSequenceFlow;
@@ -39,6 +48,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Activity;
 public abstract class Bpmn20FlowNodeBuilder<T extends TFlowNode, V extends Activity> extends NodeBuilder<T, JAXBElement<T>, V> {
 
     protected static ObjectFactory factory = new ObjectFactory();
+
 
     public Bpmn20FlowNodeBuilder(ProcessContext context, T node, V activity) {
         super(context, node, activity);
@@ -131,6 +141,8 @@ public abstract class Bpmn20FlowNodeBuilder<T extends TFlowNode, V extends Activ
     		getActivity().setKey(id);  	
     	}
     }
+
+
     
 
 }

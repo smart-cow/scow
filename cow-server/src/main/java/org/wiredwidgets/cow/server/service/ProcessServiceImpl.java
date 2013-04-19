@@ -56,6 +56,16 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     ProcessDefinitionsService processDefsService;
     
     @Override
+    public Deployment createDeployment(Definitions definitions) {
+    	loadWorkflow(definitions);
+    	Deployment d = new Deployment();      
+    	d.setId(definitions.getRootElements().get(0).getValue().getId());
+    	d.setName(definitions.getName());
+    	d.setState("active");
+    	return d;
+    }    
+    
+    @Override
     public void deleteDeployment(String id) {
         kBase.removeProcess(id);
     }
@@ -97,31 +107,18 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
         return d;
     }
 
-    @Override
-    public Deployment createDeployment(Definitions definitions, String name) {
-    	loadWorkflow(definitions);
-    	return createDeployment(definitions);
-    }
-
 	@Override
-    public Deployment saveV2Process(Process v2Process, String deploymentName) {
+    public Deployment saveV2Process(Process v2Process) {
        Definitions d = bpmn20ProcessBuilder.build(v2Process);
        log.debug("built bpmn20 process");
        saveInRem2(v2Process);
-       return createDeployment(d, deploymentName);
+       return createDeployment(d);
     }
 
     @Transactional(readOnly = true)
     @Override
     public InputStream getResourceAsStream(String key, String extension) {
     	return getProcessFromRem2(key).getInputStream();
-    }
-    
-    @Transactional(readOnly = true)
-    @Override
-    public InputStream getResourceAsStreamByDeploymentId(String id, String extension) {
-        InputStream in = null;
-        return in;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
@@ -197,13 +194,6 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	return restTemplate.getForObject(url, StreamSource.class);
     }
     
-    private Deployment createDeployment(Definitions definitions) {
-    	Deployment d = new Deployment();      
-    	d.setId(definitions.getRootElements().get(0).getValue().getId());
-    	d.setName(definitions.getName());
-    	d.setState("active");
-    	return d;
-    }
     
     private void loadWorkflow(Definitions defs) {
     	try {

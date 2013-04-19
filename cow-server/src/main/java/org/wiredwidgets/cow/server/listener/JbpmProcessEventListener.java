@@ -12,6 +12,7 @@ import org.drools.event.process.ProcessNodeTriggeredEvent;
 import org.drools.event.process.ProcessStartedEvent;
 import org.drools.event.process.ProcessVariableChangedEvent;
 import org.drools.runtime.StatefulKnowledgeSession;
+import org.drools.runtime.process.NodeInstance;
 import org.jbpm.workflow.instance.node.HumanTaskNodeInstance;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,8 @@ public class JbpmProcessEventListener implements ProcessEventListener{
 
     @Override
     public void afterNodeLeft(ProcessNodeLeftEvent event) {
+    	NodeInstance node = event.getNodeInstance();
+    	log.info("After node left. Node: " + node.getClass().getSimpleName() + " (" + node.getId() + ")");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 

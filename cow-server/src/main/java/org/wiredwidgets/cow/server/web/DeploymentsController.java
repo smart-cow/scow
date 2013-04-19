@@ -43,8 +43,9 @@ public class DeploymentsController {
      */
     @RequestMapping(value = "/native", method = RequestMethod.POST)
     @ResponseBody
+    @Deprecated
     public Deployment createDeployment(@RequestBody Definitions definitions, @RequestParam String name, @RequestParam(value = "bpmn2", required = false) boolean bpmn2) {
-        return processService.createDeployment(definitions, name);
+        return processService.createDeployment(definitions);
     }
     
     /**
@@ -91,26 +92,24 @@ public class DeploymentsController {
     /**
      * Create or update a workflow process using a 'cow' format file.
      * @param process a valid COW format workflow document
-     * @param name The name of the deployment.  By convention this should be the same as the "name" attribute of the process element.
      * @return  a Deployment object as XML
      */
     @RequestMapping(value = "/cow", method = RequestMethod.POST)
     @ResponseBody
-    public Deployment createCowDeployment(@RequestBody Process process, @RequestParam String name) {
-        return createV2Deployment(process, name);
+    public Deployment createCowDeployment(@RequestBody Process process) {
+        return createV2Deployment(process);
     }
    
     /**
      * For backward compatibility.  'cow' is preferred.
      * @param process
-     * @param name
      * @return 
      * @see #createCowDeployment(Process, String)
      */
     @RequestMapping(value = "/v2", method = RequestMethod.POST)
     @ResponseBody
-    public Deployment createV2Deployment(@RequestBody Process process, @RequestParam String name) {
-        return processService.saveV2Process(process, name);
+    public Deployment createV2Deployment(@RequestBody Process process) {
+        return processService.saveV2Process(process);
     }
     
 }

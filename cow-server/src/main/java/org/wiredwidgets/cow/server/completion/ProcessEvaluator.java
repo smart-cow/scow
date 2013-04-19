@@ -37,4 +37,9 @@ public class ProcessEvaluator extends AbstractEvaluator<Activity> {
                 }         
 	}
 
+	@Override
+	protected Class<Activity> getActivityClass() {
+		return Activity.class;
+	}
+
 }

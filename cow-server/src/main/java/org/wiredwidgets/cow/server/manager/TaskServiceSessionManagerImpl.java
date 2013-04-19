@@ -6,10 +6,13 @@ package org.wiredwidgets.cow.server.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.jbpm.task.Group;
 import org.jbpm.task.User;
+import org.jbpm.task.identity.LDAPUserGroupCallbackImpl;
+import org.jbpm.task.identity.UserGroupCallbackManager;
 import org.jbpm.task.service.TaskService;
 import org.jbpm.task.service.TaskServiceSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
     public void initLdap() {
         jbpmTaskServiceSession = jbpmTaskService.createSession();
         addUserGroupToSession();
+        initLdapCallback();
     }
 
     private void addUserGroupToSession() {
@@ -50,6 +54,25 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
             jbpmTaskServiceSession.addUser(new User(username));
             users.add(username);
         }
+    }
+    
+    private void initLdapCallback() {
+    	
+        Properties properties = new Properties();
+        properties.setProperty(LDAPUserGroupCallbackImpl.BIND_USER, "ou=People,dc=smart-cow,dc=org");
+        properties.setProperty(LDAPUserGroupCallbackImpl.USER_CTX, "ou=People,dc=smart-cow,dc=org");
+        properties.setProperty(LDAPUserGroupCallbackImpl.ROLE_CTX, "ou=Roles,dc=smart-cow,dc=org");
+        properties.setProperty(LDAPUserGroupCallbackImpl.USER_ROLES_CTX, "ou=Roles,dc=smart-cow,dc=org");
+        properties.setProperty(LDAPUserGroupCallbackImpl.USER_FILTER, "(uid={0})");
+        properties.setProperty(LDAPUserGroupCallbackImpl.ROLE_FILTER, "(cn={0})");
+        properties.setProperty(LDAPUserGroupCallbackImpl.USER_ROLES_FILTER, "(roleOccupant={0})");
+        //properties.setProperty("ldap.user.id.dn", "true");
+        properties.setProperty("java.naming.provider.url", "ldap://scout3.mitre.org:389/");
+
+        LDAPUserGroupCallbackImpl ldapUserGroupCallback = new LDAPUserGroupCallbackImpl(properties);
+        
+        UserGroupCallbackManager.getInstance().setCallback(ldapUserGroupCallback);   	
+    	
     }
 
     /*private List<String> getAllGroups() {

@@ -32,4 +32,9 @@ public class BypassableActivityEvaluator extends AbstractEvaluator<BypassableAct
         // set the completion state of the wrapped activity to the completion state of the wrapper
         activity.getWrappedActivity().setCompletionState(activity.getActivities().getCompletionState());
     }
+
+	@Override
+	protected Class<BypassableActivity> getActivityClass() {
+		return BypassableActivity.class;
+	}
 }
