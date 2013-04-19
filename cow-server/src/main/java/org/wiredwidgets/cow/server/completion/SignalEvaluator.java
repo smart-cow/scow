@@ -37,5 +37,10 @@ public class SignalEvaluator extends AbstractEvaluator<Signal> {
     		this.completionState = branchState;
     	}
     }
+
+	@Override
+	protected Class<Signal> getActivityClass() {
+		return Signal.class;
+	}
      
 }

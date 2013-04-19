@@ -44,5 +44,10 @@ public class ScriptEvaluator extends AbstractEvaluator<Script> {
     		this.completionState = branchState;
     	}
     }
+
+	@Override
+	protected Class<Script> getActivityClass() {
+		return Script.class;
+	}
      
 }

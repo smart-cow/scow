@@ -84,4 +84,9 @@ public class TaskEvaluator extends AbstractEvaluator<Task> {
             return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
         }
     }
+
+	@Override
+	protected Class<Task> getActivityClass() {
+		return Task.class;
+	}
 }

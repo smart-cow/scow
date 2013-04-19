@@ -67,4 +67,9 @@ public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
         // not completed, not open, must be not started
         return branchState;
     }
+
+	@Override
+	protected Class<SubProcess> getActivityClass() {
+		return SubProcess.class;
+	}
 }

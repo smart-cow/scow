@@ -62,4 +62,9 @@ public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
             completionState = CompletionState.COMPLETED;    
         }
     }
+
+	@Override
+	protected Class<Activities> getActivityClass() {
+		return Activities.class;
+	}
 }
