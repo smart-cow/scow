@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Approved for Public Release: 10-4800. Distribution Unlimited.
+    Copyright 2011 The MITRE Corporation,
+    Licensed under the Apache License,
+    Version 2.0 (the "License");
+
+    You may not use this file except in compliance with the License.
+    You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied.
+
+    See the License for the specific language governing permissions and limitations under the License.
+
+-->
+
+
+<b:beans xmlns="http://www.springframework.org/schema/security"
+         xmlns:b="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:context="http://www.springframework.org/schema/context"
+         xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+         xmlns:c="http://www.springframework.org/schema/c"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                             http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+						     http://www.springframework.org/schema/context
+						     http://www.springframework.org/schema/context/spring-context-3.1.xsd                             
+                             http://www.springframework.org/schema/security 
+                             http://www.springframework.org/schema/security/spring-security-3.1.xsd
+                             http://www.springframework.org/schema/security/oauth2 
+                             http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd">
+    
+    <context:property-placeholder location="file:${COW_APPS_HOME}/cow-server/config/cow-server.properties" />
+    
+    <http auto-config="false" entry-point-ref="http403EntryPoint" >
+    	<intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" />
+    	<custom-filter ref="preAuthFilter" position="PRE_AUTH_FILTER"/>
+    </http>
+    
+    <!-- Assume the request has already been authenticated, and the user's ID is in the COW_USER header -->
+    <b:bean id="preAuthFilter" class="org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter" >
+    	<b:property name="principalRequestHeader" value="COW_USER" />
+    	<b:property name="authenticationManager" ref="authenticationManager" />
+    </b:bean>
+    
+    <!-- If pre-authentication fails, there is nothing to do but respond with a 403 -->
+    <b:bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
+    
+    <!-- The provider is used to obtain user information based on the preauth ID -->
+    <b:bean id="preAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider" >
+    	<b:property name="preAuthenticatedUserDetailsService" ref="userDetailsWrapper" />
+    </b:bean>
+    
+    <ldap-server id="ldapServer" url="ldap://${ldap.host}:${ldap.port}/dc=smart-cow,dc=org" />
+    
+    <ldap-user-service id="ldapUserService" server-ref="ldapServer" user-search-filter="(uid={0})" user-search-base="ou=People" 
+    		group-search-base="ou=Roles"/>
+    		
+    <!-- Wraps the ldapUserService so it can be used as an AuthenticationUserDetailsService -->		
+	<b:bean id="userDetailsWrapper" class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper"
+		c:userDetailsService-ref="ldapUserService" />    		
+    
+    <authentication-manager alias="authenticationManager">
+    	<authentication-provider ref="preAuthProvider" />
+    </authentication-manager>
+    
+</b:beans>

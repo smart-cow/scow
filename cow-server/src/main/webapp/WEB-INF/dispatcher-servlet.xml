@@ -31,6 +31,8 @@
                            http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+                           
+    <import resource="security.xml"/>                           
 
     <!-- Enables annotation based type conversion and formatting.
          For example, the @DateTimeFormat annotation
@@ -60,5 +62,7 @@
     </bean>-->
 
     <context:component-scan base-package="org.wiredwidgets.cow.server.web"/>
+    
+
 
 </beans>

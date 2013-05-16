@@ -44,6 +44,17 @@ public abstract class Bpmn20ActivityNodeBuilder<T extends TActivity, U extends A
 		assignInputValue(addDataInput(name), value);
 	}
 
+	/**
+	 * Adds a data input item and adds it to the input set
+	 * 
+	 * <dataInput name="{name}" id="_{node id}_{name}Input"/>
+	 * <inputSet>
+	 * 	<dataInputRefs>{dataInput id}</dataInputRefs>
+	 * </inputSet>
+	 * 
+	 * @param name
+	 * @return
+	 */
 	protected DataInput addDataInput(String name) {
 	    DataInput dataInput = new DataInput();
 	    dataInput.setId(getInputRefName(name));
@@ -53,6 +64,14 @@ public abstract class Bpmn20ActivityNodeBuilder<T extends TActivity, U extends A
 	    return dataInput;
 	}
 	
+	/**
+	 * Adds a data output item and adds it to the output set
+	 * 
+	 * 
+	 * 
+	 * @param name
+	 * @return
+	 */
 	protected DataOutput addDataOutput(String name) {
 	    DataOutput dataOutput = new DataOutput();
 	    dataOutput.setId(getOutputRefName(name));

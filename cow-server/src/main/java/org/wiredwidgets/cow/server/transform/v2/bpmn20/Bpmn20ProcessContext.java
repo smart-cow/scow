@@ -111,6 +111,12 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
         }
     }
      
+    
+    /*
+     * Defines a process level variable with <property> and <itemDefinition> elements
+     * <property itemSubjectRef="_{itemName}Item" id="{itemName}"/>
+     * <itemDefinition structureRef="{dataType}" id="_{itemName}Item" />
+     */
     protected Property addProcessVariable(String itemName, String dataType) {
         TItemDefinition itemDef = new TItemDefinition();
         String id = "_" + itemName + "Item";
@@ -126,6 +132,9 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
         return prop;
     } 
     
+    /*
+     * Returns an existing property so we can reuse it
+     */
     protected Property getProcessVariable(String name) {
     	return properties.get(name);
     }
