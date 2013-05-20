@@ -8,6 +8,10 @@ import org.apache.log4j.Logger;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.policy.TimeoutRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.User;
@@ -124,12 +128,32 @@ public class AmqpNotifier {
 	// Sends a message using the exchange name over rabbit
 	private void sendMessage(String message, String exchangeName) {
 
-		try {
+		/*try {
 			log.debug("sending amqp message: " +  message);
 			amqpTemplate.convertAndSend("amq.topic", "process", message);
 		} catch (AmqpException e) {
 			log.error(e);
-		}
+		}*/
+                TimeoutRetryPolicy retry = new TimeoutRetryPolicy();
+                retry.setTimeout(600000L);
+                RetryTemplate retryTemplate = new RetryTemplate();
+                retryTemplate.setRetryPolicy(retry);
+                final String msg = message;
+                try{                     
+                    String result = retryTemplate.execute(new RetryCallback<String>() {
+                        
+                        public String doWithRetry(RetryContext context) {
+                            log.debug("sending amqp message: " +  msg);
+                            amqpTemplate.convertAndSend("amq.topic", "process", msg);
+                            return "Message Sent";                            
+                        }                       
+                     });
+                    
+                    log.info(result); 
+                    
+                }catch(Exception e){
+                    log.error(e);
+                }
 	}
 
 }
