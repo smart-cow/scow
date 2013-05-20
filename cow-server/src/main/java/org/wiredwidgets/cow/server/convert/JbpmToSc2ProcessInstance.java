@@ -31,9 +31,6 @@ import org.wiredwidgets.cow.server.api.service.Variables;
 @Component
 public class JbpmToSc2ProcessInstance extends AbstractConverter<org.drools.runtime.process.ProcessInstance, ProcessInstance> {
 
-    /*@Autowired
-    ProcessEngine engine;*/
-
     private Logger log = Logger.getLogger(JbpmToSc2ProcessInstance.class);
 
     @Override

@@ -89,7 +89,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<arguments>-extension src/main/xsd/simpleBinding.xsd</arguments>
+					<arguments>-extension ${basedir}/src/main/xsd/simpleBinding.xsd</arguments>
 					<extension>true</extension>
 				</configuration>
 			</plugin>

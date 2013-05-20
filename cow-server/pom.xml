@@ -252,12 +252,12 @@
 		<!-- <artifactId>hibernate-core</artifactId> -->
 		<!-- <version>4.1.7.Final</version> -->
 		<!-- </dependency> -->
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>javax.persistence</groupId> -->
+<!-- 			<artifactId>persistence-api</artifactId> -->
+<!-- 			<version>1.0</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
 		<!-- <dependency> -->
 		<!-- <groupId>dom4j</groupId> -->
 		<!-- <artifactId>dom4j</artifactId> -->
