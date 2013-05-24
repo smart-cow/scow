@@ -24,9 +24,7 @@ package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TCallActivity;
-import org.wiredwidgets.cow.server.api.model.v2.Parameter;
 import org.wiredwidgets.cow.server.api.model.v2.SubProcess;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
@@ -59,33 +57,10 @@ public class Bpmn20SubProcessNodeBuilder extends Bpmn20ActivityNodeBuilder<TCall
         // this means that if the parent process is terminated the subprocess will also be terminated.
         addOtherAttribute("independent","false");
         
-        // input params
-        for (Parameter param : source.getParameterIns()) {
-        	if (param.getExpr() != null) {
-        		// input is an expression
-        		addDataInput(param.getSubvar(), param.getExpr());
-        	}
-        	else {
-        		Property p = new Property();
-        		p.setId(param.getVar());
-        		p.setName(param.getVar());
-        		p.setItemSubjectRef(new QName(param.getVar()));
-        		addDataInput(param.getSubvar(), p);
-        	}
-        }
-        
-        // output params
-        for (Parameter param : source.getParameterOuts()) {
-        	if (param.getExpr() != null) {
-        		addDataOutput(param.getSubvar(), param.getExpr());
-        	}        	
-        	else {
-        		Property p = new Property();
-        		p.setId(param.getVar());
-        		p.setName(param.getVar());
-        		p.setItemSubjectRef(new QName(param.getVar()));
-        		addDataOutput(param.getSubvar(), p);
-        	}
+        // inputs and outputs 
+        // other variable inputs
+        if (source.getVariables() != null) {
+        	addInputOutputVariables(source.getVariables().getVariables());
         }
 
     }

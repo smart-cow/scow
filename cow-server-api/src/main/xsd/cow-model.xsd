@@ -54,6 +54,8 @@
         <attribute name="name" type="string"/>
         <attribute name="value" type="string"/>
         <attribute name="type" type="string" />
+        <attribute name="required" type="boolean" default="false" />
+        <attribute name="output" type="boolean" default="false" />
     </complexType>
 
     <complexType name="Variables">
@@ -217,7 +219,7 @@
                     </element>
                     <element name="completion" type="string" minOccurs="0"/>
                     <element name="createTime" type="dateTime" minOccurs="0"/>
-                    <element name="endTime" type="dateTime" minOccurs="0"/>                    
+                    <element name="endTime" type="dateTime" minOccurs="0"/> 
                     <element name="variables" type="tns:Variables" minOccurs="0"/>
                 </sequence>
             </extension>
@@ -242,6 +244,7 @@
                     <element name="url" type="string" minOccurs="1"/>
                     <element name="content" type="string" minOccurs="0"/>
                     <element name="var" type="string" minOccurs="0"/>
+                    <element name="variables" type="tns:Variables" minOccurs="0"/>
                 </sequence>
             </extension>
         </complexContent>
@@ -291,16 +294,7 @@
         <complexContent>
             <extension base="tns:Activity">
                 <sequence>
-                    <element name="parameterIn" type="tns:Parameter" minOccurs="0" maxOccurs="unbounded" >
-                        <annotation>
-                            <documentation>Use EITHER var OR expr but not both.</documentation>
-                        </annotation>
-                    </element>
-                    <element name="parameterOut" type="tns:Parameter" minOccurs="0" maxOccurs="unbounded" >
-                        <annotation>
-                            <documentation>Use EITHER subvar OR expr but not both.</documentation>
-                        </annotation>
-                    </element>
+					<element name="variables" type="tns:Variables" minOccurs="0"/>
                 </sequence>
                 <attribute name="sub-process-key"/>
             </extension>
@@ -389,22 +383,4 @@
         </complexContent>
     </complexType>       
      
-    <complexType name="Parameter">
-        <attribute name="subvar" type="string">
-            <annotation>
-                <documentation>Name of the sub process variable.</documentation>
-            </annotation>
-        </attribute>
-        <attribute name="expr" type="string">
-            <annotation>
-                <documentation>Expression that provides the variable value.</documentation>
-            </annotation>
-        </attribute>
-        <attribute name="var" type="string">
-            <annotation>
-                <documentation>Name of the process variable in the super process.</documentation>
-            </annotation>
-        </attribute>
-    </complexType>    
-
 </schema>

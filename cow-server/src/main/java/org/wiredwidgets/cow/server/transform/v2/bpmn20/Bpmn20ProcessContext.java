@@ -118,6 +118,12 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
      * <itemDefinition structureRef="{dataType}" id="_{itemName}Item" />
      */
     protected Property addProcessVariable(String itemName, String dataType) {
+    	
+    	// if it already exists, return the existing property
+    	if (properties.get(itemName) != null) {
+    		return properties.get(itemName);
+    	}
+    	
         TItemDefinition itemDef = new TItemDefinition();
         String id = "_" + itemName + "Item";
         itemDef.setId(id);
