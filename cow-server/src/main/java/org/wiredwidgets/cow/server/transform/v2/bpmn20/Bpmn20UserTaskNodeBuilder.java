@@ -20,23 +20,13 @@
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 
-import org.omg.spec.bpmn._20100524.model.Assignment;
-import org.omg.spec.bpmn._20100524.model.DataInput;
-import org.omg.spec.bpmn._20100524.model.DataInputAssociation;
-import org.omg.spec.bpmn._20100524.model.DataOutput;
-import org.omg.spec.bpmn._20100524.model.DataOutputAssociation;
-import org.omg.spec.bpmn._20100524.model.InputSet;
-import org.omg.spec.bpmn._20100524.model.IoSpecification;
-import org.omg.spec.bpmn._20100524.model.OutputSet;
-import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.ResourceAssignmentExpression;
-import org.omg.spec.bpmn._20100524.model.TDataAssociation;
 import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.omg.spec.bpmn._20100524.model.TPotentialOwner;
 import org.omg.spec.bpmn._20100524.model.TUserTask;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
+import org.wiredwidgets.cow.server.api.model.v2.Variable;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
@@ -68,20 +58,25 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TUserTa
         ioSpec.getOutputSets().add(outputSet);
         
         // standard JBPM inputs
-        Property varsProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
-        Property processNameProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY);
-        addDataInput(TASK_INPUT_VARIABLES_NAME, varsProperty);
-        addDataOutput(TASK_OUTPUT_VARIABLES_NAME, varsProperty);
-        addDataInput("ProcessInstanceName", processNameProperty);
-        addDataInput("Comment", source.getDescription());
-        addDataInput("Skippable", "false");
+        addDataInputFromProperty(TASK_INPUT_VARIABLES_NAME, Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+        addDataOutputFromProperty(TASK_OUTPUT_VARIABLES_NAME, Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+        addDataInputFromProperty("ProcessInstanceName", Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY);
+        addDataInputFromExpression("Comment", source.getDescription());
+        
+        // other variable inputs
+        if (source.getVariables() != null) {
+        	addInputOutputVariables(source.getVariables().getVariables());
+        }
+        
+        // not used, leave it out for now
+        // addDataInputFromExpression("Skippable", "false");
         
         // prepend the id to the name so we can map back to the key
         // when converting the task we will split it apart for display
-        addDataInput("TaskName", t.getId() + "/" + source.getName());
+        addDataInputFromExpression("TaskName", t.getId() + "/" + source.getName());
 
         if (source.getCandidateGroups() != null) {
-        	addDataInput("GroupId", source.getCandidateGroups());
+        	addDataInputFromExpression("GroupId", source.getCandidateGroups());
         }   
         
         // handle assignment

@@ -59,13 +59,13 @@ public class Bpmn20ServiceTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TTas
         ServiceTask st = getActivity();
         
         Property varsProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
-        addDataInput(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty);
-        addDataOutput(Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, varsProperty);
+        addDataInputFromProperty(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty);
+        addDataOutputFromProperty(Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, varsProperty);
         
-        addDataInput("method", st.getMethod());
-        addDataInput("url", st.getUrl());
-        addDataInput("content", st.getContent());
-        addDataInput("var", st.getVar());
+        addDataInputFromExpression("method", st.getMethod());
+        addDataInputFromExpression("url", st.getUrl());
+        addDataInputFromExpression("content", st.getContent());
+        addDataInputFromExpression("var", st.getVar());
 
     }
     
