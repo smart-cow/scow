@@ -33,9 +33,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.drools.runtime.StatefulKnowledgeSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -169,7 +172,23 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping("/active")
     @ResponseBody
     public ProcessInstances getAllProcessInstances() {
-        return createProcessInstances(processInstanceService.findAllProcessInstances());
+        //return createProcessInstances(processInstanceService.findAllProcessInstances());
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);              
+            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
+                public ProcessInstances doWithRetry(RetryContext context) {                            
+                    return createProcessInstances(processInstanceService.findAllProcessInstances());                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getAllProcessInstances = " + e);            
+            log.error(e);
+        }
+        return new ProcessInstances();
     }
     
     /**
@@ -298,9 +317,30 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping("/history")
     @ResponseBody
     public ProcessInstances getHistoryProcessInstances(@RequestParam(value = "key", required = false) String key, @RequestParam(value = "endedAfter", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endedAfter, @RequestParam(value = "ended", defaultValue = "true") boolean ended) {
-        ProcessInstances pi = new ProcessInstances();
+        /*ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(key, endedAfter, ended));
-        return pi;
+        return pi;*/
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);            
+            final String k = key; 
+            final Date ea = endedAfter; 
+            final Boolean e = ended; 
+            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                
+                public ProcessInstances doWithRetry(RetryContext context) { 
+                    ProcessInstances pi = new ProcessInstances();
+                    pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(k, ea, e));
+                    return pi;
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getHistoryProcessInstances = " + e);            
+            log.error(e);
+        }
+        return new ProcessInstances();
     }  
     
     /**
@@ -328,7 +368,24 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = "/tasks", params = "assignee")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForAssignee(@RequestParam("assignee") String assignee) {
-        return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
+        //return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String assign = assignee;  
+            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
+                public ProcessInstances doWithRetry(RetryContext context) {                            
+                    return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assign)));                            
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getProcessInstancesWithTasksForAssignee = " + e);            
+            log.error(e);
+        }
+        return new ProcessInstances();
     }
     
     /**
@@ -353,7 +410,24 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = "/tasks", params = "candidate")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(@RequestParam("candidate") String candidate) {
-        return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
+        //return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);            
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String candi = candidate;  
+            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
+                public ProcessInstances doWithRetry(RetryContext context) {                            
+                    return createProcessInstances(mergeTasks(taskService.findGroupTasks(candi)));                            
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getProcessInstancesWithTasksForCandidate = " + e);            
+            log.error(e);
+        }
+        return new ProcessInstances(); 
     }  
     
     private List<ProcessInstance> mergeTasks(List<Task> tasks) {
