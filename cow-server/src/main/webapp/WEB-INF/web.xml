@@ -32,20 +32,20 @@
         </init-param>      
     </filter>    
     
-	<filter>
+	<!--filter>
 	  <filter-name>SynchronizedFilter</filter-name>
 	  <filter-class>org.wiredwidgets.cow.server.web.SynchronizedFilter</filter-class>
-	</filter>
+	</filter-->
 	
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>  	
 	
-	<filter-mapping>
+	<!--filter-mapping>
 	  <filter-name>SynchronizedFilter</filter-name>
 	  <url-pattern>/*</url-pattern>
-	</filter-mapping>
+	</filter-mapping-->
    
     <servlet>
         <servlet-name>dispatcher</servlet-name>
