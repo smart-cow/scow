@@ -131,7 +131,8 @@ public class Parse {
 		Node process = (Node)doc.getChildren().get(0);
 		Activities a = (Activities)parseActivity(((ArrayList<Node>)process.getChildNodes()).get(0));
 		a.setName(getAttributeValue(process, "name"));
-		a.setKey(getAttributeValue(process, "key"));
+		//No longer keep the key
+		a.setKey("");
 		return a;
 	}
 	
