@@ -44,6 +44,7 @@ import com.google.gwt.gadgets.client.Gadget.UseLongManifestName;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.BaseWidget;
 import com.smartgwt.client.widgets.Label;
 
@@ -67,6 +68,10 @@ import com.smartgwt.client.widgets.Label;
 public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements EntryPoint {
 	// Create a remote service proxy to talk to the server-side Greeting service.
 	private static final BpmServiceAsync bpmService = GWT.create(BpmService.class);
+	
+	
+	// Create a remote service proxy to talk to the server-side auth service.
+	private static final AuthServiceAsync authService = GWT.create(AuthService.class);
 	
 	// Name of the current user
 	private static String user = "test";
@@ -93,12 +98,10 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 		Label templateLabel = new Label();
 		templateLabel.setHeight(20);
 		Label.setDefaultProperties(templateLabel);
-		
-		//MATT
-		History.addValueChangeHandler(new ValueChangeHandler() {
+
+		History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			
 			public void onValueChange(ValueChangeEvent arg0) {
-
 				String[] args = arg0.getValue().toString().split("-ARG-");
 				Pages p = Pages.valueOf(args[0]);
 				
@@ -116,17 +119,15 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 						b = new Login();
 						break;
 					case WORKFLOW:
-							boolean a = Boolean.valueOf(args[2]);
-							b = new ViewWorkflow(args[1].toString(), a);
-
+						boolean a = Boolean.valueOf(args[2]);
+						b = new ViewWorkflow(args[1].toString(), a);
 						break;
 					case EDITWORKFLOWSTRING:
 						b = new EditWorkflow(args[1].toString());
 						break;	
 					case VIEWACTIVEWORKFLOWS:
 						b = new ViewActiveWorkflows();
-						break;	
-						
+						break;							
 					case ADMIN:
 						b = new Admin();
 						break;
@@ -142,10 +143,8 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 						break;
 					case MANAGEWORKFLOWS:
 						b = new ManageWorkflows();
-						break;
-						
-					case VIEWWORKFLOW:
-						
+						break;						
+					case VIEWWORKFLOW:						
 						if ((args.length > 2)){
 							boolean a11 = Boolean.valueOf(args[2]);					
 							b = new ViewWorkflow(args[1].toString(), a11);
@@ -164,7 +163,14 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 
 				
 			}
+			
+			
+			
 		});
+		
+		
+		
+		
 		
 		if(Window.Location.getParameter("pollingRate") != null) {
 			pollingRate = Integer.parseInt(Window.Location.getParameter("pollingRate")) * 1000;
@@ -172,6 +178,20 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 			pollingRate = 60000;
 		}
 		
+		authService.retrieveUsername(
+				 new AsyncCallback<String>() {
+				  public void onFailure(Throwable caught) {
+				   SC.say("Remote Procedure Call - Failure:" + caught);
+				  }
+				  public void onSuccess(String result) {
+					  //TODO - what goes here?
+					  setUser(result);
+					  PageManager.getInstance().setPageHistory(Pages.TASK, null);
+				  }
+				 }
+				);
+		
+		/*
 		if(Window.Location.getParameter("user") != null) {
 			user = Window.Location.getParameter("user");
 			String[] args = null;
@@ -184,6 +204,9 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 		} else {
 			PageManager.getInstance().setPageHistory(Pages.LOGIN ,null);
 		}
+		*/
+		
+		
 	}
 	
 	/*protected void init(UserPreferences preferences) {

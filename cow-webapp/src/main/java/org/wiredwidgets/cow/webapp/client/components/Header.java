@@ -21,7 +21,7 @@ import org.wiredwidgets.cow.webapp.client.PageManager;
 import org.wiredwidgets.cow.webapp.client.PageManager.Pages;
 import org.wiredwidgets.cow.webapp.client.page.PageWidget;
 
-
+import com.google.gwt.user.client.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -113,7 +113,7 @@ public class Header extends HLayout {
 		ToolStripButton logout = new ToolStripButton(BpmServiceMain.getUser() + " - Logout");
 		logout.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				PageManager.getInstance().setPageHistory(Pages.LOGIN ,null);
+				Window.Location.replace("spring_security_login");
 			}
 		});
 		t.addButton(logout);
