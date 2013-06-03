@@ -15,11 +15,9 @@
  */
 package org.wiredwidgets.cow.server.completion;
 
-import java.math.BigInteger;
-
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
-import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 public abstract class AbstractEvaluator<T extends Activity> implements Evaluator<T> {
 
@@ -33,6 +31,8 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
     protected String processInstanceId;
     protected CompletionState branchState;
     protected boolean inLoop = false;
+    
+    protected abstract Class<T> getActivityClass();   
 
     @Override
     public final void evaluate() {
@@ -44,7 +44,7 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
 	        evaluateInternal();
 	        // activity.setPercentComplete(BigInteger.valueOf((long) percentComplete));
 	        activity.setCompletionState(completionState.getName());
-    	//}
+//    	}
     }
 
     /*

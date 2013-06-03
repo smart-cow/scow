@@ -12,11 +12,16 @@
 	xmlns:sec="http://www.springframework.org/schema/security"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:jee="http://www.springframework.org/schema/jee"
-	xmlns:rabbit="http://www.springframework.org/schema/rabbit" xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:oxm="http://www.springframework.org/schema/oxm" xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
-	xmlns:jbpm="http://drools.org/schema/drools-spring" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oxm="http://www.springframework.org/schema/oxm" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:jbpm="http://drools.org/schema/drools-spring" 
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://www.springframework.org/schema/security
@@ -27,8 +32,10 @@
        http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-	   http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/jee 
+	   http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
        http://www.springframework.org/schema/oxm
        http://www.springframework.org/schema/oxm/spring-oxm-3.1.xsd
        http://www.springframework.org/schema/tx
@@ -81,68 +88,10 @@
 	<bean id="jbpmTaskService" class="org.jbpm.task.service.TaskService"
 		c:emf-ref="emf" c:systemEventListener-ref="sel" />
 
-	<!-- Taken from the JBPM documentation. Unclear whether it's necessary -->
-<!-- 	<bean id="htTxManager" -->
-<!-- 		class="org.drools.container.spring.beans.persistence.HumanTaskSpringTransactionManager" -->
-<!-- 		c:ptm-ref="txManager" /> -->
-
-	<!-- Taken from JBPM documenation. Unclear whether it's necessary -->
-<!-- 	<bean id="springTaskSessionFactory" -->
-<!-- 		class="org.jbpm.task.service.persistence.TaskSessionSpringFactoryImpl" -->
-<!-- 		init-method="initialize" depends-on="jbpmTaskService"> -->
-<!-- 		<property name="entityManagerFactory" ref="emf" /> -->
-<!-- 		<property name="transactionManager" ref="htTxManager" /> -->
-<!-- 		<property name="useJTA" value="true" /> -->
-<!-- 		<property name="taskService" ref="jbpmTaskService" /> -->
-
-<!-- 	</bean> -->
-
 	<bean id="localTaskService" class="org.jbpm.task.service.local.LocalTaskService"
 		c:taskService-ref="jbpmTaskService" />
 
-	<!--<bean id="userGroups" class="java.util.HashMap" /> -->
-
-	<!--<bean id="userGroupCallback" class="org.jbpm.task.identity.LDAPUserGroupCallbackImpl" 
-		/> -->
-
-	<!-- <bean id="minaTaskServer" class="org.jbpm.task.service.mina.MinaTaskServer" 
-		c:service-ref="jbpmTaskService" destroy-method="stop" /> -->
-
-	<bean id="minaTaskServerManager"
-		class="org.wiredwidgets.cow.server.manager.MinaTaskServerManager"
-		init-method="init">
-		<!-- <property name="minaTaskServer" ref="minaTaskServer" /> -->
-		<!-- <property name="userGroupCallback" ref="userGroupCallback" /> -->
-	</bean>
-
-	<!-- <bean id="minaTaskClientHandler" class="org.jbpm.task.service.mina.MinaTaskClientHandler" 
-		c:systemEventListener-ref="sel"/> -->
-
-	<!-- <bean id="minaTaskClientConnector" class="org.jbpm.task.service.mina.MinaTaskClientConnector"> -->
-	<!-- <constructor-arg type="java.lang.String" value="client 1" /> -->
-	<!-- <constructor-arg ref="minaTaskClientHandler" /> -->
-	<!-- </bean> -->
-
-	<!--<bean id="minaTaskClient" class="org.jbpm.task.service.mina.AsyncMinaTaskClient" 
-		/> -->
-
-	<!-- <bean id="taskClient" class="org.jbpm.task.service.TaskClient" c:connector-ref="minaTaskClientConnector" 
-		/> -->
-
-	<!-- <bean id="taskClientManager" class="org.wiredwidgets.cow.server.manager.TaskClientManager" 
-		init-method="init" > -->
-	<!-- <property name="taskClient" ref="taskClient" /> -->
-	<!-- </bean> -->
-
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
-
-<!-- 	<bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager"> -->
-<!-- 		<property name="entityManagerFactory" ref="emf" /> -->
-<!-- 		<property name="dataSource" ref="myDataSource" /> -->
-<!-- 		<property name="jpaDialect" ref="jpaDialect" /> -->
-<!-- 		<property name="nestedTransactionAllowed" value="false" /> -->
-<!-- 	</bean> -->
-
 
 	<!-- Spring JtaTransactionManager -->
 	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager" />

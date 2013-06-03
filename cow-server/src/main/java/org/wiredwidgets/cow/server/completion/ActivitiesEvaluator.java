@@ -33,9 +33,10 @@ public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
 
         int completedCount = 0;
         int openCount = 0;
-
+        
         for (JAXBElement<? extends Activity> jbe : activity.getActivities()) {
             Activity act = jbe.getValue();
+            
             evaluate(act);
             CompletionState state = CompletionState.forName(act.getCompletionState());
             if (state == COMPLETED) {
@@ -61,4 +62,9 @@ public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
             completionState = CompletionState.COMPLETED;    
         }
     }
+
+	@Override
+	protected Class<Activities> getActivityClass() {
+		return Activities.class;
+	}
 }

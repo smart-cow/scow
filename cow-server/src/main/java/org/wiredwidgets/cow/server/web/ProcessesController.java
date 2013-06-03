@@ -73,7 +73,7 @@ public class ProcessesController extends CowServerController {
      * @param key the process key.  Note: any "/" characters must be doubly encoded to "%252F"
      * @return the XML process document
      */
-    @RequestMapping(value = "/{key}", params = "format=cow")
+    @RequestMapping(value = "/{key}", params = "format=cow", produces="application/xml")
     @ResponseBody
     public StreamSource getCowProcess(@PathVariable("key") String key) {
         return getV2Process(key);
@@ -86,7 +86,7 @@ public class ProcessesController extends CowServerController {
      * @return 
      * @see #getCowProcess(java.lang.String) 
      */
-    @RequestMapping(value = "/{key}", params = "format=v2")
+    @RequestMapping(value = "/{key}", params = "format=v2", produces="application/xml")
     @ResponseBody
     public StreamSource getV2Process(@PathVariable("key") String key) {  
         return new StreamSource(service.getResourceAsStream(decode(key), ProcessService.V2_EXTENSION));

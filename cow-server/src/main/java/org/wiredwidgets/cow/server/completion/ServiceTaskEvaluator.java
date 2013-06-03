@@ -51,4 +51,9 @@ public class ServiceTaskEvaluator extends AbstractEvaluator<ServiceTask> {
             return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
         }
     }
+
+	@Override
+	protected Class<ServiceTask> getActivityClass() {
+		return ServiceTask.class;
+	}
 }

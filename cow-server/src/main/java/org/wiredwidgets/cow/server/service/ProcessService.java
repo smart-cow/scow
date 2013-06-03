@@ -40,11 +40,9 @@ public interface ProcessService {
      * Creates a new deployment from a StreamSource.  The StreamSource is presumed
      * to contain a BPMN format process definition xml file.
      * @param source
-     * @param name the name assigned to the deployment.  The same name, with .jpdl.xml
-     * appended, will be used for the resource stored with the deployment.
      * @return
      */
-    public Deployment createDeployment(Definitions definitions, String name);
+    public Deployment createDeployment(Definitions definitions);
 
     void deleteDeployment(String id);
 
@@ -56,11 +54,9 @@ public interface ProcessService {
 
     Deployment getDeployment(String id);
 
-    Deployment saveV2Process(Process v2Process, String deploymentName);
+    Deployment saveV2Process(Process v2Process);
 
     InputStream getResourceAsStream(String key, String extension);
-
-    InputStream getResourceAsStreamByDeploymentId(String id, String extension);
 
     org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(String key);
 

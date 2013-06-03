@@ -23,8 +23,8 @@ package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
 import javax.xml.bind.JAXBElement;
 
+import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TScriptTask;
-import org.wiredwidgets.cow.server.api.model.v2.Exit;
 import org.wiredwidgets.cow.server.api.model.v2.Script;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
@@ -32,7 +32,7 @@ import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
  * Node builder for TEndEvent
  * @author JKRANES
  */
-public class Bpmn20ScriptTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TScriptTask, Script> {
+public class Bpmn20ScriptTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TScriptTask, Script> {
 
     public Bpmn20ScriptTaskNodeBuilder(ProcessContext context, Script script) {
         super(context, new TScriptTask(), script);
@@ -54,10 +54,35 @@ public class Bpmn20ScriptTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TScriptTa
         	 getContext().addImport(className);
          }
          
+         // create a process level property to indicate whether the script has been
+         // run or not. 
+         String completedPropertyName = getNode().getId() + "_completed";
+         Property property = getContext().addProcessVariable(completedPropertyName, "Boolean");
+         
+         
          org.omg.spec.bpmn._20100524.model.Script script = new org.omg.spec.bpmn._20100524.model.Script();           
          script.getContent().add(getActivity().getContent());
+         
+         // XXX: kind of a hack
+         // Tried to do this somehow via output variable assignment but was unable
+         // to get it working.  Unclear whether it is possible to have an output variable
+         // that is simply an expression value.  In any case this gets the job done.
+         
+         String scriptLine = "kcontext.setVariable(\"" + completedPropertyName + "\"" + ", true);";
+         
+         script.getContent().add(scriptLine);
+         
          getNode().setScriptFormat(getActivity().getScriptFormat());
          getNode().setScript(script);
+         
+         
+         
+         
+         // getNode().setIoSpecification(ioSpec);           
+         // ioSpec.getOutputSets().add(outputSet);
+         // assignOutputValue(addDataOutput("complete", "complete"), "true");
+         
+         
     }
     
    

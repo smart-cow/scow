@@ -31,6 +31,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -222,7 +226,7 @@ public class TasksController {
     @RequestMapping("/active")
     @ResponseBody
     public Tasks getAllTasks() {
-        Tasks tasks = new Tasks();
+        /*Tasks tasks = new Tasks();
         try{        
         tasks.getTasks().addAll(taskService.findAllTasks()); 
         //return tasks;
@@ -230,6 +234,25 @@ public class TasksController {
             log.error(e);
         }
         return tasks;
+        */
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);              
+            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
+                public Tasks doWithRetry(RetryContext context) { 
+                    Tasks tasks = new Tasks();
+                    tasks.getTasks().addAll(taskService.findAllTasks());
+                    return tasks;                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getAllTasks = " + e);            
+            log.error(e);
+        }
+        return new Tasks();       
     }
 
     /**
@@ -241,13 +264,33 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "assignee")
     @ResponseBody
     public Tasks getTasksByAssignee(@RequestParam("assignee") String assignee) {
-        Tasks tasks = new Tasks();
+        /*Tasks tasks = new Tasks();
         try{        
         tasks.getTasks().addAll(taskService.findPersonalTasks(assignee));        
         }catch(Exception e){
             log.error(e);            
         }
         return tasks;
+        */
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String assign = assignee;
+            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
+                public Tasks doWithRetry(RetryContext context) { 
+                    Tasks tasks = new Tasks();
+                    tasks.getTasks().addAll(taskService.findPersonalTasks(assign));
+                    return tasks;                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getTasksByAssignee = " + e);            
+            log.error(e);
+        }
+        return new Tasks();
     }
 
     /**
@@ -277,7 +320,7 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
     public Tasks getUnassignedTasks() {
-        Tasks tasks = new Tasks();
+        /*Tasks tasks = new Tasks();
         try{        
             tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
         //return tasks;
@@ -285,7 +328,25 @@ public class TasksController {
             log.error(e);
         }
         return tasks;
-        //throw new UnsupportedOperationException("Not supported yet.");
+        */
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);              
+            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
+                public Tasks doWithRetry(RetryContext context) { 
+                    Tasks tasks = new Tasks();
+                    tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
+                    return tasks;                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getUnassignedTasks = " + e);            
+            log.error(e);
+        }
+        return new Tasks();
     }
 
     /**
@@ -301,13 +362,33 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "candidate")
     @ResponseBody
     public Tasks getUnassignedTasksByCandidate(@RequestParam("candidate") String candidate) {
-        Tasks tasks = new Tasks();
+        /*Tasks tasks = new Tasks();
         try{        
         tasks.getTasks().addAll(taskService.findGroupTasks(candidate));        
         }catch(Exception e){
             log.error(e);
         }
         return tasks;
+        */
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String candi = candidate;
+            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
+                public Tasks doWithRetry(RetryContext context) { 
+                    Tasks tasks = new Tasks();
+                    tasks.getTasks().addAll(taskService.findGroupTasks(candi));
+                    return tasks;                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getUnassignedTasksByCandidate = " + e);            
+            log.error(e);
+        }
+        return new Tasks();
     }
 
     /**
@@ -319,9 +400,28 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "processInstance")
     @ResponseBody
     public Tasks getTasksByProcessInstance(@RequestParam("processInstance") String processInstance) {
-        Tasks tasks = new Tasks();
+        /*Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(Long.decode(processInstance)));
-        return tasks;
+        return tasks;*/
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String pi = processInstance;
+            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
+                public Tasks doWithRetry(RetryContext context) { 
+                    Tasks tasks = new Tasks();
+                    tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(Long.decode(pi)));
+                    return tasks;                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getTasksByProcessInstance = " + e);            
+            log.error(e);
+        }
+        return new Tasks();
     }
 
     /**
@@ -380,9 +480,30 @@ public class TasksController {
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "!process")
     @ResponseBody
     public HistoryTasks getHistoryTasks(@RequestParam(value = "assignee", required = false) String assignee, @RequestParam(value = "start", required = false) @DateTimeFormat(iso = ISO.DATE) Date start, @RequestParam(value = "end", required = false) @DateTimeFormat(iso = ISO.DATE) Date end) {
-         HistoryTasks tasks = new HistoryTasks();
+         /*HistoryTasks tasks = new HistoryTasks();
          tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(assignee, start, end)); 
-         return tasks;
+         return tasks;*/
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String assign = assignee; 
+            final Date s = start; 
+            final Date e = end; 
+            HistoryTasks result = retryTemplate.execute(new RetryCallback<HistoryTasks>() {                     
+                public HistoryTasks doWithRetry(RetryContext context) { 
+                    HistoryTasks tasks = new HistoryTasks();
+                    tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(assign, s, e));
+                    return tasks;
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getHistoryTasks = " + e);            
+            log.error(e);
+        }
+        return new HistoryTasks();
     }
 
     /**
@@ -393,10 +514,30 @@ public class TasksController {
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "process")
     @ResponseBody
     public HistoryTasks getHistoryTasks(@RequestParam(value = "process", required = true) String process) {       
-         HistoryTasks tasks = new HistoryTasks();
+         /*HistoryTasks tasks = new HistoryTasks();
          Long processInstanceId = Long.valueOf(process.split("\\.")[1]);
          tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId));
-         return tasks;
+         return tasks;*/
+        try{
+            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+            retry.setMaxAttempts(50);
+            RetryTemplate retryTemplate = new RetryTemplate();               
+            retryTemplate.setRetryPolicy(retry);
+            final String p = process;
+            HistoryTasks result = retryTemplate.execute(new RetryCallback<HistoryTasks>() {                     
+                public HistoryTasks doWithRetry(RetryContext context) { 
+                    HistoryTasks tasks = new HistoryTasks();
+                    Long processInstanceId = Long.valueOf(p.split("\\.")[1]);
+                    tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId));
+                    return tasks;                           
+                }                       
+            });
+            return result;
+        }catch(Exception e){
+            log.info("ERROR in getHistoryTasks = " + e);            
+            log.error(e);
+        }
+        return new HistoryTasks();
          
     }
 

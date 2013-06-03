@@ -90,4 +90,9 @@ public class DecisionEvaluator extends AbstractEvaluator<Decision> {
     	String varName = activity.getTask().getKey() + "_decision";
     	return info.getVariables().get(varName);
     }
+
+	@Override
+	protected Class<Decision> getActivityClass() {
+		return Decision.class;
+	}
 }

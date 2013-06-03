@@ -73,5 +73,10 @@ public class LoopEvaluator extends AbstractEvaluator<Loop> {
     	String decision = info.getVariables().get(varName);
     	return decision == null ? false : decision.equals(activity.getRepeatName());
     }
+
+	@Override
+	protected Class<Loop> getActivityClass() {
+		return Loop.class;
+	}
     
 }

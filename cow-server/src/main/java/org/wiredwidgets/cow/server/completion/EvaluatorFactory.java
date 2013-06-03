@@ -25,7 +25,9 @@ import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.api.model.v2.Script;
 import org.wiredwidgets.cow.server.api.model.v2.ServiceTask;
+import org.wiredwidgets.cow.server.api.model.v2.Signal;
 import org.wiredwidgets.cow.server.api.model.v2.SubProcess;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 
@@ -51,8 +53,12 @@ public class EvaluatorFactory implements ApplicationContextAware {
             eval = applicationContext.getBean(LoopEvaluator.class);
         } else if (activity instanceof Exit) {
             eval = applicationContext.getBean(ExitEvaluator.class);
+        } else if (activity instanceof Script) {
+            eval = applicationContext.getBean(ScriptEvaluator.class);   
         } else if (activity instanceof ServiceTask) {
-            eval = applicationContext.getBean(ServiceTaskEvaluator.class);
+            eval = applicationContext.getBean(ServiceTaskEvaluator.class);            
+        } else if (activity instanceof Signal) {
+            eval = applicationContext.getBean(SignalEvaluator.class);
         } else if (activity instanceof SubProcess) {
             eval = applicationContext.getBean(SubProcessEvaluator.class);
         }

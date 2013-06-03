@@ -2,8 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>org.wiredwidgets</groupId>
+	<parent>
+		<groupId>org.wiredwidgets</groupId>
+		<artifactId>scow-projects-parent</artifactId>
+		<version>1.0</version>
+	</parent>
+	<!--groupId>org.wiredwidgets</groupId -->
 	<artifactId>cow-server-new</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
@@ -14,9 +18,10 @@
 		<org.jbpm.version>5.4.0.Final</org.jbpm.version>
 		<!--<copyright.basedir>${basedir}../../..</copyright.basedir> -->
 		<org.springframework.version>3.1.2.RELEASE</org.springframework.version>
-		<org.drools.version>5.5.0.Final</org.drools.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
+		<org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
+			<org.drools.version>5.5.0.Final</org.drools.version>
+			<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+			<netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
 	</properties>
 
 	<dependencies>
@@ -90,7 +95,23 @@
 			<version>1.2.0.RELEASE</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>${org.springframework.security.version}</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${org.springframework.security.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${org.springframework.security.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -185,14 +206,14 @@
 					<groupId>dom4j</groupId>
 					<artifactId>dom4j</artifactId>
 				</exclusion>
-<!-- 				<exclusion> -->
-<!-- 					<groupId>org.apache.cxf</groupId> -->
-<!-- 					<artifactId>cxf-rt-frontend-jaxws</artifactId> -->
-<!-- 				</exclusion> -->
-<!-- 				<exclusion> -->
-<!-- 					<groupId>org.apache.cxf</groupId> -->
-<!-- 					<artifactId>cxf-rt-databinding-jaxb</artifactId> -->
-<!-- 				</exclusion> -->
+				<!-- <exclusion> -->
+				<!-- <groupId>org.apache.cxf</groupId> -->
+				<!-- <artifactId>cxf-rt-frontend-jaxws</artifactId> -->
+				<!-- </exclusion> -->
+				<!-- <exclusion> -->
+				<!-- <groupId>org.apache.cxf</groupId> -->
+				<!-- <artifactId>cxf-rt-databinding-jaxb</artifactId> -->
+				<!-- </exclusion> -->
 			</exclusions>
 		</dependency>
 
@@ -252,12 +273,12 @@
 		<!-- <artifactId>hibernate-core</artifactId> -->
 		<!-- <version>4.1.7.Final</version> -->
 		<!-- </dependency> -->
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
-		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>javax.persistence</groupId> -->
+		<!-- <artifactId>persistence-api</artifactId> -->
+		<!-- <version>1.0</version> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
 		<!-- <dependency> -->
 		<!-- <groupId>dom4j</groupId> -->
 		<!-- <artifactId>dom4j</artifactId> -->
@@ -305,6 +326,11 @@
 
 		<!--<dependency> <groupId>org.apache.mina</groupId> <artifactId></artifactId> 
 			<version>2.0.7</version> </dependency> -->
+                <dependency>
+                        <groupId>org.springframework.retry</groupId>
+                        <artifactId>spring-retry</artifactId>
+                        <version>1.0.2.RELEASE</version>
+                </dependency>
 	</dependencies>
 
 
@@ -329,35 +355,16 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-                        
-                        <!-- To Deploy WAR to JBoss -->
-                         <!--plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-dependency-plugin</artifactId>
-                            <version>2.7</version>
-                            <executions>
-                              <execution>
-                                <id>copy-installed</id>
-                                <phase>install</phase>
-                                <goals>
-                                  <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                  <artifactItems>
-                                    <artifactItem>
-                                      <groupId>${project.groupId}</groupId>
-                                      <artifactId>${project.artifactId}</artifactId>
-                                      <version>${project.version}</version>
-                                      <type>${project.packaging}</type>
-                                      <overWrite>true</overWrite>
-                                      <outputDirectory>${env.JBOSS_HOME}/standalone/deployments</outputDirectory>
-                                      <destFileName>${project.name}.war</destFileName>
-                                    </artifactItem>                                    
-                                  </artifactItems>                                  
-                                </configuration>
-                              </execution>
-                            </executions>
-                          </plugin-->
+
+			<!-- To Deploy WAR to JBoss -->
+			<!--plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
+				<version>2.7</version> <executions> <execution> <id>copy-installed</id> <phase>install</phase> 
+				<goals> <goal>copy</goal> </goals> <configuration> <artifactItems> <artifactItem> 
+				<groupId>${project.groupId}</groupId> <artifactId>${project.artifactId}</artifactId> 
+				<version>${project.version}</version> <type>${project.packaging}</type> <overWrite>true</overWrite> 
+				<outputDirectory>${env.JBOSS_HOME}/standalone/deployments</outputDirectory> 
+				<destFileName>${project.name}.war</destFileName> </artifactItem> </artifactItems> 
+				</configuration> </execution> </executions> </plugin -->
 		</plugins>
 		<finalName>cow-server-new</finalName>
 		<testResources>

@@ -42,5 +42,10 @@ public class ExitEvaluator extends AbstractEvaluator<Exit> {
             this.completionState = branchState;
         }
     }
+
+	@Override
+	protected Class<Exit> getActivityClass() {
+		return Exit.class;
+	}
      
 }
