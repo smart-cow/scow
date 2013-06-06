@@ -57,4 +57,49 @@
     <property name="baseURL"><value>${webapp.baseURL}</value></property>    
     </bean> 
     
+    <bean id="authService" class="org.wiredwidgets.cow.webapp.server.AuthServiceImpl" />
+
+    
+
+    <sec:http auto-config="true">
+        <sec:intercept-url pattern="/cow-webapp/**" access="ROLE_USER"/>        
+        <sec:intercept-url pattern="/**" access="ROLE_USER" />
+        <sec:logout invalidate-session="true" logout-success-url="/cow-webapp/" />
+    </sec:http>
+    
+        
+    
+    
+    <!--  Use custom login, not LDAP -->
+    <!--
+    <bean id="customAuthListener" class="org.wiredwidgets.cow.webapp.server.CustomAuthListener"/>
+    <bean id="customAuthenticationProvider" class="org.wiredwidgets.cow.webapp.server.CustomAuthenticationProvider" />
+    <sec:authentication-manager alias="authenticationManager">
+    	<sec:authentication-provider ref="customAuthenticationProvider"/>
+ 	</sec:authentication-manager-->
+ 	
+    
+    <!-- LDAP Configuration -->
+     
+    <sec:authentication-manager>
+         <sec:ldap-authentication-provider 
+           user-search-filter="(uid={0})"
+           user-search-base="ou=People"
+           group-search-filter="(roleOccupant={0})"
+           group-search-base="ou=Roles"
+           group-role-attribute="cn">
+         </sec:ldap-authentication-provider>
+ 	</sec:authentication-manager>
+    
+    
+    <sec:ldap-server url="ldap://scout3.mitre.org:389/dc=smart-cow,dc=org" />
+  
+    
+
+    
+    
 </beans>
+
+
+
+	

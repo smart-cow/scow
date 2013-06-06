@@ -29,6 +29,7 @@ import org.wiredwidgets.cow.webapp.client.bpm.Parse;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.util.ValueCallback;
 import com.smartgwt.client.widgets.Button;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
@@ -79,6 +80,46 @@ public class Admin extends PageWidget {
 				});
 			}
 		});
+		
+		
+		
+		
+		
+		
+		Button deleteSingle = new Button();
+		deleteSingle.setAutoFit(true);
+		deleteSingle.setTitle("Delete specific workflow");
+		deleteSingle.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				
+					
+					SC.askforValue("Which workflow would you like to end?", new ValueCallback() {
+						 
+		                public void execute(String s) {
+		                    if (s != null) {
+		                    	BpmServiceMain.sendDelete("/processInstances/active/" + s, new AsyncCallback<Void>() {
+									public void onFailure(Throwable arg0) {
+										SC.say("Cannot find Worflow Instance: Please use the instance ID ");
+									}
+									public void onSuccess(Void arg0) {
+										
+									}
+								});
+		                    	
+
+		                    }
+		                }
+		            });	
+			
+
+			}
+
+		});
+
+		
+		
+		
+		
 		
 		Button groups = new Button();
 		groups.setAutoFit(true);
@@ -145,6 +186,7 @@ public class Admin extends PageWidget {
 			}
 		});
 		
+		layout.addMember(deleteSingle);
 		layout.addMember(delete);
 		layout.addMember(groups);
 		layout.addMember(users);
