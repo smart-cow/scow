@@ -8,6 +8,7 @@ import org.jbpm.task.service.local.LocalTaskService;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
 import org.wiredwidgets.cow.server.service.TaskService;
 
 @Component
@@ -22,12 +23,14 @@ public class JbpmTaskEventListener implements TaskEventListener {
     TaskService taskService;
     
 	@Autowired
-	LocalTaskService jbpmTaskService;    
+	//LocalTaskService jbpmTaskService;
+        TaskServiceFactory taskServiceFactory;
 
 	@Override
 	public void taskCreated(TaskUserEvent event) {
 		Long taskId = event.getTaskId();
-		Task task = jbpmTaskService.getTask(taskId);
+		//Task task = jbpmTaskService.getTask(taskId);
+                Task task = taskServiceFactory.getTaskService().getTask(taskId);
 		String processId = task.getTaskData().getProcessId() 
 				+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
 		

@@ -23,15 +23,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.jbpm.task.Content;
-import org.jbpm.task.service.local.LocalTaskService;
-import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
-import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
+//import org.jbpm.task.service.local.LocalTaskService;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
+import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 /**
@@ -42,7 +41,8 @@ import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder
 public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.query.TaskSummary, Task> {
 
     @Autowired
-    LocalTaskService localService;
+    //LocalTaskService localService;
+    TaskServiceFactory taskServiceFactory;
     
     private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
 
@@ -83,9 +83,11 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
 
-        org.jbpm.task.Task task = localService.getTask(source.getId());
+        //org.jbpm.task.Task task = localService.getTask(source.getId());
+        org.jbpm.task.Task task = taskServiceFactory.getTaskService().getTask(source.getId());
 
-        Content content = localService.getContent(task.getTaskData().getDocumentContentId());
+        //Content content = localService.getContent(task.getTaskData().getDocumentContentId());
+        Content content = taskServiceFactory.getTaskService().getContent(task.getTaskData().getDocumentContentId());
         
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
         		content.getContent(), null);  
