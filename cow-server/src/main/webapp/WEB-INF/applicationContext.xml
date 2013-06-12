@@ -122,11 +122,13 @@
 		<constructor-arg ref="kSession" />
 		<constructor-arg ref="restServiceTaskHandler" />
 		<constructor-arg ref="localTaskService" />
-                <!--constructor-arg ref="taskServiceFactory" /-->
+                <!--constructor-arg ref="workItemTaskService" /-->
 	</bean>
         <!-- For use of ThreadLocal -->        
-        <bean id="taskServiceFactory" class="org.wiredwidgets.cow.server.manager.TaskServiceFactory" />
-        
+        <!--bean id="workItemTaskService" class="org.wiredwidgets.cow.server.manager.WorkItemTaskService" 
+              c:taskService-ref="jbpmTaskService" />
+        <bean id="threadLocalTaskService" class="org.jbpm.task.service.local.LocalTaskService"
+		c:taskService-ref="jbpmTaskService" /-->
         
 	<bean id="jpmnProcessEventListener"
 		class="org.wiredwidgets.cow.server.listener.JbpmProcessEventListener">
