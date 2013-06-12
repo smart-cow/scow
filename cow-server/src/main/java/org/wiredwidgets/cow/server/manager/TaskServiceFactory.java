@@ -17,7 +17,7 @@ import org.jbpm.task.service.local.LocalTaskService;
 public class TaskServiceFactory {
     
     @Autowired
-    TaskService taskService;
+    org.jbpm.task.service.TaskService taskService;
     
     private ThreadLocal<org.jbpm.task.TaskService> localTaskService = new ThreadLocal<org.jbpm.task.TaskService>() {
         /*
