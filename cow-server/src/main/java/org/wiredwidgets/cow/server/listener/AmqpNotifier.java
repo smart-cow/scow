@@ -30,10 +30,11 @@ public class AmqpNotifier {
 	TaskRepository taskRepo;
 
 	@Autowired
-	AmqpTemplate amqpTemplate;
+	AmqpTemplate amqpTemplate;  
         
         @Autowired
         ProcessInstanceService processInstanceService;
+        
 
 	/**
 	 * Publishes a message to amqp that describes what action a user has just
@@ -111,10 +112,11 @@ public class AmqpNotifier {
 	 */
 	public void amqpProcessPublish(String processId, String exchangeName,
 			String eventName) {
-		/*String info = "eventType=" + eventName + ";" + "processID=" + processId
-				+ ";";*/
+		//String info = "eventType=" + eventName + ";" + "processID=" + processId
+		//		+ ";";
+                //IS FIXING THIS IN THE CALL BETTER?
                 ProcessInstance id = processInstanceService.getProcessInstance(Long.decode(processId)); 
-                String info = "eventType=" + eventName + ";" + "processID=" + id.getId() + ";";                
+                String info = "eventType=" + eventName + ";" + "processID=" + id.getId() + ";";               
 		sendMessage(info, exchangeName);
 	}
 
@@ -156,7 +158,7 @@ public class AmqpNotifier {
                         public String doWithRetry(RetryContext context) {
                             log.debug("sending amqp message: " +  msg);
                             amqpTemplate.convertAndSend("amq.topic", "process", msg);
-                            return "Message Sent: " + msg;                            
+                            return "\nMessage Sent: \n" + msg + "\n";                            
                         }                       
                      });
                     

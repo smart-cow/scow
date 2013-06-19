@@ -19,8 +19,8 @@ public class JbpmTaskEventListener implements TaskEventListener {
     @Autowired
     AmqpTemplate amqp;	
     
-    @Autowired
-    TaskService taskService;
+    //@Autowired
+    //TaskService taskService;
     
 	@Autowired
 	//LocalTaskService jbpmTaskService;

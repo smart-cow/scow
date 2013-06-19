@@ -122,7 +122,7 @@ public class ProcessInstancesController extends CowServerController{
         System.out.println("STARTED PROCESS ID " + id);
         response.setStatus(SC_CREATED); // 201
         response.setHeader("Location", req.getRequestURL() + "/" + id);
-        
+        //pi.getKey();
         amqpNotifier.amqpProcessPublish(pi.getId(), "process", "ProcessStarted");
     }
     

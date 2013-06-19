@@ -88,8 +88,8 @@
 	<bean id="jbpmTaskService" class="org.jbpm.task.service.TaskService"
 		c:emf-ref="emf" c:systemEventListener-ref="sel" />
 
-	<bean id="localTaskService" class="org.jbpm.task.service.local.LocalTaskService"
-		c:taskService-ref="jbpmTaskService" />
+	<!--bean id="localTaskService" class="org.jbpm.task.service.local.LocalTaskService"
+		c:taskService-ref="jbpmTaskService" /-->        
 
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
 
@@ -121,15 +121,13 @@
 		factory-method="createInstance"> <!--c:session-ref="kSession" c:handle-ref="restServiceTaskHandler" > -->
 		<constructor-arg ref="kSession" />
 		<constructor-arg ref="restServiceTaskHandler" />
-		<constructor-arg ref="localTaskService" />
-                <!--constructor-arg ref="workItemTaskService" /-->
+		<!--constructor-arg ref="localTaskService" /-->
+                <constructor-arg ref="taskService" />
 	</bean>
-        <!-- For use of ThreadLocal -->        
-        <!--bean id="workItemTaskService" class="org.wiredwidgets.cow.server.manager.WorkItemTaskService" 
-              c:taskService-ref="jbpmTaskService" />
-        <bean id="threadLocalTaskService" class="org.jbpm.task.service.local.LocalTaskService"
-		c:taskService-ref="jbpmTaskService" /-->
-        
+        <!-- For use of ThreadLocal -->  
+        <bean id="taskServiceFactory" class="org.wiredwidgets.cow.server.manager.TaskServiceFactory" />      
+        <bean id="taskService" factory-bean="taskServiceFactory" factory-method="getTaskService" />
+                
 	<bean id="jpmnProcessEventListener"
 		class="org.wiredwidgets.cow.server.listener.JbpmProcessEventListener">
 		<property name="sessionProcessListener" ref="kSession" />
