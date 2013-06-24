@@ -132,10 +132,32 @@ public class Parse {
 		Activities a = (Activities)parseActivity(((ArrayList<Node>)process.getChildNodes()).get(0));
 		a.setName(getAttributeValue(process, "name"));
 		//No longer keep the key
-		a.setKey("");
-		return a;
+		return removeAllkeys(a);
 	}
 	
+	public static Activities removeAllkeys(Activities as){
+		as.setKey("");
+		
+		for(int i = 0; i < as.activities.size(); i++){
+			Activity a = as.activities.get(i);
+			as.activities.get(i).setKey("");
+			String name = a.getName();
+			if(name.split(":").length > 1)
+				name = name.split(":")[1];
+			if (a instanceof Activities) { 
+				as.activities.set(i, removeAllkeys((Activities) a));
+			}
+				
+				
+		}
+			
+			
+			
+		
+		return as;
+		
+	}
+
 	public static HashMap<String, String> parseVariables(Node variables) {
 		HashMap<String, String> vars = new HashMap<String, String>();
 		for(Node n : (ArrayList<Node>)variables.getChildNodes()) {
