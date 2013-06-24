@@ -35,10 +35,18 @@ import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.smartgwt.client.data.RecordList;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.SortDirection;
+import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
@@ -47,6 +55,8 @@ import com.smartgwt.client.widgets.grid.events.CellClickEvent;
 import com.smartgwt.client.widgets.grid.events.CellClickHandler;
 import com.smartgwt.client.widgets.grid.events.CellDoubleClickEvent;
 import com.smartgwt.client.widgets.grid.events.CellDoubleClickHandler;
+import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.VLayout;
 
 public class ViewActiveWorkflows extends PageWidget {
 	HashMap<String, String> map;
@@ -78,8 +88,11 @@ public class ViewActiveWorkflows extends PageWidget {
 					}
 					if (statusList.contains(value)){
 						return value;
-					}					
-	                return super.getBaseStyle(record, rowNum, colNum);
+					}
+					else{
+						return "chicCell";
+					}
+	                //return super.getBaseStyle(record, rowNum, colNum);
 	            }
 				
 			};
@@ -87,8 +100,8 @@ public class ViewActiveWorkflows extends PageWidget {
 			
 			
 
-			grid.setWidth100();
-			grid.setHeight100();
+			grid.setWidth("100%");
+			grid.setHeight("96%");
 			grid.setShowFilterEditor(true);
 			grid.setFilterOnKeypress(true);
 			grid.setShowRecordComponents(true);
@@ -268,9 +281,64 @@ public class ViewActiveWorkflows extends PageWidget {
 					
 				}
 			});
+			//TODO decide on V or H and figure out what the % bug is
+			final VLayout layout = new VLayout();
+			//final HLayout layout = new HLayout();
+			
+			layout.setWidth("100%");
+			layout.setHeight("100%");
+			final HLayout labels = new HLayout();
+			//final VLayout labels = new VLayout();
+			labels.setWidth("60%");
+			//precluded", "completed", "contingent", "planned", "notStarted", "open"
+			Label completed = new Label();
+			completed.setWidth("10%");
+			completed.setBaseStyle("completed");
+			completed.setContents("Completed");
+			completed.setAlign(Alignment.CENTER);  
+			completed.setValign(VerticalAlignment.CENTER); 
+			labels.addMember(completed);
 			
 			
-			createPage(grid, PageWidget.PAGE_VIEWACTIVEWORKFLOWS);}
+			
+			Label open = new Label();
+			open.setWidth("10%");
+			open.setBaseStyle("open");
+			open.setContents("Open");
+			open.setAlign(Alignment.CENTER);  
+			open.setValign(VerticalAlignment.CENTER); 		
+			labels.addMember(open);
+			
+			Label planned = new Label();
+			planned.setWidth("10%");
+			planned.setBaseStyle("planned");
+			planned.setContents("Planned");
+			planned.setAlign(Alignment.CENTER);  
+			planned.setValign(VerticalAlignment.CENTER); 	
+			labels.addMember(planned);
+			
+			Label contingent = new Label();
+			contingent.setWidth("10%");
+			contingent.setBaseStyle("contingent");
+			contingent.setContents("Contingent");
+			contingent.setAlign(Alignment.CENTER);  
+			contingent.setValign(VerticalAlignment.CENTER); 		
+			labels.addMember(contingent);
+			
+			Label precluded = new Label();
+			precluded.setWidth("10%");
+			precluded.setBaseStyle("precluded");
+			precluded.setContents("Precluded");
+			precluded.setAlign(Alignment.CENTER);  
+			precluded.setValign(VerticalAlignment.CENTER); 		
+			labels.addMember(precluded);
+			
+			layout.addMember(grid);
+			layout.addMember(labels);
+			
+			
+			
+			createPage(layout, PageWidget.PAGE_VIEWACTIVEWORKFLOWS);}
 		}
 
 
