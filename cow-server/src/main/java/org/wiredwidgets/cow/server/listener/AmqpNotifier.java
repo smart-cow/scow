@@ -5,7 +5,6 @@
 package org.wiredwidgets.cow.server.listener;
 
 import org.apache.log4j.Logger;
-import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.RetryCallback;
@@ -13,9 +12,11 @@ import org.springframework.retry.RetryContext;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.User;
 import org.wiredwidgets.cow.server.repo.TaskRepository;
+import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 
 /**
  * 
@@ -29,7 +30,11 @@ public class AmqpNotifier {
 	TaskRepository taskRepo;
 
 	@Autowired
-	AmqpTemplate amqpTemplate;
+	AmqpTemplate amqpTemplate;  
+        
+        @Autowired
+        ProcessInstanceService processInstanceService;
+        
 
 	/**
 	 * Publishes a message to amqp that describes what action a user has just
@@ -52,10 +57,15 @@ public class AmqpNotifier {
 		if (eventName.equals("TaskTaken")) {
 
 			try {
-				info = "eventType=" + eventName + ";" + "processID="
+				/*info = "eventType=" + eventName + ";" + "processID="
 						+ task.getProcessInstanceId() + ";" + "taskID="
 						+ task.getId() + ";" + "assignee=" + task.getAssignee()
-						+ ";";
+						+ ";";*/
+                                org.jbpm.task.Task ht = taskRepo.findById(Long.decode(taskId));                                
+				String processName = ht.getTaskData().getProcessId();				
+                                info = "eventType=" + eventName + ";" + "processID="
+						+ processName + "." + task.getProcessInstanceId() + ";" + "taskID="
+						+ task.getId() + ";" + "assignee=" + task.getAssignee()	+ ";";
 			} catch (Exception e) {
 				log.debug(e.getMessage());
 			}
@@ -102,8 +112,11 @@ public class AmqpNotifier {
 	 */
 	public void amqpProcessPublish(String processId, String exchangeName,
 			String eventName) {
-		String info = "eventType=" + eventName + ";" + "processID=" + processId
-				+ ";";
+		//String info = "eventType=" + eventName + ";" + "processID=" + processId
+		//		+ ";";
+                //IS FIXING THIS IN THE CALL BETTER?
+                ProcessInstance id = processInstanceService.getProcessInstance(Long.decode(processId)); 
+                String info = "eventType=" + eventName + ";" + "processID=" + id.getId() + ";";               
 		sendMessage(info, exchangeName);
 	}
 
@@ -145,7 +158,7 @@ public class AmqpNotifier {
                         public String doWithRetry(RetryContext context) {
                             log.debug("sending amqp message: " +  msg);
                             amqpTemplate.convertAndSend("amq.topic", "process", msg);
-                            return "Message Sent";                            
+                            return "\nMessage Sent: \n" + msg + "\n";                            
                         }                       
                      });
                     
@@ -154,6 +167,5 @@ public class AmqpNotifier {
                 }catch(Exception e){
                     log.error(e);
                 }
-	}
-
+	} 
 }
