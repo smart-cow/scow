@@ -14,7 +14,7 @@ import org.jbpm.task.service.local.LocalTaskService;
  *
  * @author PREMA
  */
-@Component
+//@Component
 public class TaskServiceFactory {
     
     @Autowired

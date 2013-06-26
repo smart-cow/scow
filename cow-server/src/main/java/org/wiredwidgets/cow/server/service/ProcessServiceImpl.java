@@ -171,7 +171,8 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
              
         log.debug("calling rem2");
         RestTemplate restTemplate = new RestTemplate();
-        URI location = restTemplate.postForLocation("http://scout.mitre.org:8080/rem2/cms/workflows", node);
+        URI location = restTemplate.postForLocation("http://localhost:8080/rem2/cms/workflows", node);
+        //URI location = restTemplate.postForLocation("${rem2.url}" + "/cms/workflows", node);
     } 
     
     private InputStream marshalToInputStream(Object source) {
