@@ -18,6 +18,7 @@ import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 /**
  *
@@ -96,8 +97,8 @@ public class JbpmTaskToSc2Task extends AbstractConverter<org.jbpm.task.Task, Tas
         }
         
         // get ad-hoc variables from the "Content" map
-        if (map.containsKey("Content")){
-            Map<String, Object> contentMap = (Map<String, Object>) map.get("Content");
+        if (map.containsKey(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME)){
+            Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME);
             if (contentMap != null) {
                     for (Map.Entry<String, Object> entry : contentMap.entrySet()) {
                             addVariable(target, entry.getKey(), entry.getValue());
