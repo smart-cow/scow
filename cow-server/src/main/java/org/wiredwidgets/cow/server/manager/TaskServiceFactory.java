@@ -20,7 +20,7 @@ public class TaskServiceFactory {
     @Autowired
     org.jbpm.task.service.TaskService taskService;
     
-    public static Logger log = Logger.getLogger(TaskServiceFactory.class);
+    //public static Logger log = Logger.getLogger(TaskServiceFactory.class);
     
     
     private ThreadLocal<org.jbpm.task.TaskService> localTaskService = new ThreadLocal<org.jbpm.task.TaskService>() {
