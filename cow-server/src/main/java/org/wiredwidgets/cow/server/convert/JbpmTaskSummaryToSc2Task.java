@@ -18,12 +18,12 @@ package org.wiredwidgets.cow.server.convert;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.jbpm.task.Content;
-//import org.jbpm.task.service.local.LocalTaskService;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,9 @@ import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
+//import org.jbpm.task.service.local.LocalTaskService;
 
 /**
  *
@@ -92,12 +94,6 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
         		content.getContent(), null);  
         
-        if (log.isDebugEnabled()) {
-	        for (String key : map.keySet()) {
-	        	log.debug("Key: " + key);
-	        }
-        }
-        
         // add task outcomes using the "Options" variable from the task
         String optionsString = (String) map.get("Options");
         if (optionsString != null) {     
@@ -107,7 +103,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         
         // get ad-hoc variables map
        
-        Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME);
+        Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
         if (contentMap != null) {
 	        for (Entry<String, Object> entry : contentMap.entrySet()) {
 	        	log.debug(entry.getKey() + "=" + entry.getValue());
@@ -117,66 +113,16 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         else {
         	log.debug("No Content found for task");
         }
-
-        // add variables
-        /*Set<String> names = taskService.getVariableNames(source.getId());
-        Map<String, Object> variables = taskService.getVariables(source.getId(), names);
-        // remove process name var
-        variables.remove("_name");
-        for (String key : variables.keySet()) {
-            Variable var = new Variable();
-            var.setName(key);
-            // Support strings only.  Other types will cause ClassCastException
-            try {
-                var.setValue((String) variables.get(key));
-            } catch (ClassCastException e) {
-                var.setValue("Variable type " + variables.get(key).getClass().getName() + " is not supported");
-            }
-            addVariable(target, var);
+        
+        // all other non system variables
+        Set<String> systemVarNames = Bpmn20UserTaskNodeBuilder.getSystemVariableNames();
+        for (String key : map.keySet()) {
+        	if (! systemVarNames.contains(key)) {
+        		// log.info("Additional var: " + key);
+        		addVariable(target, key, map.get(key));
+        	}
         }
-
-        // Do this only if the task is not an ad-hoc task (as indicated by null executionId)
-        if (source.getExecutionId() != null) {
-
-            // name is the 'form' attribute in JPDL
-            // this is used in the COW schema to store the display name, as distinct from the system-generated name
-            target.setName(source.getFormResourceName());
-            
-            // activityName is the 'name' from JPDL
-            target.setActivityName(source.getActivityName());            
-
-            Execution ex = executionService.findExecutionById(source.getExecutionId());
-            target.setProcessInstanceId(ex.getProcessInstance().getId());
-
-            // outcomes
-            Set<String> outcomes = taskService.getOutcomes(source.getId());
-            for (String outcome : outcomes) {
-                target.getOutcomes().add(outcome);
-            }
-
-            // Workaround to the fact that we cannot use autowiring here
-            if (this.cowTaskService == null) {
-                this.cowTaskService = (org.wiredwidgets.cow.server.service.TaskService) this.factory.getBean("taskService");
-            }
-
-            // add process level task varibles (
-            String executionId = getTopLevelExecutionId(source.getExecutionId());
-            org.wiredwidgets.cow.server.api.model.v2.Activity activity = cowTaskService.getWorkflowActivity(executionId, source.getActivityName());
-            if (activity != null && activity instanceof org.wiredwidgets.cow.server.api.model.v2.Task) {
-                org.wiredwidgets.cow.server.api.model.v2.Task cowTask = (org.wiredwidgets.cow.server.api.model.v2.Task) activity;
-                if (cowTask.getVariables() != null) {
-                    for (org.wiredwidgets.cow.server.api.model.v2.Variable var : cowTask.getVariables().getVariables()) {
-                        Variable newVar = new Variable();
-                        newVar.setName(var.getName());
-                        newVar.setValue(var.getValue());
-                        addVariable(target, newVar);
-                    }
-                }
-            }
-        } else {
-            // for ad-hoc tasks
-            target.setName(source.getName());
-        }*/
+      
 
         return target;
     }

@@ -19,6 +19,9 @@
  */
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.xml.bind.JAXBElement;
 
 import org.omg.spec.bpmn._20100524.model.ResourceAssignmentExpression;
@@ -26,7 +29,6 @@ import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.omg.spec.bpmn._20100524.model.TPotentialOwner;
 import org.omg.spec.bpmn._20100524.model.TUserTask;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
-import org.wiredwidgets.cow.server.api.model.v2.Variable;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
@@ -91,6 +93,18 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TUserTa
     
     private void addGroupAssginment(TUserTask t, String groupName) {
     	
+    }
+    
+    public static Set<String> getSystemVariableNames() {
+    	Set<String> varNames = new HashSet<String>();
+    	varNames.add(TASK_INPUT_VARIABLES_NAME);
+    	varNames.add("ProcessInstanceName");
+    	varNames.add("Options");
+    	varNames.add("Comment");
+    	varNames.add("TaskName");    	
+    	varNames.add("ActorId");   
+    	varNames.add("GroupId"); 
+    	return varNames;
     }
       
     private void addPotentialOwner(TUserTask t, String ownerName) {

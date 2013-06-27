@@ -6,11 +6,11 @@ package org.wiredwidgets.cow.server.convert;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.jbpm.task.Content;
 import org.jbpm.task.TaskData;
-//import org.jbpm.task.service.local.LocalTaskService;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,9 @@ import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
+//import org.jbpm.task.service.local.LocalTaskService;
 
 /**
  *
@@ -97,14 +99,23 @@ public class JbpmTaskToSc2Task extends AbstractConverter<org.jbpm.task.Task, Tas
         }
         
         // get ad-hoc variables from the "Content" map
-        if (map.containsKey(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME)){
-            Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME);
+        if (map.containsKey(Bpmn20ProcessBuilder.VARIABLES_PROPERTY)){
+            Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
             if (contentMap != null) {
                     for (Map.Entry<String, Object> entry : contentMap.entrySet()) {
                             addVariable(target, entry.getKey(), entry.getValue());
                     }
             }
         }
+        
+        // all other non system variables
+        Set<String> systemVarNames = Bpmn20UserTaskNodeBuilder.getSystemVariableNames();
+        for (String key : map.keySet()) {
+        	if (! systemVarNames.contains(key)) {
+        		// log.info("Additional var: " + key);
+        		addVariable(target, key, map.get(key));
+        	}
+        }        
         
         return target;
     }

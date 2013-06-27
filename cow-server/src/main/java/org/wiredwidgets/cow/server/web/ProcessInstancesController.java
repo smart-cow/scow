@@ -96,15 +96,14 @@ public class ProcessInstancesController extends CowServerController{
         log.debug("startExecution: " + pi.getProcessDefinitionKey());
         
         // option to initialize the process instance with variables / values set in the master process
-        // ** MAKE THIS HAPPEN ALWAYS!!! - JK **
-        //if (initVars) {
+        if (initVars) {
             Process process = processService.getV2Process(pi.getProcessDefinitionKey());
             if (process.getVariables() != null) {
 	            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
 	                addVariable(pi, var.getName(), var.getValue());
 	            }
             }
-        //}
+        }
         
         String id = processInstanceService.executeProcess(pi);
         
