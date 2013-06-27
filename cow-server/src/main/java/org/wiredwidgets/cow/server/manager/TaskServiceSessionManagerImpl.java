@@ -4,6 +4,7 @@
  */
 package org.wiredwidgets.cow.server.manager;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import org.jbpm.task.identity.UserGroupCallbackManager;
 import org.jbpm.task.service.TaskService;
 import org.jbpm.task.service.TaskServiceSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.helper.LDAPHelper;
@@ -67,9 +69,10 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
         properties.setProperty(LDAPUserGroupCallbackImpl.ROLE_FILTER, "(cn={0})");
         properties.setProperty(LDAPUserGroupCallbackImpl.USER_ROLES_FILTER, "(roleOccupant={0})");
         //properties.setProperty("ldap.user.id.dn", "true");
-        properties.setProperty("java.naming.provider.url", "ldap://scout3.mitre.org:389/");
-        //properties.setProperty("java.naming.provider.url", "${ldap.url}");
-
+        //properties.setProperty("java.naming.provider.url", "ldap://scout3.mitre.org:389/");        
+        log.info("\nldap : " + ldapHelper.getLDAPUrl());        
+        properties.setProperty("java.naming.provider.url", ldapHelper.getLDAPUrl());       
+        
         LDAPUserGroupCallbackImpl ldapUserGroupCallback = new LDAPUserGroupCallbackImpl(properties);
         
         UserGroupCallbackManager.getInstance().setCallback(ldapUserGroupCallback);   	

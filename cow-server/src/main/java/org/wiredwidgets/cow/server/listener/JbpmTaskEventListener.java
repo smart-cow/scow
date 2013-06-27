@@ -28,35 +28,39 @@ public class JbpmTaskEventListener implements TaskEventListener {
 
 	@Override
 	public void taskCreated(TaskUserEvent event) {
-                System.out.println("taskCreated = " + event.getTaskId());
+                log.info("taskCreated = " + event.getTaskId());
 		Long taskId = event.getTaskId();
 		//Task task = jbpmTaskService.getTask(taskId);
-                Task task = taskServiceFactory.getTaskService().getTask(taskId);
-		String processId = task.getTaskData().getProcessId() 
-				+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
+                try{
+                //Task task = taskServiceFactory.getTaskService().getTask(taskId);
+		//String processId = task.getTaskData().getProcessId() 
+				//+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
 		
-		String info = "eventType=TaskReady;processID=" + processId + ";taskID=" + taskId;
+		String info = "eventType=TaskReady;taskID=" + taskId;
 		
 		log.info("sending message: " + info);
-		amqp.convertAndSend("amqp.topic", "process", info);
+		//amqp.convertAndSend("amqp.topic", "process", info);
+                }catch(Exception e){
+                 log.info("task created error: " + e);    
+                }
     }		
 
 
 	@Override
 	public void taskClaimed(TaskUserEvent event) {
 		
-                System.out.println("\ntaskClaimed = " + event.getTaskId());
+                log.info("\ntaskClaimed = " + event.getTaskId());
                 Long taskId = event.getTaskId();
 		//Task task = jbpmTaskService.getTask(taskId);
                 try{
-                Task task = taskServiceFactory.getTaskService().getTask(taskId);
-		String processId = task.getTaskData().getProcessId() 
-				+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
+                //Task task = taskServiceFactory.getTaskService().getTask(taskId);
+		//String processId = task.getTaskData().getProcessId() 
+		//		+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
 		
-		String info = "eventType=TaskClaimed;processID=" + processId + ";taskID=" + taskId;
+		String info = "eventType=TaskClaimed;taskID=" + taskId;
 		
 		log.info("sending message: " + info);
-		amqp.convertAndSend("amqp.topic", "process", info);
+		//amqp.convertAndSend("amqp.topic", "process", info);
                 }catch(Exception e){
                  log.info("task claimed error: " + e);    
                 }
@@ -65,53 +69,57 @@ public class JbpmTaskEventListener implements TaskEventListener {
 	@Override
 	public void taskStarted(TaskUserEvent event) {
 		
-                System.out.println("\ntaskStarted = " + event.getTaskId());       
+                log.info("\ntaskStarted = " + event.getTaskId());       
                 Long taskId = event.getTaskId();
 		//Task task = jbpmTaskService.getTask(taskId);
-                Task task = taskServiceFactory.getTaskService().getTask(taskId);
-		String processId = task.getTaskData().getProcessId() 
-				+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
+                try{
+                //Task task = taskServiceFactory.getTaskService().getTask(taskId);
+		//String processId = task.getTaskData().getProcessId() 
+				//+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
 		
-		String info = "eventType=TaskReady;processID=" + processId + ";taskID=" + taskId;
+		String info = "eventType=TaskReady;taskID=" + taskId;
 		
 		log.info("sending message: " + info);
-		amqp.convertAndSend("amqp.topic", "process", info);
+		//amqp.convertAndSend("amqp.topic", "process", info);
+                }catch(Exception e){
+                 log.info("task Started error: " + e);    
+                }
 	}
 
 	@Override
 	public void taskStopped(TaskUserEvent event) {
 		// TODO Auto-generated method stub
-System.out.println("taskStopped = " + event.getTaskId());
+log.info("taskStopped = " + event.getTaskId());
 	}
 
 	@Override
 	public void taskReleased(TaskUserEvent event) {
 		// TODO Auto-generated method stub
-System.out.println("taskReleased = " + event.getTaskId());
+log.info("taskReleased = " + event.getTaskId());
 	}
 
 	@Override
 	public void taskCompleted(TaskUserEvent event) {
 		// TODO Auto-generated method stub
-System.out.println("taskCompleted = " + event.getTaskId());
+log.info("taskCompleted = " + event.getTaskId());
 	}
 
 	@Override
 	public void taskFailed(TaskUserEvent event) {
 		// TODO Auto-generated method stub
-System.out.println("taskFailed = " + event.getTaskId());
+log.info("taskFailed = " + event.getTaskId());
 	}
 
 	@Override
 	public void taskSkipped(TaskUserEvent event) {
 		// TODO Auto-generated method stub
-System.out.println("taskSkipped = " + event.getTaskId());
+log.info("taskSkipped = " + event.getTaskId());
 	}
 
 	@Override
 	public void taskForwarded(TaskUserEvent event) {
 		// TODO Auto-generated method stub
-System.out.println("taskForwarded = " + event.getTaskId());
+log.info("taskForwarded = " + event.getTaskId());
 	}
 
 }

@@ -25,6 +25,7 @@ import org.drools.io.ResourceFactory;
 import org.jbpm.process.instance.ProcessInstance;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -54,6 +55,13 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     
     @Autowired
     ProcessDefinitionsService processDefsService;
+    
+    @Value("${rem2.url}")
+    String REM2_URL;
+    
+    public String getRem2WorkflowLocation(){
+        return this.REM2_URL +"/cms/workflows";        
+    }
     
     @Override
     public Deployment createDeployment(Definitions definitions) {
@@ -171,8 +179,10 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
              
         log.debug("calling rem2");
         RestTemplate restTemplate = new RestTemplate();
-        URI location = restTemplate.postForLocation("http://localhost:8080/rem2/cms/workflows", node);
-        //URI location = restTemplate.postForLocation("${rem2.url}" + "/cms/workflows", node);
+        //URI location = restTemplate.postForLocation("http://scout.mitre.org:8080/rem2/cms/workflows", node);
+        
+        log.info("\nrem2.url = " + this.getRem2WorkflowLocation());
+        URI location = restTemplate.postForLocation(this.getRem2WorkflowLocation(), node);
     } 
     
     private InputStream marshalToInputStream(Object source) {

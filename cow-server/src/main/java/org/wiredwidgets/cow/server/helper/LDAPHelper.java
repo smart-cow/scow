@@ -46,6 +46,13 @@ public class LDAPHelper {
     String LDAP_ADMIN;
     @Value("${ldap.admin.password}")
     String LDAP_ADMIN_PASSWORD;
+    
+    @Value("${ldap.url}")
+    String LDAP_URL;
+    
+    public String getLDAPUrl(){
+        return this.LDAP_URL;
+    }
 
     public List<String> getLDAPGroups() {
         List<String> ldapGroups = new ArrayList<String>();
