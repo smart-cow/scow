@@ -29,61 +29,31 @@ public class JbpmTaskEventListener implements TaskEventListener {
 	@Override
 	public void taskCreated(TaskUserEvent event) {
                 log.info("taskCreated = " + event.getTaskId());
-		Long taskId = event.getTaskId();
-		//Task task = jbpmTaskService.getTask(taskId);
-                try{
-                //Task task = taskServiceFactory.getTaskService().getTask(taskId);
-		//String processId = task.getTaskData().getProcessId() 
-				//+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
-		
-		String info = "eventType=TaskReady;taskID=" + taskId;
-		
-		log.info("sending message: " + info);
-		//amqp.convertAndSend("amqp.topic", "process", info);
-                }catch(Exception e){
-                 log.info("task created error: " + e);    
-                }
-    }		
+        }		
 
 
 	@Override
-	public void taskClaimed(TaskUserEvent event) {
-		
-                log.info("\ntaskClaimed = " + event.getTaskId());
-                Long taskId = event.getTaskId();
-		//Task task = jbpmTaskService.getTask(taskId);
-                try{
-                //Task task = taskServiceFactory.getTaskService().getTask(taskId);
-		//String processId = task.getTaskData().getProcessId() 
-		//		+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
-		
-		String info = "eventType=TaskClaimed;taskID=" + taskId;
-		
-		log.info("sending message: " + info);
-		//amqp.convertAndSend("amqp.topic", "process", info);
-                }catch(Exception e){
-                 log.info("task claimed error: " + e);    
-                }
+	public void taskClaimed(TaskUserEvent event) {		
+                log.info("\ntaskClaimed = " + event.getTaskId());                
 	}
 
 	@Override
 	public void taskStarted(TaskUserEvent event) {
 		
                 log.info("\ntaskStarted = " + event.getTaskId());       
-                Long taskId = event.getTaskId();
-		//Task task = jbpmTaskService.getTask(taskId);
+                Long taskId = event.getTaskId();		
                 try{
-                //Task task = taskServiceFactory.getTaskService().getTask(taskId);
-		//String processId = task.getTaskData().getProcessId() 
-				//+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
+                Task task = taskServiceFactory.getTaskService().getTask(taskId);
+		String processId = task.getTaskData().getProcessId() 
+				+ "." + String.valueOf(task.getTaskData().getProcessInstanceId());
 		
-		String info = "eventType=TaskReady;taskID=" + taskId;
+		String info = "eventType=TaskReady;processID=" + processId + ";taskID=" + taskId;
 		
 		log.info("sending message: " + info);
-		//amqp.convertAndSend("amqp.topic", "process", info);
+		amqp.convertAndSend("amqp.topic", "process", info);
                 }catch(Exception e){
-                 log.info("task Started error: " + e);    
-                }
+                 log.info("ERROR in taskStarted event: " + e);    
+                }/**/
 	}
 
 	@Override
