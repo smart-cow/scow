@@ -48,7 +48,7 @@ public class Parse {
 		}
 		else if (cname.endsWith(("processInstance"))){
 			ArrayList<Node> nodes = first.getChildNodes();
-			process = nodes.get(6);
+			process = nodes.get(7);
 			String processInstanceName = ((Node)nodes.get(5).getChildNodes().get(0)).getValue();
 			t.setName(processInstanceName);
 
@@ -76,7 +76,7 @@ public class Parse {
 		s = clean(s);		
 		Document doc = Document.xmlParse(s);
 		
-		Node process = (Node)((Document) doc.getChildren().get(0)).getChildren().get(6);
+		Node process = (Node)((Document) doc.getChildren().get(0)).getChildren().get(7);
 		Template t = new Template();
 		t.setMaxId(getAttributeValue(process, "maxId"));
 		t.setName(getAttributeValue(process, "name"));
@@ -106,7 +106,8 @@ public class Parse {
 		}
 		else if (cname.endsWith(("processInstance"))){
 			ArrayList<Node> nodes = first.getChildNodes();
-			process = nodes.get(6);
+			//TODO make this not hard coded to a specific number
+			process = nodes.get(7);
 		}
 		Map<String, String> map = new HashMap<String, String>();
 		parseNodeCompletion((Node)(process.getChildNodes().get(0)), map);
@@ -389,6 +390,7 @@ public class Parse {
 					ArrayList<Node> variables = children.get(j).getChildNodes();
 					for(int k = 0; k < variables.size(); k++) {
 						tasks.get(i).set(getAttributeValue(variables.get(k), "name"), getAttributeValue(variables.get(k), "value"));
+						tasks.get(i).setVariable(getAttributeValue(variables.get(k), "name"), getAttributeValue(variables.get(k), "value"));
 					}
 				} else {
 					tasks.get(i).set(s, getValue(children.get(j)));
@@ -442,7 +444,8 @@ public class Parse {
 							for(int k = 0; k < variables.size(); k++) {
 								String varname = getAttributeValue(variables.get(k), "name");
 								if (varname != "assignee")
-									t.set(varname, getAttributeValue(variables.get(k), "value"));
+									//t.set(varname, getAttributeValue(variables.get(k), "value"));
+									t.setVariable(varname, getAttributeValue(variables.get(k), "value"));
 							}
 						} else {
 							t.set(s, getValue(children.get(j)));
@@ -580,7 +583,7 @@ public class Parse {
 	 * @param xml The XML to clean
 	 * @return The cleaned XML, as a new String
 	 */
-	protected static String clean(String xml) {
+	public static String clean(String xml) {
 		/*xml = xml.replaceAll("\r", "");
 		xml = xml.replaceAll("\n", "");
 		return xml.replaceAll("   ", "");*/
@@ -599,7 +602,7 @@ public class Parse {
 		return s;
 	}
 	
-	protected static String getAttributeValue(Node n, String attribute) {
+	public static String getAttributeValue(Node n, String attribute) {
 		String s = n.getAttribute(attribute);
 		if (s == null){
 			s = "";	

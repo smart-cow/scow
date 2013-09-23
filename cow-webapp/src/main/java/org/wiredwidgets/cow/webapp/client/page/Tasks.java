@@ -390,23 +390,28 @@ public class Tasks extends PageWidget {
 			String value = entry.getValue();
 			lgr.setAttribute("$#" + key, value);
 		}
+		for (Map.Entry<String, String> entry : t.getRawWariables().entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			lgr.setAttribute(key, value);
+		}
 		lgr.setAttribute("$#assignee", t.get("assignee"));
 		if(history) {
 			if(t.getOutcomes().get(0).equals("jbpm_no_task_outcome_specified_jbpm"))
-				lgr.setAttribute("outcome", "N/A");
+				lgr.setAttribute("$#outcome", "N/A");
 			else
-				lgr.setAttribute("outcome", t.getOutcomes().get(0));
+				lgr.setAttribute("$#outcome", t.getOutcomes().get(0));
 		} else {
 			lgr.setAttribute("name", t.getName());
 			if(t.get("processName") != null && !t.get("processName").equals(""))
 				lgr.setAttribute("taskname", t.get("processName") + ": " + t.getName());
 			else
 				lgr.setAttribute("taskname", t.get("processInstanceId") + ": " + t.getName());
-			lgr.setAttribute("complete", false);
+			lgr.setAttribute("$#complete", false);
 			lgr.setAttribute("task", t);
 			String description = t.getHtmlDescription();
 			if(description != null && !description.equals(""))
-				lgr.setAttribute("$#description", description);
+				lgr.setAttribute("description", description);
 		}
 		
 		return lgr;

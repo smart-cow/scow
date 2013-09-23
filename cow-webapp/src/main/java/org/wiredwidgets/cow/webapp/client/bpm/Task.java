@@ -169,4 +169,8 @@ public class Task extends Activity {
 		return out;
 	}
 
+	public HashMap<String, String> getRawWariables() {
+		return variables;
+	}
+
 }

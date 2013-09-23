@@ -28,10 +28,13 @@ import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.page.PageWidget;
 import org.wiredwidgets.cow.webapp.client.page.Tasks;
 import org.wiredwidgets.cow.webapp.client.page.ViewWorkflow;
+import org.wiredwidgets.cow.webapp.client.bpm.Parse;
 
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.gwt.components.client.xml.Document;
+import com.gwt.components.client.xml.Node;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
@@ -66,7 +69,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerField;
  * formats some of the fields that have special identifiers
  * before them. Auto-detects URLs and makes them links.
  * 
- * @author JSTASIK
+ * 
  *
  */
 public class MyTasksListGrid extends ListGrid {
@@ -161,15 +164,32 @@ public class MyTasksListGrid extends ListGrid {
         ListGridRecord lgr = null;
         for(String s : record.getAttributes()) {
         	lgr = new ListGridRecord();
-    		//lgr.setAttribute("taskname", t.get("id"));
-        
-        	lgr.setAttribute("varname", s);
-        	lgr.setAttribute("value", record.getAttribute(s));
-            lgr.setAttribute("required",((Boolean)(s.charAt(0) < 'p')));
-        	records[count] = lgr;
+        	if (s == "task"){
+        		s = Parse.clean(record.getAttribute(s));
+        		Document doc = Document.xmlParse(s);
+        		ArrayList<Node> children = ((Node)doc.getChildren().get(0)).getChildNodes();
+        		
+        		for(int j = 0; j < children.size(); j++) {
+    				String s1 = children.get(j).getName();
+    				//SC.say("Inside:" + (counters+=s1));
+    				if(s1.equals("variables")) {
+    					ArrayList<Node> variables = children.get(j).getChildNodes();
+						for(int k = 0; k < variables.size(); k++) {
+							String varname = Parse.getAttributeValue(variables.get(k), "name");
+							String varval = Parse.getAttributeValue(variables.get(k), "value");
+							lgr = new ListGridRecord();
+				    		//lgr.setAttribute("taskname", t.get("id"));
+				        	
+				        	lgr.setAttribute("varname", varname);
+				        	lgr.setAttribute("value", varval);
+				            lgr.setAttribute("required",((Boolean)(s1.charAt(0) < 'p')));
+				            records[count] = lgr;
+				        	count++;
+						}
+    				}        	
+        		}
+        	}
         	
-
-        	count++;
         }
         taskGrid.setData(records);
         

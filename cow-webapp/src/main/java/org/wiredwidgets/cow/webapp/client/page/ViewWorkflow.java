@@ -159,7 +159,7 @@ public class ViewWorkflow extends PageWidget {
 						});
 					}
 				};
-				timer.scheduleRepeating(BpmServiceMain.getPollingRate());
+				timer.scheduleRepeating(5000);
 			}
 		});
 	}
