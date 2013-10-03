@@ -1,0 +1,6 @@
+com.gwt.components.client.xml
+org.wiredwidgets.cow.webapp.client
+org.wiredwidgets.cow.webapp.client.bpm
+org.wiredwidgets.cow.webapp.client.components
+org.wiredwidgets.cow.webapp.client.page
+org.wiredwidgets.cow.webapp.server
