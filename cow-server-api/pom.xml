@@ -3,14 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-        <parent>
+    <parent>
         <groupId>org.wiredwidgets</groupId>
-	<artifactId>scow-projects-parent</artifactId>
-	<version>1.0</version>
-        </parent>
+		<artifactId>scow-projects-parent</artifactId>
+		<version>1.0</version>
+    </parent>
 	<!--groupId>org.wiredwidgets</groupId-->
 	<artifactId>cow-server-api</artifactId>
-	<version>0.5.3-SNAPSHOT</version>
 	<name>cow-server-api</name>
 	<url>http://maven.apache.org</url>
 	<build>

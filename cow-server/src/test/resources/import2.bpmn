@@ -1,0 +1,11 @@
+<definitions id="Definitions" name="script" targetNamespace="http://www.jboss.org/drools" expressionLanguage="http://www.mvel.org/2.0" typeLanguage="http://www.java.com/javaTypes" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC">
+   <process processType="Private" isExecutable="true" name="script" id="script" tns:packageName="defaultPackage" xmlns:tns="http://www.jboss.org/drools">
+      <extensionElements>
+         <tns:import name="java.lang.String" xmlns="http://www.jboss.org/drools"/>
+         <tns:import name="java.util.Map" xmlns="http://www.jboss.org/drools"/>
+      </extensionElements>
+      <startEvent name="start" id="_1">
+         <ns6:outgoing xmlns="" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL">_1_2</ns6:outgoing>
+      </startEvent>
+   </process>
+</definitions>      

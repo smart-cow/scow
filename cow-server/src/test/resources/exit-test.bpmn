@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<definitions id="Definition"
+             targetNamespace="http://www.jboss.org/drools"
+             typeLanguage="http://www.java.com/javaTypes"
+             expressionLanguage="http://www.mvel.org/2.0"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"
+             xmlns:g="http://www.jboss.org/drools/flow/gpd"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:tns="http://www.jboss.org/drools">
+
+  <itemDefinition id="_variablesItem" />
+  <itemDefinition id="_processInstanceNameItem" />
+  <itemDefinition id="_processExitStateItem" />
+
+  <itemDefinition id="_5-variablesItem" />
+  <itemDefinition id="_5-processInstanceNameItem" />
+  <itemDefinition id="_5-processExitStateItem" />
+
+  <itemDefinition id="_7-variablesItem" />
+  <itemDefinition id="_7-processInstanceNameItem" />
+  <itemDefinition id="_7-processExitStateItem" />
+
+  <process processType="Private" isExecutable="true" id="exit-test" name="exit-test" tns:packageName="defaultPackage" >
+
+    <!-- process variables -->
+    <property id="variables" itemSubjectRef="_variablesItem"/>
+    <property id="processInstanceName" itemSubjectRef="_processInstanceNameItem"/>
+    <property id="processExitState" itemSubjectRef="_processExitStateItem"/>
+
+    <!-- nodes -->
+    <startEvent id="_1" name="start" />
+    <exclusiveGateway id="_2" name="gateway" gatewayDirection="Converging" />
+    <parallelGateway id="_3" name="gateway" gatewayDirection="Diverging" />
+    <parallelGateway id="_4" name="gateway" gatewayDirection="Converging" />
+    <userTask id="_5" name="Task 1" >
+      <ioSpecification>
+        <dataInput id="_5_VariablesInput" name="Variables" />
+        <dataInput id="_5_ProcessInstanceNameInput" name="ProcessInstanceName" />
+        <dataInput id="_5_CommentInput" name="Comment" />
+        <dataInput id="_5_SkippableInput" name="Skippable" />
+        <dataInput id="_5_TaskNameInput" name="TaskName" />
+        <dataInput id="_5_GroupIdInput" name="GroupId" />
+        <dataOutput id="_5_VariablesOutput" name="Variables" />
+        <inputSet>
+          <dataInputRefs>_5_VariablesInput</dataInputRefs>
+          <dataInputRefs>_5_ProcessInstanceNameInput</dataInputRefs>
+          <dataInputRefs>_5_CommentInput</dataInputRefs>
+          <dataInputRefs>_5_SkippableInput</dataInputRefs>
+          <dataInputRefs>_5_TaskNameInput</dataInputRefs>
+          <dataInputRefs>_5_GroupIdInput</dataInputRefs>
+        </inputSet>
+        <outputSet>
+          <dataOutputRefs>_5_VariablesOutput</dataOutputRefs>
+        </outputSet>
+      </ioSpecification>
+      <dataInputAssociation>
+        <sourceRef>variables</sourceRef>
+        <targetRef>_5_VariablesInput</targetRef>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <sourceRef>processInstanceName</sourceRef>
+        <targetRef>_5_ProcessInstanceNameInput</targetRef>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_5_CommentInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression"></from>
+          <to xsi:type="tFormalExpression">_5_CommentInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_5_SkippableInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">false</from>
+          <to xsi:type="tFormalExpression">_5_SkippableInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_5_TaskNameInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">_5/Task 1</from>
+          <to xsi:type="tFormalExpression">_5_TaskNameInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_5_GroupIdInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">group1</from>
+          <to xsi:type="tFormalExpression">_5_GroupIdInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataOutputAssociation>
+        <sourceRef>_5_VariablesOutput</sourceRef>
+        <targetRef>variables</targetRef>
+      </dataOutputAssociation>
+      <potentialOwner>
+        <resourceAssignmentExpression>
+          <formalExpression></formalExpression>
+        </resourceAssignmentExpression>
+      </potentialOwner>
+    </userTask>
+    <scriptTask id="_6" name="exit exit 1" >
+      <script>processExitState = "exit 1";</script>
+    </scriptTask>
+    <userTask id="_7" name="Task 2" >
+      <ioSpecification>
+        <dataInput id="_7_VariablesInput" name="Variables" />
+        <dataInput id="_7_ProcessInstanceNameInput" name="ProcessInstanceName" />
+        <dataInput id="_7_CommentInput" name="Comment" />
+        <dataInput id="_7_SkippableInput" name="Skippable" />
+        <dataInput id="_7_TaskNameInput" name="TaskName" />
+        <dataInput id="_7_GroupIdInput" name="GroupId" />
+        <dataOutput id="_7_VariablesOutput" name="Variables" />
+        <inputSet>
+          <dataInputRefs>_7_VariablesInput</dataInputRefs>
+          <dataInputRefs>_7_ProcessInstanceNameInput</dataInputRefs>
+          <dataInputRefs>_7_CommentInput</dataInputRefs>
+          <dataInputRefs>_7_SkippableInput</dataInputRefs>
+          <dataInputRefs>_7_TaskNameInput</dataInputRefs>
+          <dataInputRefs>_7_GroupIdInput</dataInputRefs>
+        </inputSet>
+        <outputSet>
+          <dataOutputRefs>_7_VariablesOutput</dataOutputRefs>
+        </outputSet>
+      </ioSpecification>
+      <dataInputAssociation>
+        <sourceRef>variables</sourceRef>
+        <targetRef>_7_VariablesInput</targetRef>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <sourceRef>processInstanceName</sourceRef>
+        <targetRef>_7_ProcessInstanceNameInput</targetRef>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_7_CommentInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression"></from>
+          <to xsi:type="tFormalExpression">_7_CommentInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_7_SkippableInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">false</from>
+          <to xsi:type="tFormalExpression">_7_SkippableInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_7_TaskNameInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">_7/Task 2</from>
+          <to xsi:type="tFormalExpression">_7_TaskNameInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_7_GroupIdInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">group1</from>
+          <to xsi:type="tFormalExpression">_7_GroupIdInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataOutputAssociation>
+        <sourceRef>_7_VariablesOutput</sourceRef>
+        <targetRef>variables</targetRef>
+      </dataOutputAssociation>
+      <potentialOwner>
+        <resourceAssignmentExpression>
+          <formalExpression></formalExpression>
+        </resourceAssignmentExpression>
+      </potentialOwner>
+    </userTask>
+    <endEvent id="_8" name="end" />
+    <scriptTask id="_9" name="Script" />
+
+    <!-- connections -->
+    <sequenceFlow id="_6-_2" sourceRef="_6" targetRef="_2" />
+    <sequenceFlow id="_4-_2" sourceRef="_4" targetRef="_2" />
+    <sequenceFlow id="_1-_3" sourceRef="_1" targetRef="_3" />
+    <sequenceFlow id="_7-_4" sourceRef="_7" targetRef="_4" />
+    <sequenceFlow id="_9-_4" sourceRef="_9" targetRef="_4" />
+    <sequenceFlow id="_3-_5" sourceRef="_3" targetRef="_5" />
+    <sequenceFlow id="_5-_6" sourceRef="_5" targetRef="_6" />
+    <sequenceFlow id="_3-_7" sourceRef="_3" targetRef="_7" />
+    <sequenceFlow id="_2-_8" sourceRef="_2" targetRef="_8" />
+    <sequenceFlow id="_3-_9" sourceRef="_3" targetRef="_9" />
+
+  </process>
+
+  <bpmndi:BPMNDiagram>
+    <bpmndi:BPMNPlane bpmnElement="exit-test" >
+      <bpmndi:BPMNShape bpmnElement="_1" >
+        <dc:Bounds x="57" y="107" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_2" >
+        <dc:Bounds x="776" y="107" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_3" >
+        <dc:Bounds x="187" y="121" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_4" >
+        <dc:Bounds x="786" y="280" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_5" >
+        <dc:Bounds x="380" y="58" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_6" >
+        <dc:Bounds x="551" y="55" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_7" >
+        <dc:Bounds x="379" y="176" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_8" >
+        <dc:Bounds x="901" y="101" width="48" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_9" >
+        <dc:Bounds x="374" y="356" width="80" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_6-_2" >
+        <di:waypoint x="576" y="80" />
+        <di:waypoint x="800" y="131" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_4-_2" >
+        <di:waypoint x="810" y="304" />
+        <di:waypoint x="800" y="131" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_1-_3" >
+        <di:waypoint x="81" y="131" />
+        <di:waypoint x="211" y="145" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_7-_4" >
+        <di:waypoint x="404" y="201" />
+        <di:waypoint x="810" y="304" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_9-_4" >
+        <di:waypoint x="414" y="380" />
+        <di:waypoint x="810" y="304" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3-_5" >
+        <di:waypoint x="211" y="145" />
+        <di:waypoint x="405" y="83" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_5-_6" >
+        <di:waypoint x="405" y="83" />
+        <di:waypoint x="576" y="80" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3-_7" >
+        <di:waypoint x="211" y="145" />
+        <di:waypoint x="404" y="201" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_2-_8" >
+        <di:waypoint x="800" y="131" />
+        <di:waypoint x="925" y="125" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3-_9" >
+        <di:waypoint x="211" y="145" />
+        <di:waypoint x="414" y="380" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

@@ -10,7 +10,12 @@
 	<name>SCOW</name>
 	<description>SCOW project</description>
 	
-
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+	</properties>
+	
 	<modules>
 		<module>rem2-api</module>
 		<module>cow-server-api</module>

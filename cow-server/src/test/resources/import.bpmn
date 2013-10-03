@@ -1,0 +1,119 @@
+<definitions id="Definitions" name="script" targetNamespace="http://www.jboss.org/drools" expressionLanguage="http://www.mvel.org/2.0" typeLanguage="http://www.java.com/javaTypes" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC">
+   <process processType="Private" isExecutable="true" name="script" id="script" tns:packageName="defaultPackage" xmlns:tns="http://www.jboss.org/drools">
+      <extensionElements>
+         <tns:import name="java.lang.String" xmlns="http://www.jboss.org/drools"/>
+         <tns:import name="java.util.Map" xmlns="http://www.jboss.org/drools"/>
+      </extensionElements>
+      <ns6:property itemSubjectRef="_variablesItem" id="variables" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <ns6:property itemSubjectRef="_processInstanceNameItem" id="processInstanceName" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <ns6:property itemSubjectRef="_processExitStateItem" id="processExitState" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <startEvent name="start" id="_1">
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_1_2</ns6:outgoing>
+      </startEvent>
+      <scriptTask name="script" id="_2">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_1_2</ns6:incoming>
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_2_3</ns6:outgoing>
+         <script>line 1;
+      		line 2;
+      		line 3;</script>
+      </scriptTask>
+      <userTask name="task1" id="_3">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_2_3</ns6:incoming>
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_3_4</ns6:outgoing>
+         <ioSpecification>
+            <dataInput name="Variables" id="_3_VariablesInput"/>
+            <dataInput name="ProcessInstanceName" id="_3_ProcessInstanceNameInput"/>
+            <dataInput name="Comment" id="_3_CommentInput"/>
+            <dataInput name="Skippable" id="_3_SkippableInput"/>
+            <dataInput name="TaskName" id="_3_TaskNameInput"/>
+            <dataOutput name="Variables" id="_3_VariablesOutput"/>
+            <inputSet>
+               <dataInputRefs>_3_VariablesInput</dataInputRefs>
+               <dataInputRefs>_3_ProcessInstanceNameInput</dataInputRefs>
+               <dataInputRefs>_3_CommentInput</dataInputRefs>
+               <dataInputRefs>_3_SkippableInput</dataInputRefs>
+               <dataInputRefs>_3_TaskNameInput</dataInputRefs>
+            </inputSet>
+            <outputSet>
+               <dataOutputRefs>_3_VariablesOutput</dataOutputRefs>
+            </outputSet>
+         </ioSpecification>
+         <dataInputAssociation>
+            <sourceRef>variables</sourceRef>
+            <targetRef>_3_VariablesInput</targetRef>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <sourceRef>processInstanceName</sourceRef>
+            <targetRef>_3_ProcessInstanceNameInput</targetRef>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_3_CommentInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_3_CommentInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_3_SkippableInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">false</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_3_SkippableInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_3_TaskNameInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_3/task1</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_3_TaskNameInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataOutputAssociation>
+            <sourceRef>_3_VariablesOutput</sourceRef>
+            <targetRef>variables</targetRef>
+         </dataOutputAssociation>
+         <potentialOwner>
+            <resourceAssignmentExpression>
+               <formalExpression/>
+            </resourceAssignmentExpression>
+         </potentialOwner>
+      </userTask>
+      <sequenceFlow sourceRef="_2" targetRef="_3" id="_2_3"/>
+      <sequenceFlow sourceRef="_1" targetRef="_2" id="_1_2"/>
+      <endEvent name="end" id="_4">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_3_4</ns6:incoming>
+         <terminateEventDefinition/>
+      </endEvent>
+      <sequenceFlow sourceRef="_3" targetRef="_4" id="_3_4"/>
+   </process>
+   <ns5:itemDefinition structureRef="java.util.Map" id="_variablesItem" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns5:itemDefinition structureRef="String" id="_processInstanceNameItem" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns5:itemDefinition structureRef="String" id="_processExitStateItem" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns3:BPMNDiagram>
+      <ns3:BPMNPlane bpmnElement="script" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="">
+         <ns3:BPMNShape bpmnElement="_1">
+            <ns4:Bounds x="200.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNShape bpmnElement="_2">
+            <ns4:Bounds x="300.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNShape bpmnElement="_3">
+            <ns4:Bounds x="400.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNEdge bpmnElement="_2_3">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+         <ns3:BPMNEdge bpmnElement="_1_2">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+         <ns3:BPMNShape bpmnElement="_4">
+            <ns4:Bounds x="500.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNEdge bpmnElement="_3_4">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+      </ns3:BPMNPlane>
+   </ns3:BPMNDiagram>
+</definitions>      

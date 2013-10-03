@@ -16,61 +16,40 @@
     See the License for the specific language governing permissions and limitations under the License.
 
 -->
-
-<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-    <display-name>cow-server-new</display-name>
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    
-    <filter>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-        <init-param>
-            <param-name>contextAttribute</param-name>
-            <param-value>org.springframework.web.servlet.FrameworkServlet.CONTEXT.dispatcher</param-value>
-        </init-param>      
-    </filter>    
-    
-	<!--filter>
-	  <filter-name>SynchronizedFilter</filter-name>
-	  <filter-class>org.wiredwidgets.cow.server.web.SynchronizedFilter</filter-class>
-	</filter-->
-	
-    <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>  	
-	
-	<!--filter-mapping>
-	  <filter-name>SynchronizedFilter</filter-name>
-	  <url-pattern>/*</url-pattern>
-	</filter-mapping-->
-   
-    <servlet>
-        <servlet-name>dispatcher</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>dispatcher</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-    <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
-    </session-config>
-    
-    
-	<persistence-unit-ref>
-	  <persistence-unit-ref-name>persistence/myEmf</persistence-unit-ref-name>
-	  <persistence-unit-name>org.drools.persistence.jpa.jta</persistence-unit-name>
-	</persistence-unit-ref>
-	    
-    
-    <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
-    </welcome-file-list>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>cow-server</display-name>
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <filter>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    <init-param>
+      <param-name>contextAttribute</param-name>
+      <param-value>org.springframework.web.servlet.FrameworkServlet.CONTEXT.dispatcher</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>springSecurityFilterChain</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <servlet>
+    <servlet-name>dispatcher</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>dispatcher</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+  <persistence-unit-ref>
+    <persistence-unit-ref-name>persistence/myEmf</persistence-unit-ref-name>
+    <persistence-unit-name>org.drools.persistence.jpa.jta</persistence-unit-name>
+  </persistence-unit-ref>
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
 </web-app>

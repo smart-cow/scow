@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<definitions id="Definition"
+             targetNamespace="http://www.jboss.org/drools"
+             typeLanguage="http://www.java.com/javaTypes"
+             expressionLanguage="http://www.mvel.org/2.0"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"
+             xmlns:g="http://www.jboss.org/drools/flow/gpd"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:tns="http://www.jboss.org/drools">
+
+  <process processType="Private" isExecutable="true" id="script" name="Sample Process" tns:packageName="defaultPackage" >
+  
+
+  	<property itemSubjectRef="_completedItem" id="completed" />
+  	<property itemSubjectRef="_signalItem" id="signal" />
+  	
+    <!-- nodes -->
+    <startEvent id="_1" name="StartProcess" />
+    <endEvent id="_4" name="End" >
+        <terminateEventDefinition/>
+    </endEvent>
+      <scriptTask name="script" id="_2">
+         <incoming>_5_2</incoming>
+         <outgoing>_2_3</outgoing>
+         <script>int i = 1;
+      		int j = 2;
+      		int k = 3;
+      	 kcontext.setVariable("completed", "abcd");</script>
+      </scriptTask>
+
+      <intermediateCatchEvent name="Signal:signal1" id="_3">
+         <outgoing>_3_4</outgoing>
+         <dataOutput name="event" id="_3_eventOutput"/>
+         <dataOutputAssociation>
+            <sourceRef>_3_eventOutput</sourceRef>
+            <targetRef>signal</targetRef>
+         </dataOutputAssociation>
+         <outputSet>
+            <dataOutputRefs>_3_eventOutput</dataOutputRefs>
+         </outputSet>
+         <ns6:signalEventDefinition signalRef="signal1" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      </intermediateCatchEvent>
+    
+
+    <!-- connections -->
+    <sequenceFlow id="_1_2" sourceRef="_1" targetRef="_2" />
+    <sequenceFlow id="_2_3" sourceRef="_2" targetRef="_3" />
+    <sequenceFlow id="_3_4" sourceRef="_3" targetRef="_4" />
+
+  </process>
+  
+  <itemDefinition structureRef="String" id="_completedItem" />  
+  <itemDefinition structureRef="String" id="_signalItem" />  
+
+</definitions>

@@ -9,19 +9,14 @@
 	</parent>
 	<!--groupId>org.wiredwidgets</groupId -->
 	<artifactId>cow-server-new</artifactId>
-	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-
-	<name>cow-server-new</name>
 
 	<properties>
 		<org.jbpm.version>5.4.0.Final</org.jbpm.version>
 		<!--<copyright.basedir>${basedir}../../..</copyright.basedir> -->
 		<org.springframework.version>3.1.2.RELEASE</org.springframework.version>
 		<org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
-			<org.drools.version>5.5.0.Final</org.drools.version>
-			<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-			<netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
+		<org.drools.version>5.5.0.Final</org.drools.version>
 	</properties>
 
 	<dependencies>

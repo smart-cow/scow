@@ -1,0 +1,221 @@
+<definitions id="Definitions" name="signal" targetNamespace="http://www.jboss.org/drools" expressionLanguage="http://www.mvel.org/2.0" typeLanguage="http://www.java.com/javaTypes" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC">
+   <process processType="Private" isExecutable="true" name="signal" id="signal" tns:packageName="defaultPackage" xmlns:tns="http://www.jboss.org/drools">
+      <ns6:property itemSubjectRef="_variablesItem" id="variables" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <ns6:property itemSubjectRef="_processInstanceNameItem" id="processInstanceName" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <ns6:property itemSubjectRef="_processExitStateItem" id="processExitState" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <ns6:property itemSubjectRef="_signal_signal1Item" id="signal_signal1" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      <startEvent name="start" id="_1">
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_1_2</ns6:outgoing>
+      </startEvent>
+      <userTask name="task one" id="_2">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_1_2</ns6:incoming>
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_2_4</ns6:outgoing>
+         <ioSpecification>
+            <dataInput name="Variables" id="_2_VariablesInput"/>
+            <dataInput name="ProcessInstanceName" id="_2_ProcessInstanceNameInput"/>
+            <dataInput name="Comment" id="_2_CommentInput"/>
+            <dataInput name="Skippable" id="_2_SkippableInput"/>
+            <dataInput name="TaskName" id="_2_TaskNameInput"/>
+            <dataInput name="GroupId" id="_2_GroupIdInput"/>
+            <dataOutput name="Variables" id="_2_VariablesOutput"/>
+            <inputSet>
+               <dataInputRefs>_2_VariablesInput</dataInputRefs>
+               <dataInputRefs>_2_ProcessInstanceNameInput</dataInputRefs>
+               <dataInputRefs>_2_CommentInput</dataInputRefs>
+               <dataInputRefs>_2_SkippableInput</dataInputRefs>
+               <dataInputRefs>_2_TaskNameInput</dataInputRefs>
+               <dataInputRefs>_2_GroupIdInput</dataInputRefs>
+            </inputSet>
+            <outputSet>
+               <dataOutputRefs>_2_VariablesOutput</dataOutputRefs>
+            </outputSet>
+         </ioSpecification>
+         <dataInputAssociation>
+            <sourceRef>variables</sourceRef>
+            <targetRef>_2_VariablesInput</targetRef>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <sourceRef>processInstanceName</sourceRef>
+            <targetRef>_2_ProcessInstanceNameInput</targetRef>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_2_CommentInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">this is a description of task 1</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_2_CommentInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_2_SkippableInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">false</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_2_SkippableInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_2_TaskNameInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_2/task one</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_2_TaskNameInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_2_GroupIdInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">group1</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_2_GroupIdInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataOutputAssociation>
+            <sourceRef>_2_VariablesOutput</sourceRef>
+            <targetRef>variables</targetRef>
+         </dataOutputAssociation>
+         <potentialOwner>
+            <resourceAssignmentExpression>
+               <formalExpression/>
+            </resourceAssignmentExpression>
+         </potentialOwner>
+      </userTask>
+      <intermediateCatchEvent name="Signal:signal1" id="_3">
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_3_4</ns6:outgoing>
+         <dataOutput name="event" id="_3_eventOutput"/>
+         <dataOutputAssociation>
+            <sourceRef>_3_eventOutput</sourceRef>
+            <targetRef>signal_signal1</targetRef>
+         </dataOutputAssociation>
+         <outputSet>
+            <dataOutputRefs>_3_eventOutput</dataOutputRefs>
+         </outputSet>
+         <ns6:signalEventDefinition signalRef="signal1" xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+      </intermediateCatchEvent>
+      <parallelGateway gatewayDirection="Converging" name="gateway" id="_4">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_3_4</ns6:incoming>
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_2_4</ns6:incoming>
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_4_5</ns6:outgoing>
+      </parallelGateway>
+      <sequenceFlow sourceRef="_3" targetRef="_4" id="_3_4"/>
+      <sequenceFlow sourceRef="_2" targetRef="_4" id="_2_4"/>
+      <userTask name="task two" id="_5">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_4_5</ns6:incoming>
+         <ns6:outgoing xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_5_6</ns6:outgoing>
+         <ioSpecification>
+            <dataInput name="Variables" id="_5_VariablesInput"/>
+            <dataInput name="ProcessInstanceName" id="_5_ProcessInstanceNameInput"/>
+            <dataInput name="Comment" id="_5_CommentInput"/>
+            <dataInput name="Skippable" id="_5_SkippableInput"/>
+            <dataInput name="TaskName" id="_5_TaskNameInput"/>
+            <dataInput name="GroupId" id="_5_GroupIdInput"/>
+            <dataOutput name="Variables" id="_5_VariablesOutput"/>
+            <inputSet>
+               <dataInputRefs>_5_VariablesInput</dataInputRefs>
+               <dataInputRefs>_5_ProcessInstanceNameInput</dataInputRefs>
+               <dataInputRefs>_5_CommentInput</dataInputRefs>
+               <dataInputRefs>_5_SkippableInput</dataInputRefs>
+               <dataInputRefs>_5_TaskNameInput</dataInputRefs>
+               <dataInputRefs>_5_GroupIdInput</dataInputRefs>
+            </inputSet>
+            <outputSet>
+               <dataOutputRefs>_5_VariablesOutput</dataOutputRefs>
+            </outputSet>
+         </ioSpecification>
+         <dataInputAssociation>
+            <sourceRef>variables</sourceRef>
+            <targetRef>_5_VariablesInput</targetRef>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <sourceRef>processInstanceName</sourceRef>
+            <targetRef>_5_ProcessInstanceNameInput</targetRef>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_5_CommentInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">this is a description of task 2</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_5_CommentInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_5_SkippableInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">false</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_5_SkippableInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_5_TaskNameInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_5/task two</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_5_TaskNameInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataInputAssociation>
+            <targetRef>_5_GroupIdInput</targetRef>
+            <assignment>
+               <from xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">group1</from>
+               <to xsi:type="tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">_5_GroupIdInput</to>
+            </assignment>
+         </dataInputAssociation>
+         <dataOutputAssociation>
+            <sourceRef>_5_VariablesOutput</sourceRef>
+            <targetRef>variables</targetRef>
+         </dataOutputAssociation>
+         <potentialOwner>
+            <resourceAssignmentExpression>
+               <formalExpression/>
+            </resourceAssignmentExpression>
+         </potentialOwner>
+      </userTask>
+      <sequenceFlow sourceRef="_4" targetRef="_5" id="_4_5"/>
+      <sequenceFlow sourceRef="_1" targetRef="_2" id="_1_2"/>
+      <endEvent name="end" id="_6">
+         <ns6:incoming xmlns:ns6="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL">_5_6</ns6:incoming>
+         <terminateEventDefinition/>
+      </endEvent>
+      <sequenceFlow sourceRef="_5" targetRef="_6" id="_5_6"/>
+   </process>
+   <ns5:itemDefinition structureRef="java.util.Map" id="_variablesItem" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns5:itemDefinition structureRef="String" id="_processInstanceNameItem" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns5:itemDefinition structureRef="String" id="_processExitStateItem" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns5:itemDefinition structureRef="string" id="_signal_signal1Item" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="" xmlns:mod="http://www.omg.org/spec/BPMN/20100524/MODEL"/>
+   <ns3:BPMNDiagram>
+      <ns3:BPMNPlane bpmnElement="signal" xmlns:ns5="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns="">
+         <ns3:BPMNShape bpmnElement="_1">
+            <ns4:Bounds x="200.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNShape bpmnElement="_2">
+            <ns4:Bounds x="300.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNShape bpmnElement="_3">
+            <ns4:Bounds x="400.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNShape bpmnElement="_4">
+            <ns4:Bounds x="500.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNEdge bpmnElement="_3_4">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+         <ns3:BPMNEdge bpmnElement="_2_4">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+         <ns3:BPMNShape bpmnElement="_5">
+            <ns4:Bounds x="600.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNEdge bpmnElement="_4_5">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+         <ns3:BPMNEdge bpmnElement="_1_2">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+         <ns3:BPMNShape bpmnElement="_6">
+            <ns4:Bounds x="700.0" y="100.0" width="50.0" height="50.0"/>
+         </ns3:BPMNShape>
+         <ns3:BPMNEdge bpmnElement="_5_6">
+            <ns2:waypoint x="50.0" y="100.0"/>
+            <ns2:waypoint x="50.0" y="100.0"/>
+         </ns3:BPMNEdge>
+      </ns3:BPMNPlane>
+   </ns3:BPMNDiagram>
+</definitions>
