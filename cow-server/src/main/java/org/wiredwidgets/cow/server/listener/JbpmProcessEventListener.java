@@ -29,32 +29,37 @@ public class JbpmProcessEventListener implements ProcessEventListener{
     
     @Override
     public void beforeProcessStarted(ProcessStartedEvent event) {
+    	log.info("beforeProcessStarted");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void afterProcessStarted(ProcessStartedEvent event) {
+    	log.info("afterProcessStarted");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void beforeProcessCompleted(ProcessCompletedEvent event) {
+    	log.info("beforeProcessCompleted");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void afterProcessCompleted(ProcessCompletedEvent event) {
+    	log.info("beforeProcessStarted");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void beforeNodeTriggered(ProcessNodeTriggeredEvent event) {
+    	log.info("beforeNodeTriggered");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
-    	
+    	log.info("afterNodeTriggered");
 //    	if (event.getNodeInstance() instanceof HumanTaskNodeInstance) {
 //    		HumanTaskNodeInstance ni = (HumanTaskNodeInstance)event.getNodeInstance();
 //   
@@ -74,6 +79,7 @@ public class JbpmProcessEventListener implements ProcessEventListener{
 
     @Override
     public void beforeNodeLeft(ProcessNodeLeftEvent event) {
+    	log.info("beforeNodeLeft");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 
