@@ -35,6 +35,7 @@
 					<server>github</server>
 					<repositoryName>scow</repositoryName>
 					<repositoryOwner>mhowansky</repositoryOwner>
+					<outputDirectory>site</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>

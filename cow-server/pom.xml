@@ -8,7 +8,7 @@
 		<version>1.0</version>
 	</parent>
 	<!--groupId>org.wiredwidgets</groupId -->
-	<artifactId>cow-server-new</artifactId>
+	<artifactId>cow-server</artifactId>
 	<packaging>war</packaging>
 
 	<properties>
@@ -361,7 +361,6 @@
 				<destFileName>${project.name}.war</destFileName> </artifactItem> </artifactItems> 
 				</configuration> </execution> </executions> </plugin >
 		</plugins>
-		<finalName>cow-server-new</finalName>
 		<testResources>
 			<!-- this makes the applicationContext.xml available for testing -->
 			<testResource>
