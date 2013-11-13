@@ -67,9 +67,6 @@ public class TasksController {
     @Autowired
     AmqpNotifier amqpNotifier;
     
-    // @Autowired
-    // protected MinaHTWorkItemHandler minaWorkItemHandler;
-    
     static Logger log = Logger.getLogger(TasksController.class);
 
     /**

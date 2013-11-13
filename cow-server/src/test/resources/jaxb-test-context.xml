@@ -56,7 +56,11 @@
        default-init-method="init">
        
  <!-- Specify packages containing JAXB generated classes for marshalling/unmarshalling -->
-    <oxm:jaxb2-marshaller id="jaxb-marshaller" contextPath="org.omg.spec.bpmn._20100524.model:org.wiredwidgets.cow.server.api.service:org.wiredwidgets.rem2.schema:org.wiredwidgets.cow.server.api.model.v2" />       
-
+    <oxm:jaxb2-marshaller id="jaxb-marshaller" contextPath="org.omg.spec.bpmn._20100524.model:org.wiredwidgets.cow.server.api.service:org.wiredwidgets.rem2.schema:org.wiredwidgets.cow.server.api.model.v2" />
+    
+    <bean id="conversionService"
+		class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
+    
+    <context:component-scan base-package="org.wiredwidgets.cow.server.transform, org.wiredwidgets.cow.server.convert" />
     
 </beans>

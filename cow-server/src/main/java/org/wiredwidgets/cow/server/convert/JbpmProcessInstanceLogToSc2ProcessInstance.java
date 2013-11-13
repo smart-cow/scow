@@ -34,7 +34,7 @@ import org.wiredwidgets.cow.server.api.service.Variables;
 @Component
 public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverter<ProcessInstanceLog, ProcessInstance>{
 	
-	@Autowired
+	@Autowired(required=false)
 	StatefulKnowledgeSession kSession;
 
     @Override

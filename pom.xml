@@ -6,7 +6,7 @@
 	<groupId>org.wiredwidgets</groupId>
 	<artifactId>scow-projects-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0</version>
+	<version>1.01-SNAPSHOT</version>
 	<name>SCOW</name>
 	<description>SCOW project</description>
 	

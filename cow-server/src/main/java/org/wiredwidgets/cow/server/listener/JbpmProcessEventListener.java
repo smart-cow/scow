@@ -5,22 +5,24 @@
 package org.wiredwidgets.cow.server.listener;
 
 import org.apache.log4j.Logger;
+import org.drools.event.process.DefaultProcessEventListener;
 import org.drools.event.process.ProcessCompletedEvent;
-import org.drools.event.process.ProcessEventListener;
+import org.drools.event.process.ProcessEvent;
+import org.drools.event.process.ProcessNodeEvent;
 import org.drools.event.process.ProcessNodeLeftEvent;
 import org.drools.event.process.ProcessNodeTriggeredEvent;
 import org.drools.event.process.ProcessStartedEvent;
 import org.drools.event.process.ProcessVariableChangedEvent;
-import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.runtime.process.NodeInstance;
-import org.jbpm.workflow.instance.node.HumanTaskNodeInstance;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 /**
  *
  * @author FITZPATRICK
  */
-public class JbpmProcessEventListener implements ProcessEventListener{
+@Component
+public class JbpmProcessEventListener extends DefaultProcessEventListener{
     
     private static Logger log = Logger.getLogger(JbpmProcessEventListener.class);
     
@@ -29,37 +31,32 @@ public class JbpmProcessEventListener implements ProcessEventListener{
     
     @Override
     public void beforeProcessStarted(ProcessStartedEvent event) {
-    	log.info("beforeProcessStarted");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("beforeProcessStarted: " + getInfo(event));
     }
 
     @Override
     public void afterProcessStarted(ProcessStartedEvent event) {
-    	log.info("afterProcessStarted");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("afterProcessStarted: " + getInfo(event));
     }
 
     @Override
     public void beforeProcessCompleted(ProcessCompletedEvent event) {
-    	log.info("beforeProcessCompleted");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("beforeProcessCompleted: " + getInfo(event));
     }
 
     @Override
     public void afterProcessCompleted(ProcessCompletedEvent event) {
-    	log.info("beforeProcessStarted");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("afterProcessCompleted: " + getInfo(event));
     }
 
     @Override
     public void beforeNodeTriggered(ProcessNodeTriggeredEvent event) {
-    	log.info("beforeNodeTriggered");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("beforeNodeTriggered: " + getNodeInfo(event));
     }
 
     @Override
     public void afterNodeTriggered(ProcessNodeTriggeredEvent event) {
-    	log.info("afterNodeTriggered");
+    	log.info("afterNodeTriggered: " + getNodeInfo(event));
 //    	if (event.getNodeInstance() instanceof HumanTaskNodeInstance) {
 //    		HumanTaskNodeInstance ni = (HumanTaskNodeInstance)event.getNodeInstance();
 //   
@@ -79,15 +76,13 @@ public class JbpmProcessEventListener implements ProcessEventListener{
 
     @Override
     public void beforeNodeLeft(ProcessNodeLeftEvent event) {
-    	log.info("beforeNodeLeft");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("beforeNodeLeft: " + getNodeInfo(event));
     }
 
     @Override
     public void afterNodeLeft(ProcessNodeLeftEvent event) {
     	NodeInstance node = event.getNodeInstance();
-    	log.info("After node left. Node: " + node.getClass().getSimpleName() + " (" + node.getId() + ")");
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	log.info("After node left: " + getNodeInfo(event));
     }
 
     @Override
@@ -100,12 +95,13 @@ public class JbpmProcessEventListener implements ProcessEventListener{
         //throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    public void getSessionProcessListener() {
-        
+    private String getInfo(ProcessEvent event) {
+    	return event.getProcessInstance().getProcessId() + "." + event.getProcessInstance().getId();
     }
-
-    public void setSessionProcessListener(StatefulKnowledgeSession kSession) {
-        kSession.addEventListener(this);
+    
+    private String getNodeInfo(ProcessNodeEvent event) {
+    	return event.getProcessInstance().getProcessId() + "." + event.getProcessInstance().getId()
+    			+ " (" + event.getNodeInstance().getNodeName() + ")";
     }
     
 }

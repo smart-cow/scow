@@ -14,13 +14,13 @@ import org.jbpm.task.service.local.LocalTaskService;
  *
  * @author PREMA
  */
-//@Component
+@Component
 public class TaskServiceFactory {
     
     @Autowired
     org.jbpm.task.service.TaskService taskService;
     
-    //public static Logger log = Logger.getLogger(TaskServiceFactory.class);
+    private static Logger log = Logger.getLogger(TaskServiceFactory.class);
     
     
     private ThreadLocal<org.jbpm.task.TaskService> localTaskService = new ThreadLocal<org.jbpm.task.TaskService>() {
@@ -29,8 +29,8 @@ public class TaskServiceFactory {
         */
         @Override
         protected org.jbpm.task.TaskService initialValue() {
-	System.out.println("Creating TaskService for Thread : " + Thread.currentThread().getName());
-        return new LocalTaskService(taskService);
+        	log.info("Creating TaskService for Thread : " + Thread.currentThread().getName());
+        	return new LocalTaskService(taskService);
         }
     };
 
@@ -38,4 +38,5 @@ public class TaskServiceFactory {
         return localTaskService.get();
     }    
     
+  
 }

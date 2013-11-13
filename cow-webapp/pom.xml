@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wiredwidgets</groupId>
 		<artifactId>scow-projects-parent</artifactId>
-		<version>1.0</version>
+		<version>1.01-SNAPSHOT</version>
     </parent>
     <!--groupId>org.wiredwidgets</groupId-->
     <artifactId>cow-webapp</artifactId>
@@ -18,12 +18,8 @@
         <!-- convenience to define GWT version in one place -->
         <gwt.version>2.0.3</gwt.version>
         
-        <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
-        
-
-        <!--  tell the compiler we can use 1.5 -->
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
+        <org.springframework.version>3.2.4.RELEASE</org.springframework.version>
+        <org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
         <copyright.basedir>${basedir}</copyright.basedir>
     </properties>
@@ -101,22 +97,22 @@
          <dependency>
 		 	<groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-core</artifactId>
-		    <version>${org.springframework.version}</version>
+		    <version>${org.springframework.security.version}</version>
 		 </dependency> 
 		 <dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-web</artifactId>
-		    <version>${org.springframework.version}</version>
+		    <version>${org.springframework.security.version}</version>
 		  </dependency> 
 		  <dependency>
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-config</artifactId>
-		    <version>${org.springframework.version}</version>
+		    <version>${org.springframework.security.version}</version>
  		</dependency>
  		<dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-ldap</artifactId>
-            <version>${org.springframework.version}</version>
+            <version>${org.springframework.security.version}</version>
         </dependency>
 		  
 		<dependency>
@@ -191,9 +187,6 @@
                     <warSourceDirectory>war</warSourceDirectory>
                     <runTarget>cow-webapp.html</runTarget>
                     <style>PRETTY</style>
-
-                    
-                    
                 </configuration>
                 <executions>
                     <execution>
@@ -210,15 +203,6 @@
                 <version>2.1.1</version>
                 <configuration>
                     <warSourceDirectory>war</warSourceDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>

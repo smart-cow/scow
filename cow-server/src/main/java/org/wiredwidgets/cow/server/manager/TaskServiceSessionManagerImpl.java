@@ -70,7 +70,7 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
         properties.setProperty(LDAPUserGroupCallbackImpl.USER_ROLES_FILTER, "(roleOccupant={0})");
         //properties.setProperty("ldap.user.id.dn", "true");
         //properties.setProperty("java.naming.provider.url", "ldap://scout3.mitre.org:389/");        
-        log.info("\nldap : " + ldapHelper.getLDAPUrl());        
+        log.info("ldap : " + ldapHelper.getLDAPUrl());        
         properties.setProperty("java.naming.provider.url", ldapHelper.getLDAPUrl());       
         
         LDAPUserGroupCallbackImpl ldapUserGroupCallback = new LDAPUserGroupCallbackImpl(properties);

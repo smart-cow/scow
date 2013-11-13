@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.wiredwidgets.cow.server.listener.JbpmProcessEventListener;
 import org.wiredwidgets.cow.server.manager.RestServiceTaskHandler;
 
 @Component
@@ -33,6 +34,9 @@ public class KnowledgeSessionServiceImpl implements KnowledgeSessionService {
     
     @Autowired
     PlatformTransactionManager txManager;
+    
+    @Autowired
+    JbpmProcessEventListener processListener;
     
     private static Logger log = Logger.getLogger(KnowledgeSessionServiceImpl.class);
 	
@@ -64,6 +68,7 @@ public class KnowledgeSessionServiceImpl implements KnowledgeSessionService {
         JPAProcessInstanceDbLog.setEnvironment(env);
         
         // em.close();
+        kSession.addEventListener(processListener);
         
         return kSession;
     }
@@ -74,16 +79,13 @@ public class KnowledgeSessionServiceImpl implements KnowledgeSessionService {
 			StatefulKnowledgeSession session, RestServiceTaskHandler handle,
 			org.jbpm.task.TaskService taskClient) {
     	
-    	EntityManager em = emf.createEntityManager();
-    	assert(em.isOpen());
-    	
+    	// EntityManager em = emf.createEntityManager();
+    	// assert(em.isOpen());
     	
 		GenericHTWorkItemHandler handler = new LocalHTWorkItemHandler(taskClient, session);
 		handler.setLocal(true);
 		
 		session.getWorkItemManager().registerWorkItemHandler("Human Task", handler);
-		
-		//RestServiceTaskHandler restHandler = new RestServiceTaskHandler();
 		session.getWorkItemManager().registerWorkItemHandler("RestService", handle);
 
 		return handler;

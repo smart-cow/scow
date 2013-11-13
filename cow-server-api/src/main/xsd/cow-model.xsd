@@ -51,10 +51,58 @@
     <!-- Type definitions -->
 
     <complexType name="Variable">
-        <attribute name="name" type="string"/>
-        <attribute name="value" type="string"/>
+        <annotation>
+            <documentation>
+            	<![CDATA[
+            	Variables are used to define inputs and outputs associated with a workflow
+            	or workflow activity.
+            	
+            	Depending on the attributes, variables function in different ways in the BPMN flow:
+            	
+            	Input Variable (no value, output=false): an input variable allows dynamic data to be made available to a workflow task.
+            	The value of the data is assumed to have been set prior to the task being reached.  The value could be set either (a) when
+            	the process is started, or (b) as an output of a previous task.
+            	
+            	Input Constant (value, output=false): in this case the variable has a fixed value for all instances of the workflow.  This
+            	could be used for example to provide documentation or other information that would be useful to display when
+            	performing a task.
+            	
+            	Input/Output Variable (no value, output=true): a variable that can be modified when the task is performed.  The variable
+            	may have an existing value (if it has been assigned when the process is started, or in a previous step), in which case
+            	the existing will be displayed and can be passed along unchanged or modified.  This variable can be further identified
+            	as REQURIRED, in which case the server will require that a value be provided and will return an error code if it is not.
+            	
+            	]]>
+            </documentation>
+        </annotation>    
+        <attribute name="name" type="string">
+	        <annotation>
+	            <documentation>
+	            	<![CDATA[
+	            	The name of the variable.
+	            	]]>
+	            </documentation>
+	        </annotation>        
+        </attribute>
+        <attribute name="value" type="string">
+	        <annotation>
+	            <documentation>
+	            	<![CDATA[
+	            	The value of the variable.  If a value is not assigned, the variable is assumed to get its value from a previous
+	            	process step, the value is assigned to the variable, so it functions more like a constant.
+	            	]]>
+	            </documentation>
+	        </annotation>         
+        </attribute>
         <attribute name="type" type="string" />
-        <attribute name="required" type="boolean" default="false" />
+        <attribute name="required" type="boolean" default="false">
+	            <documentation>
+	            	<![CDATA[
+	            	Indicates that a value MUST be provided for this variable.  Applies only where output=true.
+	            	]]>
+	            </documentation>
+	        </annotation>          
+        </attribute>
         <attribute name="output" type="boolean" default="false" />
     </complexType>
 
@@ -164,8 +212,16 @@
                 <documentation>Temporary flag needed for internal processing by java code.  Do not use this attribute in XML documents.</documentation>
             </annotation>
         </attribute>
-        <attribute name="percentComplete" type="integer"/>
-        <attribute fixed="" name="completionState" type="string"/>
+        <attribute name="percentComplete" type="integer">
+            <annotation>
+                <documentation>Currently unused.</documentation>
+            </annotation>        
+        </attribute>
+        <attribute fixed="" name="completionState" type="string">
+            <annotation>
+                <documentation>Assigned by the server for process instance status reporting.  Not used for workflow definitions.</documentation>
+            </annotation>         
+        </attribute>
 
     </complexType>
 
@@ -192,6 +248,8 @@
 			                	A comma separated list of usernames, defining the users who are eligible to perform this task.
 			                	Note that in general, the use of candidateGroups is preferred as a more flexible way to specify
 			                	a task that can be performed by more than one person. 
+			                	
+			                	** Not currently supported by the COW server **
 			                	]]>
 			                </documentation>
 			            </annotation>

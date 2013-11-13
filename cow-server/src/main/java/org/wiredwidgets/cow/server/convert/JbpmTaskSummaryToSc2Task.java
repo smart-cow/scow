@@ -16,6 +16,7 @@
 package org.wiredwidgets.cow.server.convert;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,10 +31,9 @@ import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
-import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
-//import org.jbpm.task.service.local.LocalTaskService;
+
 
 /**
  *
@@ -42,14 +42,23 @@ import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder
 @Component
 public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.query.TaskSummary, Task> {
 
-    @Autowired
-    //LocalTaskService localService;
-    TaskServiceFactory taskServiceFactory;
+    @Autowired(required=false)
+    org.jbpm.task.TaskService taskClient;
     
     private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
 
     @Override
     public Task convert(org.jbpm.task.query.TaskSummary source) {
+    	try {
+    		return doConvert(source);
+    	}
+    	catch (Exception e) {
+    		log.error("Error converting task ID " + source.getId(), e);
+    		return null;
+    	}
+    }
+    
+    private Task doConvert(org.jbpm.task.query.TaskSummary source) {
 
         Task target = new Task();
 
@@ -70,9 +79,9 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         
         if (source.getName() != null){
             String[] parts = source.getName().split("/");
-            target.setActivityName(parts[0]);
+            target.setActivityName(parts[0]); // corresponds to "key" in workflow
             if (parts.length == 2) {	
-            	target.setName(parts[1]);
+	            target.setName(parts[1]); // used for display to the user
             }
             else {
             	log.error("Expecting task name in [key]/[name] format, but was: " + source.getName());
@@ -85,14 +94,23 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
 
-        //org.jbpm.task.Task task = localService.getTask(source.getId());
-        org.jbpm.task.Task task = taskServiceFactory.getTaskService().getTask(source.getId());
+        org.jbpm.task.Task task = taskClient.getTask(source.getId());
+        if (task == null) {
+        	log.error("Unable to find task ID " + source.getId());
+        	return null;
+        }
 
-        //Content content = localService.getContent(task.getTaskData().getDocumentContentId());
-        Content content = taskServiceFactory.getTaskService().getContent(task.getTaskData().getDocumentContentId());
+        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
         
-        Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
-        		content.getContent(), null);  
+        Map<String, Object> map = null;
+        if (content != null) {
+	         map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
+	        		content.getContent(), null);  
+        }
+        else {
+        	log.info("No content found for task ID: " + task.getId() + " content ID " + task.getTaskData().getDocumentContentId() );
+        	map = new HashMap<String, Object>();
+        }
         
         // add task outcomes using the "Options" variable from the task
         String optionsString = (String) map.get("Options");
@@ -122,10 +140,8 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         		addVariable(target, key, map.get(key));
         	}
         }
-      
-
         return target;
-    }
+    }    
     
     private void addVariable(Task task, String key, Object value) {
         Variable var = new Variable();

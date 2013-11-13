@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.jbpm.task.event.TaskEventListener;
+import org.jbpm.process.workitem.wsht.LocalHTWorkItemHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
@@ -12,6 +12,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.listener.JbpmTaskEventListener;
 import org.wiredwidgets.cow.server.manager.TaskServiceSessionManager;
 
 /**
@@ -38,7 +39,10 @@ public class AppStartup implements ApplicationListener<ApplicationContextEvent> 
 	org.jbpm.task.service.TaskService taskService;
 
 	@Autowired
-	TaskEventListener taskListener;
+	JbpmTaskEventListener taskListener;
+	
+	@Autowired
+	LocalHTWorkItemHandler htHandler;
 
 	boolean loaded = false;
 
@@ -50,7 +54,11 @@ public class AppStartup implements ApplicationListener<ApplicationContextEvent> 
 			if (!loaded) {
 				
 				// register the task event listener
+				log.info("Loading task event listener: " + taskListener.getClass().getSimpleName());
 				taskService.addEventListener(taskListener);
+				
+				// unclear whether this does anything...
+				// htHandler.connect();
 
 				try {
 					service.loadAllProcesses();
