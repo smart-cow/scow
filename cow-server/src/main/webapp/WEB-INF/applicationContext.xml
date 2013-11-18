@@ -145,6 +145,7 @@
 	<!-- ref="jacksonJaxbAnnotationIntrospector" /> -->
 	<!-- </bean> -->
 
+
 	<bean id="jacksonTypeFactory" class="com.fasterxml.jackson.databind.type.TypeFactory"
 		factory-method="defaultInstance" />
 
@@ -213,13 +214,29 @@
 	<jpa:repositories base-package="org.wiredwidgets.cow.server.repo"
 		entity-manager-factory-ref="emf" transaction-manager-ref="txManager" />
 
+
 	<!-- Rabbit MQ -->
 	<rabbit:connection-factory id="connectionFactory"
 		username="${amqp.user}" password="${amqp.password}" host="${amqp.host}"
 		port="${amqp.port}" />
 
-	<rabbit:template id="amqpTemplate" connection-factory="connectionFactory" />
+	<!-- <rabbit:template id="amqpTemplate" connection-factory="connectionFactory" /> -->
 
+    <bean class="org.springframework.amqp.rabbit.core.RabbitTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="exchange" value="amq.topic" />
+        <property name="messageConverter">
+            <bean class="org.springframework.amqp.support.converter.JsonMessageConverter">
+                <!-- if necessary, override the DefaultClassMapper -->
+                <!-- <property name="classMapper" ref="customClassMapper"/> -->
+            </bean>
+        </property>
+    </bean>
+
+
+  	<util:list id="tasksListeners">
+    	<bean class="org.wiredwidgets.cow.server.listener.amqp.TasksAmqpSender" />
+   	</util:list>
 
 
 </beans>

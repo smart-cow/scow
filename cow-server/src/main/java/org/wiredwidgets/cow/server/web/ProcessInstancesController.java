@@ -53,7 +53,6 @@ import org.wiredwidgets.cow.server.api.service.ProcessInstances;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
-import org.wiredwidgets.cow.server.listener.AmqpNotifier;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 import org.wiredwidgets.cow.server.service.ProcessService;
 import org.wiredwidgets.cow.server.service.TaskService;
@@ -76,8 +75,7 @@ public class ProcessInstancesController extends CowServerController{
     @Autowired
     TaskService taskService;
     
-    @Autowired
-    AmqpNotifier amqpNotifier;
+
     /**
      * Starts execution of a new process instance.  The processInstance representation
      * must contain, at minimum, a processDefinitionKey element to identify the process,
@@ -123,7 +121,6 @@ public class ProcessInstancesController extends CowServerController{
         response.setStatus(SC_CREATED); // 201
         response.setHeader("Location", req.getRequestURL() + "/" + id);
         //pi.getKey();
-        amqpNotifier.amqpProcessPublish(pi.getId(), "process", "ProcessStarted");
     }
     
     private void addVariable(ProcessInstance pi, String name, String value) {
@@ -212,13 +209,6 @@ public class ProcessInstancesController extends CowServerController{
                 response.setStatus(SC_NOT_FOUND); // 404
             }
         }
-        
-        if (instanceId == ""){
-        	amqpNotifier.amqpProcessPublish(id, "process", "ProcessDeleted");
-        } else {
-        	amqpNotifier.amqpProcessPublish(instanceId, "process", "ProcessDeleted");
-        }
-        
     }
     
     private ProcessInstances createProcessInstances(List<org.wiredwidgets.cow.server.api.service.ProcessInstance> instances) {
