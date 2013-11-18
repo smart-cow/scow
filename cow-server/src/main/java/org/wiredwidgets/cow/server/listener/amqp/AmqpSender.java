@@ -13,7 +13,6 @@ import org.springframework.retry.RetryContext;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 
@@ -24,9 +23,6 @@ public class AmqpSender {
 	
 	@Autowired
 	AmqpTemplate amqpTemplate;
-	
-    @Autowired
-    ProcessInstanceService processInstanceService;
 
 	private RetryTemplate retryTemplate_;
 	
@@ -51,8 +47,7 @@ public class AmqpSender {
 		}
 	}
 	
-	
-	
+
 	private void send(final String routingKey, final Object body) {
 		try {
 			String result = retryTemplate_.execute(new RetryCallback<String>() {
@@ -69,28 +64,10 @@ public class AmqpSender {
 		}
 	}
 	
-	
-	
-	private String getWorkflowKey(String pid) {
-		if (pid.contains(".")) {
-			return pid;
-		}
-		
-		ProcessInstance pi = processInstanceService.getProcessInstance(Long.parseLong(pid));
-		pid = pi.getId();
-		if (pid.contains(".")) {
-			return pid;
-		}
-		return pi.getProcessDefinitionKey() + '.' + pid;
-	}
-	
-	
+
 	
 	private String getRoutingKey(String pid, String category, String action) {
-		String workflowKey = getWorkflowKey(pid);
-		String rk = String.format("%s.%s.%s", workflowKey, category, action);
-		
-		return rk;
+		return String.format("%s.%s.%s", pid, category, action);
 	}
 	
 	

@@ -64,7 +64,7 @@ public class JbpmToSc2ProcessInstance extends AbstractConverter<org.drools.runti
         
         // get the parent process in case this is a subprocess
         ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(source.getId());
-        if (pil.getParentProcessInstanceId() > 0) {	
+        if (pil != null && pil.getParentProcessInstanceId() > 0) {	
         	ProcessInstanceLog parent = JPAProcessInstanceDbLog.findProcessInstance(pil.getParentProcessInstanceId());
         	target.setParentId(parent.getProcessId() + "." + parent.getId());
         }

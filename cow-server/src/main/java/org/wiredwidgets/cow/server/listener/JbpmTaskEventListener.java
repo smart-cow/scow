@@ -19,7 +19,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.wiredwidgets.cow.server.api.service.Task;
 
 @Component
-public class JbpmTaskEventListener extends DefaultTaskEventListener implements BeanFactoryAware  {
+public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 
 	private static Logger log = Logger.getLogger(JbpmTaskEventListener.class);
 
@@ -28,9 +28,7 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 	
 	@Autowired 
 	ConversionService converter;
-	
-	private BeanFactory beanFactory;
-	
+		
 	private List<TasksEventListener> tasksListeners_;
 
 	@Resource(name="tasksListeners")
@@ -181,11 +179,7 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 		log.info("taskForwarded = " + event.getTaskId());
 	}
 
-	@Override
-	public void setBeanFactory(BeanFactory factory) throws BeansException {
-		this.beanFactory = factory;
-	}
-	
+
 	
 	private org.wiredwidgets.cow.server.api.service.Task convert(org.jbpm.task.Task task) {
 		return converter.convert(task, org.wiredwidgets.cow.server.api.service.Task.class);

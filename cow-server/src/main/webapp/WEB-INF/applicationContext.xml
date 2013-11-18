@@ -238,5 +238,9 @@
     	<bean class="org.wiredwidgets.cow.server.listener.amqp.TasksAmqpSender" />
    	</util:list>
 
+  	<util:list id="processInstanceListeners">
+    	<bean class="org.wiredwidgets.cow.server.listener.amqp.ProcessInstancesAmqpSender" />
+   	</util:list>
+
 
 </beans>
