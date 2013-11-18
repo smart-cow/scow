@@ -56,7 +56,8 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 		registerSync(new TransactionSynchronizationAdapter() {
 			public void afterCompletion(int i) {
 				for (TasksEventListener listener : tasksListeners_) {
-					listener.onCreateTask(convert(jbpmTask));
+					listener.onCreateTask(convert(jbpmTask), 
+							jbpmTask.getPeopleAssignments().getPotentialOwners());
 				}
 			}
 		});
@@ -82,7 +83,8 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 		registerSync(new TransactionSynchronizationAdapter() {
 			public void afterCompletion(int i) {
 				for (TasksEventListener listener : tasksListeners_) {
-					listener.onTakeTask(convert(jbpmTask));
+					listener.onTakeTask(convert(jbpmTask), 
+							jbpmTask.getPeopleAssignments().getPotentialOwners());
 				}
 			}
 		});
@@ -156,7 +158,8 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 		registerSync(new TransactionSynchronizationAdapter() {
 			public void afterCompletion(int i) {
 				for (TasksEventListener listener : tasksListeners_) {
-					listener.onCompleteTask(convert(jbpmTask));
+					listener.onCompleteTask(convert(jbpmTask), 
+							jbpmTask.getPeopleAssignments().getPotentialOwners());
 				}
 			}
 		});
