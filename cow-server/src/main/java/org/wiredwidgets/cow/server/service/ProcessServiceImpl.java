@@ -11,7 +11,9 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -22,18 +24,21 @@ import org.drools.builder.KnowledgeBuilderFactory;
 import org.drools.builder.ResourceType;
 import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
-import org.jbpm.process.instance.ProcessInstance;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.Deployment;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.cow.server.api.service.ResourceNames;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
+import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20NewProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.builder.GraphBuilder;
 import org.wiredwidgets.rem2.schema.Node;
 import org.wiredwidgets.rem2.schema.Property;
 
@@ -48,13 +53,16 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     private static Logger log = Logger.getLogger(ProcessServiceImpl.class);
     
     @Autowired
-    Bpmn20ProcessBuilder bpmn20ProcessBuilder;
+    Bpmn20NewProcessBuilder bpmn20ProcessBuilder;
     
     @Autowired
     RestTemplate restTemplate;
     
     @Autowired
     ProcessDefinitionsService processDefsService;
+    
+    @Autowired
+    GraphBuilder graphBuilder;
     
     @Value("${rem2.url}")
     String REM2_URL;
@@ -136,6 +144,45 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     }
     
     @Override
+	public Map<String, Object> getProcessGraph(String key) {
+    	Process process = getV2Process(key);
+    	ActivityGraph graph = graphBuilder.buildGraph(process);
+    	
+    	// put into a List so we have a defined order
+    	List<Activity> activities = new ArrayList<Activity>();
+    	activities.addAll(graph.vertexSet());
+    	
+    	List<Map<String, Object>> edgeList = new ArrayList<Map<String, Object>>();
+    	int i = 0;
+    	for (ActivityEdge activityEdge : graph.edgeSet()) {
+    		Map<String, Object> edge = new HashMap<String, Object>();
+    		edge.put("source", activities.indexOf(graph.getEdgeSource(activityEdge)));
+    		edge.put("target", activities.indexOf(graph.getEdgeTarget(activityEdge)));
+    		edge.put("left", false);
+    		edge.put("right", true);
+    		edgeList.add(edge);
+    		i++;
+    	}
+    	
+    	// create list of Nodes
+    	List<Map<String, Object>> nodeList = new ArrayList<Map<String, Object>>();
+    	for (Activity activity : activities) {
+    		Map<String, Object> node = new HashMap<String, Object>();
+    		node.put("type", activity.getClass().getSimpleName());
+    		node.put("details", activity);
+    		nodeList.add(node);
+    	}
+    	
+    	
+    	Map<String, Object> resultMap = new HashMap<String, Object>();
+    	resultMap.put("Nodes", nodeList);
+    	resultMap.put("Edges", edgeList);
+    	
+    	return resultMap;
+    	
+    }
+    
+    @Override
 	public Definitions getBpmn20Process(String key) {
     	return bpmn20ProcessBuilder.build(getV2Process(key));
     }
@@ -144,9 +191,15 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
 	public void loadAllProcesses() {
     	List<ProcessDefinition> defs = processDefsService.findLatestVersionProcessDefinitions();
     	for (ProcessDefinition def : defs) {
-    		log.info("Loading process: " + def.getKey());
-    		Definitions d = getBpmn20Process(def.getKey());
-    		loadWorkflow(d);		
+    		try {
+	    		log.info("Loading process: " + def.getKey());
+	    		Definitions d = getBpmn20Process(def.getKey());
+	    		loadWorkflow(d);		
+    		}
+    		catch (Exception e) {
+    			log.error(e);
+    			e.printStackTrace();
+    		}
     	}
     }
     

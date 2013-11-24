@@ -1,0 +1,46 @@
+<ns6:process name="v2-test" key="v2-test" maxId="29" xmlns:ns6="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns7="http://www.wiredwidgets.org/rem2/schema">
+   <ns6:activities sequential="true">
+      <ns6:task name="task1" key="_22">
+         <ns6:description>ae
+sef</ns6:description>
+         <ns6:candidateGroups>test</ns6:candidateGroups>
+      </ns6:task>
+      <ns6:loop doneName="done" repeatName="repeat" name="loop">
+         <ns6:activities sequential="true">
+            <ns6:task name="task2" key="_4">
+               <ns6:candidateGroups>group1</ns6:candidateGroups>
+            </ns6:task>
+            <ns6:task name="task3" key="_5">
+               <ns6:candidateGroups>group1</ns6:candidateGroups>
+            </ns6:task>
+            <ns6:activities sequential="false">
+               <ns6:task name="task4a" key="_8">
+                  <ns6:candidateGroups>group1</ns6:candidateGroups>
+               </ns6:task>
+               <ns6:task name="task4b" key="_9">
+                  <ns6:candidateGroups>group1</ns6:candidateGroups>
+               </ns6:task>
+            </ns6:activities>
+            <ns6:task name="task5" key="_10">
+               <ns6:candidateGroups>group1</ns6:candidateGroups>
+            </ns6:task>
+            <ns6:activities sequential="true">
+               <ns6:task name="task6" key="_11"/>
+               <ns6:decision name="decision1">
+                  <ns6:task name="choiceTask" key="_12"/>
+                  <ns6:option name="option1">
+                     <ns6:task name="task7a" key="_15"/>
+                  </ns6:option>
+                  <ns6:option name="option2">
+                     <ns6:task name="task7b" key="_16"/>
+                  </ns6:option>
+               </ns6:decision>
+            </ns6:activities>
+         </ns6:activities>
+         <ns6:loopTask name="loopDecision" key="_17"/>
+      </ns6:loop>
+      <ns6:task name="task8" key="_19">
+         <ns6:candidateGroups>test</ns6:candidateGroups>
+      </ns6:task>
+   </ns6:activities>
+</ns6:process>

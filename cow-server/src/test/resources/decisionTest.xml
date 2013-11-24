@@ -1,0 +1,33 @@
+<ns6:process name="decisionTest" key="decisionTest" xmlns:ns6="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns7="http://www.wiredwidgets.org/rem2/schema">
+   <ns6:activities sequential="true" name="base" key="base">
+      <ns6:decision name="Decision 9" key="Decision 9" bypassable="false">
+         <ns6:description/>
+         <ns6:task name="?" key="_2" bypassable="false">
+            <ns6:description/>
+            <ns6:assignee>mhowansky</ns6:assignee>
+            <ns6:variables/>
+         </ns6:task>
+         <ns6:option name="Option 11">
+            <ns6:activities sequential="true" name="Option 11option" key="Option 11option" bypassable="false">
+               <ns6:description/>
+               <ns6:task name="Task 10" key="_5" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>fitzpatrick</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Option 13">
+            <ns6:activities sequential="true" name="Option 13option" key="Option 13option" bypassable="false">
+               <ns6:description/>
+               <ns6:task name="Task 12" key="_6" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>lloren</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+      </ns6:decision>
+   </ns6:activities>
+   <ns6:bypassAssignee>admin</ns6:bypassAssignee>
+</ns6:process>

@@ -1,0 +1,107 @@
+<ns6:process name="DayInLifeOfAnyone" key="DayInLifeOfAnyone" maxId="42" xmlns:ns6="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns7="http://www.wiredwidgets.org/rem2/schema">
+   <ns6:activities sequential="true" name="base" key="base">
+      <ns6:task name="Wake up" key="_2" bypassable="false">
+         <ns6:description>assuming morning</ns6:description>
+         <ns6:assignee>tst</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:task name="Get out of bed" key="_3" bypassable="false">
+         <ns6:description/>
+         <ns6:assignee>tst</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:activities sequential="true" name="Weather_Check_Morning" key="Weather_Check" bypassable="false">
+         <ns6:description/>
+         <ns6:decision name="Choose method" key="" bypassable="false">
+            <ns6:description>so many ways...</ns6:description>
+            <ns6:task name="How will I check the weather today?" key="_4" bypassable="false">
+               <ns6:description/>
+               <ns6:assignee>tst</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:option name="See for yourself">
+               <ns6:activities sequential="true" name="See for yourselfoption" key="See for yourselfoption" bypassable="false">
+                  <ns6:description/>
+                  <ns6:task name="Go outside" key="_7" bypassable="false">
+                     <ns6:description>not much else to say!</ns6:description>
+                     <ns6:assignee>tst</ns6:assignee>
+                     <ns6:variables/>
+                  </ns6:task>
+               </ns6:activities>
+            </ns6:option>
+            <ns6:option name="TV">
+               <ns6:activities sequential="true" name="TVoption" key="TVoption" bypassable="false">
+                  <ns6:description>good ol weather channel</ns6:description>
+                  <ns6:task name="Check weather channel" key="_8" bypassable="false">
+                     <ns6:description>or your local news would be fine too</ns6:description>
+                     <ns6:assignee>tst</ns6:assignee>
+                     <ns6:variables/>
+                  </ns6:task>
+               </ns6:activities>
+            </ns6:option>
+            <ns6:option name="Internet">
+               <ns6:activities sequential="true" name="Internetoption" key="Internetoption" bypassable="false">
+                  <ns6:description/>
+                  <ns6:task name="Check weather channel for your city" key="_11" bypassable="true" wrapped="false">
+                     <ns6:description>or some other site you like</ns6:description>
+                     <ns6:assignee>tst</ns6:assignee>
+                     <ns6:variables/>
+                  </ns6:task>
+               </ns6:activities>
+            </ns6:option>
+         </ns6:decision>
+      </ns6:activities>
+      <ns6:task name="Decide on a morning activity" key="_13" bypassable="false">
+         <ns6:description>make weather check a sub of this?</ns6:description>
+         <ns6:assignee>tst</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:activities sequential="true" name="Weather_Check_Afternoon" key="Weather_Check" bypassable="false">
+         <ns6:description>2nd weather check in the DayInLifeOfAnyone wf</ns6:description>
+         <ns6:decision name="Choose method" key="" bypassable="false">
+            <ns6:description>so many ways...</ns6:description>
+            <ns6:task name="How will I check the weather today?" key="_14" bypassable="false">
+               <ns6:description/>
+               <ns6:assignee>tst</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:option name="See for yourself">
+               <ns6:activities sequential="true" name="See for yourselfoption" key="See for yourselfoption" bypassable="false">
+                  <ns6:description/>
+                  <ns6:task name="Go outside" key="_17" bypassable="false">
+                     <ns6:description>not much else to say!</ns6:description>
+                     <ns6:assignee>tst</ns6:assignee>
+                     <ns6:variables/>
+                  </ns6:task>
+               </ns6:activities>
+            </ns6:option>
+            <ns6:option name="TV">
+               <ns6:activities sequential="true" name="TVoption" key="TVoption" bypassable="false">
+                  <ns6:description>good ol weather channel</ns6:description>
+                  <ns6:task name="Check weather channel" key="_18" bypassable="false">
+                     <ns6:description>or your local news would be fine too</ns6:description>
+                     <ns6:assignee>tst</ns6:assignee>
+                     <ns6:variables/>
+                  </ns6:task>
+               </ns6:activities>
+            </ns6:option>
+            <ns6:option name="Internet">
+               <ns6:activities sequential="true" name="Internetoption" key="Internetoption" bypassable="false">
+                  <ns6:description/>
+                  <ns6:task name="Check weather channel for your city" key="_21" bypassable="true" wrapped="false">
+                     <ns6:description>or some other site you like</ns6:description>
+                     <ns6:assignee>tst</ns6:assignee>
+                     <ns6:variables/>
+                  </ns6:task>
+               </ns6:activities>
+            </ns6:option>
+         </ns6:decision>
+      </ns6:activities>
+      <ns6:task name="Decide on an afternoon activity" key="_25" bypassable="true" wrapped="false">
+         <ns6:description>what to do for the afternoon?</ns6:description>
+         <ns6:assignee>tst</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+   </ns6:activities>
+   <ns6:bypassAssignee>admin</ns6:bypassAssignee>
+</ns6:process>

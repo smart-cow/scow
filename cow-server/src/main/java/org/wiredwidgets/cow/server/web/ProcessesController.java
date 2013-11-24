@@ -16,19 +16,18 @@
 
 package org.wiredwidgets.cow.server.web;
 
+import java.util.Map;
+
 import javax.xml.transform.stream.StreamSource;
+
 import org.apache.log4j.Logger;
+import org.omg.spec.bpmn._20100524.model.Definitions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import org.wiredwidgets.cow.server.service.ProcessService;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
-import org.omg.spec.bpmn._20100524.model.Definitions;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 /**
  * Controller for REST operations for the /processes resource
@@ -91,4 +90,10 @@ public class ProcessesController extends CowServerController {
     public StreamSource getV2Process(@PathVariable("key") String key) {  
         return new StreamSource(service.getResourceAsStream(decode(key), ProcessService.V2_EXTENSION));
     }
+    
+    @RequestMapping(value = "/{key}", params = "format=graph", produces="application/json")
+    @ResponseBody
+    public Map<String, Object> getCowProcessGraph(@PathVariable("key") String key) {
+        return service.getProcessGraph(key);
+    }      
 }

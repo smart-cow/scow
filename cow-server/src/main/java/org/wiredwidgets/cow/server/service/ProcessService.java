@@ -18,8 +18,7 @@ package org.wiredwidgets.cow.server.service;
 
 import java.io.InputStream;
 import java.util.List;
-
-import javax.xml.transform.stream.StreamSource;
+import java.util.Map;
 
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
@@ -63,5 +62,7 @@ public interface ProcessService {
 	public abstract void loadAllProcesses();
 
 	public abstract Definitions getBpmn20Process(String key);
+
+	public abstract Map<String, Object> getProcessGraph(String key);
     
 }
