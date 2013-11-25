@@ -30,7 +30,7 @@ public class ProcessInstancesAmqpSender implements ProcessInstancesListener {
         	pid = pi.getName() + '.' + pid;
         }
    
-		sender.send(pid, PROC_INSTANCE_CATEGORY, action, pi, null);
+		sender.send(pid, PROC_INSTANCE_CATEGORY, action, pi);
 	}
 
 }

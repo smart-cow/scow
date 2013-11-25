@@ -35,19 +35,38 @@ public class AmqpSender {
 	
 
 	
-	public void send(String pid, String category, String action, final Object message, 
-			List<OrganizationalEntity> owners) {
+	public void send(String pid, String category, String action, Object message, 
+			List<String> groups, List<String> users) {
 		
-		if (owners == null || owners.isEmpty()) {
+		if (!hasAssignees(groups, users)) {
 			send(getRoutingKey(pid, category, action), message);
 			return;
 		}
-		for (OrganizationalEntity owner : owners) {
-			send(getRoutingKey(pid, category, action, owner), message);
+		
+		if (groups != null) {
+			for (String grpName : groups) {
+				send(getRoutingKey(pid, category, action, grpName, "group"), message);
+			}
+		}
+		
+		if (users != null) {
+			for (String username : users) {
+				send(getRoutingKey(pid, category, action, username, "user"), message);
+			}
 		}
 	}
 	
+	public void send(String pid, String category, String action, Object message) {
+		send(getRoutingKey(pid, category, action), message);
+	}
+	
+	
+	private static boolean hasAssignees(List<String> groups, List<String> users) {
+		return (groups != null && !groups.isEmpty()) || (users != null && !users.isEmpty());
+	}
 
+	
+	
 	private void send(final String routingKey, final Object body) {
 		try {
 			String result = retryTemplate_.execute(new RetryCallback<String>() {
@@ -72,14 +91,10 @@ public class AmqpSender {
 	
 	
 	private String getRoutingKey(String pid, String category, String action, 
-			OrganizationalEntity owner) {
+				String assignee, String typeName) {
+		
 		String rk = getRoutingKey(pid, category, action);
-		if (owner instanceof Group) {
-			rk += ".group.";
-		}
-		else if (owner instanceof User) {
-			rk += ".user.";
-		}
-		return rk + owner.getId();
+		return String.format("%s.%s.%s", rk, typeName, assignee);
 	}
+	
 }

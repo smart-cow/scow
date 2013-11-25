@@ -8,18 +8,12 @@ import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.User;
 
 public interface TasksEventListener {
-	
-	    public void onCreateTask(Task task);
 	    
-	    public void onCreateTask(Task task, List<OrganizationalEntity> owners);
+	    public void onCreateTask(EventParameters evtParams);
 	    
-	    public void onCompleteTask(Task task, List<OrganizationalEntity> owners);
+	    public void onCompleteTask(EventParameters evtParams);
 	    
-	    public void onCompleteTask(Task task);
-	    
-	    public void onTakeTask(Task task);
-	    
-	    public void onTakeTask(Task task, List<OrganizationalEntity> owners);
+	    public void onTakeTask(EventParameters evtParams);
 	    
 	    /*   
 	    public void onUpdateTask(Task task);
@@ -32,4 +26,27 @@ public interface TasksEventListener {
 	    
 	    public void onDeleteUserParticipation(Task task, User user);
 	    */
+	    
+	    public class EventParameters {
+			private Task task_;
+	    	private List<String> groups_;
+	    	private List<String> users_;
+	    	
+	    	public EventParameters(Task task, List<String> groups, List<String> users) {
+	    		task_ = task;
+	    		groups_ = groups;
+	    		users_ = users;
+	    	}
+	    	
+	    	public Task getTask() {
+				return task_;
+			}
+			public List<String> getGroups() {
+				return groups_;
+			}
+			public List<String> getUsers() {
+				return users_;
+			}
+
+	    }
 }

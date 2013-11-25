@@ -1,11 +1,6 @@
 package org.wiredwidgets.cow.server.listener.amqp;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.jbpm.task.OrganizationalEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.listener.TasksEventListener;
 
 public class TasksAmqpSender implements TasksEventListener {
@@ -16,40 +11,34 @@ public class TasksAmqpSender implements TasksEventListener {
 	AmqpSender sender;
 	
 
-	
 	@Override
-	public void onCreateTask(Task task) {
-		send("create", task, Collections.<OrganizationalEntity> emptyList());
+	public void onCreateTask(EventParameters evtParams) {
+		send("create", evtParams);
 	}
-	
-	@Override
-	public void onCreateTask(Task task, List<OrganizationalEntity> owners) {
-		send("create", task, owners);
-	}
+
 
 	
 	@Override
-	public void onCompleteTask(Task task) {
-		send("complete", task, null);
-	}
-
-	@Override
-	public void onTakeTask(Task task) {
-		send("take", task, null);
-	}
-
-	@Override
-	public void onCompleteTask(Task task, List<OrganizationalEntity> owners) {
-		send("complete", task, owners);
+	public void onCompleteTask(EventParameters evtParams) {
+		send("complete", evtParams);
 		
 	}
 
+
 	@Override
-	public void onTakeTask(Task task, List<OrganizationalEntity> owners) {
-		send("take", task, owners);
+	public void onTakeTask(EventParameters evtParams) {
+		send("take", evtParams);
 	}
 	
-	private void send(String action, Task task, List<OrganizationalEntity> owners) {
-		sender.send(task.getProcessInstanceId(), TASK_CATEGORY, action, task, owners);
+	
+	
+	private void send(String action, EventParameters evtParams) {
+		sender.send(
+				evtParams.getTask().getProcessInstanceId(), 
+				TASK_CATEGORY, 
+				action, 
+				evtParams.getTask(), 
+				evtParams.getGroups(), 
+				evtParams.getUsers());
 	}
 }

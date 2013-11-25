@@ -1,22 +1,21 @@
 package org.wiredwidgets.cow.server.listener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
+import org.jbpm.task.Group;
 import org.jbpm.task.OrganizationalEntity;
+import org.jbpm.task.User;
 import org.jbpm.task.event.DefaultTaskEventListener;
 import org.jbpm.task.event.entity.TaskUserEvent;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.wiredwidgets.cow.server.api.service.Task;
 
 @Component
 public class JbpmTaskEventListener extends DefaultTaskEventListener  {
@@ -42,20 +41,14 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 	 * fired without any taskCreated
 	 */
 	@Override
-	public void taskCreated(TaskUserEvent event) {
-		log.info("taskCreated = " + event.getTaskId());
-		final org.jbpm.task.Task jbpmTask = taskClient.getTask(event.getTaskId());
-		log.info("User: " + event.getUserId());
-		log.info("potential owners: ");
-		for (OrganizationalEntity e : jbpmTask.getPeopleAssignments().getPotentialOwners()) {
-			log.info(e.toString());
-		}
-	
-		registerSync(new TransactionSynchronizationAdapter() {
+	public void taskCreated(TaskUserEvent event) {		
+		final TasksEventListener.EventParameters evtParams = getEventParams(event);	
+		
+		registerSyncCallback(new TransactionSynchronizationAdapter() {	
+			
 			public void afterCompletion(int i) {
 				for (TasksEventListener listener : tasksListeners_) {
-					listener.onCreateTask(convert(jbpmTask), 
-							jbpmTask.getPeopleAssignments().getPotentialOwners());
+					listener.onCreateTask(evtParams);
 				}
 			}
 		});
@@ -68,21 +61,12 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 	 */
 	@Override
 	public void taskClaimed(TaskUserEvent event) {
-		log.info("taskClaimed = " + event.getTaskId());
-		final org.jbpm.task.Task jbpmTask = taskClient.getTask(event.getTaskId());
-		log.info("User: " + event.getUserId());
-		log.info("potential owners: ");
-		for (OrganizationalEntity e : jbpmTask.getPeopleAssignments().getPotentialOwners()) {
-			log.info(e.toString());
-			if (e.getId().equals(event.getUserId())) {
-				log.info("New task created and assigned to owner");
-			}
-		}
-		registerSync(new TransactionSynchronizationAdapter() {
+		final TasksEventListener.EventParameters evtParams = getEventParams(event);
+		
+		registerSyncCallback(new TransactionSynchronizationAdapter() {
 			public void afterCompletion(int i) {
 				for (TasksEventListener listener : tasksListeners_) {
-					listener.onTakeTask(convert(jbpmTask), 
-							jbpmTask.getPeopleAssignments().getPotentialOwners());
+					listener.onTakeTask(evtParams);
 				}
 			}
 		});
@@ -118,21 +102,23 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 //	}
 	
 	
-	@Override
-	public void taskStarted(TaskUserEvent event) {
-
-		log.info("taskStarted = " + event.getTaskId());
-		Long taskId = event.getTaskId();
-		try {
-			org.jbpm.task.Task jbpmTask = taskClient.getTask(taskId);
-			//tasksListener.onCompleteTask(convert(jbpmTask));
-			
-			// log.info("sending message: " + info);
-			// amqp.convertAndSend("amqp.topic", "process", info);
-		} catch (Exception e) {
-			log.info("ERROR in taskStarted event: " + e);
-		}/**/
-	}
+//	@Override
+//	public void taskStarted(TaskUserEvent event) {
+//
+//		log.info("taskStarted = " + event.getTaskId());
+//		Long taskId = event.getTaskId();
+//		try {
+//			org.jbpm.task.Task jbpmTask = taskClient.getTask(taskId);
+//			//tasksListener.onCompleteTask(convert(jbpmTask));
+//			
+//			// log.info("sending message: " + info);
+//			// amqp.convertAndSend("amqp.topic", "process", info);
+//		} catch (Exception e) {
+//			log.info("ERROR in taskStarted event: " + e);
+//		}/**/
+//	}
+	
+	
 
 	@Override
 	public void taskStopped(TaskUserEvent event) {
@@ -148,16 +134,15 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 	 * This event occurs when a task is completed by a user.  This is triggered after the 
 	 * afterNodeLeft event on the ProcessEventListener
 	 */
+	
 	@Override
 	public void taskCompleted(TaskUserEvent event) {
-		log.info("taskCompleted = " + event.getTaskId());
-		final org.jbpm.task.Task jbpmTask = taskClient.getTask(event.getTaskId());
-		
-		registerSync(new TransactionSynchronizationAdapter() {
+
+		final TasksEventListener.EventParameters evtParams = getEventParams(event);
+		registerSyncCallback(new TransactionSynchronizationAdapter() {
 			public void afterCompletion(int i) {
 				for (TasksEventListener listener : tasksListeners_) {
-					listener.onCompleteTask(convert(jbpmTask), 
-							jbpmTask.getPeopleAssignments().getPotentialOwners());
+					listener.onCompleteTask(evtParams);
 				}
 			}
 		});
@@ -181,13 +166,53 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 
 
 	
-	private org.wiredwidgets.cow.server.api.service.Task convert(org.jbpm.task.Task task) {
-		return converter.convert(task, org.wiredwidgets.cow.server.api.service.Task.class);
+	
+	
+	private org.wiredwidgets.cow.server.api.service.Task convert(org.jbpm.task.Task jbpmtask) {
+		return converter.convert(jbpmtask, org.wiredwidgets.cow.server.api.service.Task.class);
 	}
 	
 	
-	private static void registerSync(TransactionSynchronizationAdapter syncAdapter) {
+	private static void registerSyncCallback(TransactionSynchronizationAdapter syncAdapter) {
 		TransactionSynchronizationManager.registerSynchronization(syncAdapter);
 	}
 
+	
+	private TasksEventListener.EventParameters getEventParams(TaskUserEvent jbpmEvent) {
+		org.jbpm.task.Task jbpmTask = taskClient.getTask(jbpmEvent.getTaskId());
+		String eventUser = jbpmEvent.getUserId();
+	
+		return new TasksEventListener.EventParameters(convert(jbpmTask), getGroups(jbpmTask), 
+				getUsers(eventUser, jbpmTask));
+	}
+	
+	
+	private static List<String> getGroups(org.jbpm.task.Task jbpmTask) {
+		List<String> groups = new ArrayList<String>();
+		
+		List<OrganizationalEntity> owners = jbpmTask.getPeopleAssignments().getPotentialOwners();
+		for (OrganizationalEntity owner : owners) {
+			if (owner instanceof Group) {
+				groups.add(owner.getId());
+			}
+		}
+		return groups;
+	}
+	
+	
+	private static List<String> getUsers(String eventUser, org.jbpm.task.Task jbpmTask) {
+		List<String> users = new ArrayList<String>();
+		if (eventUser != null && !eventUser.isEmpty()) {
+			users.add(eventUser);
+		}
+		
+		List<OrganizationalEntity> owners = jbpmTask.getPeopleAssignments().getPotentialOwners();
+		for (OrganizationalEntity owner : owners) {
+			if (owner instanceof User) {
+				users.add(owner.getId());
+			}
+		}
+		return users;
+	}
+	
 }
