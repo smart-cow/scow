@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.ComplexGatewayActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.GatewayActivity;
@@ -16,7 +17,7 @@ public class ParallelActivitiesGraphBuilder extends AbstractGraphBuilder<Activit
 	private static Logger log = Logger.getLogger(ParallelActivitiesGraphBuilder.class);
 
 	@Override
-	public boolean buildGraph(Activities activity, ActivityGraph graph) {
+	protected void buildInternal(Activities activity, ActivityGraph graph, Process process) {
 		
 		GatewayActivity diverging = new ComplexGatewayActivity();
 		diverging.setDirection(GatewayActivity.DIVERGING);
@@ -27,23 +28,21 @@ public class ParallelActivitiesGraphBuilder extends AbstractGraphBuilder<Activit
 		graph.addVertex(diverging);
 		graph.addVertex(converging);
 		moveIncomingEdges(graph, activity, diverging);
+		moveOutgoingEdges(graph, activity, converging);
 		
 		for (JAXBElement<? extends Activity> element : activity.getActivities()) {
 			Activity current = element.getValue();
 			graph.addVertex(current);
 			graph.addEdge(diverging, current);
 			graph.addEdge(current, converging);
+			factory.buildGraph(current, graph, process);
 		}
 		
-		// outgoing edges
-		moveOutgoingEdges(graph, activity, converging);
 		graph.removeVertex(activity);
-
-		return true;
 	}
 
 	@Override
-	public boolean supports(Activities activity) {
+	protected boolean supportsInternal(Activities activity) {
 		return (!activity.isSequential());
 	}
 

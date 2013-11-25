@@ -4,7 +4,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 
-public interface ActivityGraphBuilder<T extends Activity> {
+public interface ActivityGraphBuilder {
 	
 	/**
 	 * Inserts the specified activity into the graph using whatever
@@ -22,14 +22,14 @@ public interface ActivityGraphBuilder<T extends Activity> {
 	 * until all graph nodes have been fully built, i.e. until all graph builders
 	 * return FALSE.
 	 */
-	public boolean buildGraph(T activity, ActivityGraph graph, Process process);
+	public void buildGraph(Activity activity, ActivityGraph graph, Process process);
 	
 	/**
 	 * Determines if this graph builder supports the specified activity instance
 	 * @param activity
 	 * @return
 	 */
-	public boolean supports(T activity);
+	public boolean supports(Activity activity);
 	
 	/**
 	 * Indicates the class of Activity that this builder supports.

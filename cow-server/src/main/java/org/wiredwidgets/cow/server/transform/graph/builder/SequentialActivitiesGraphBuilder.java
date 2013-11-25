@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 
 @Component
@@ -14,7 +15,7 @@ public class SequentialActivitiesGraphBuilder extends AbstractGraphBuilder<Activ
 	private static Logger log = Logger.getLogger(SequentialActivitiesGraphBuilder.class);
 
 	@Override
-	public boolean buildGraph(Activities activity, ActivityGraph graph) {
+	protected void buildInternal(Activities activity, ActivityGraph graph, Process process) {
 		
 		
 		Activity previous = null;
@@ -36,13 +37,18 @@ public class SequentialActivitiesGraphBuilder extends AbstractGraphBuilder<Activ
 		
 		// outgoing edges
 		moveOutgoingEdges(graph, activity, current);
+		
+		// build the activities
+		for (JAXBElement<? extends Activity> element : activity.getActivities()) {
+			factory.buildGraph(element.getValue(), graph, process);
+		}
+		
 		graph.removeVertex(activity);
 
-		return true;
 	}
 
 	@Override
-	public boolean supports(Activities activity) {
+	protected boolean supportsInternal(Activities activity) {
 		return (activity.isSequential());
 	}
 

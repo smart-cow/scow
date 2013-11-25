@@ -21,15 +21,18 @@ import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Variable;
 
-public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlowNode> implements NodeBuilder<T> {
+public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlowNode> implements NodeBuilder {
 	
 	protected static org.omg.spec.bpmn._20100524.model.ObjectFactory factory = new org.omg.spec.bpmn._20100524.model.ObjectFactory();
+	// private static Logger log = Logger.getLogger(AbstractFlowNodeBuilder.class);
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Bpmn20Node build(T activity, Bpmn20ProcessContext context) {
+	public Bpmn20Node build(Activity activity, Bpmn20ProcessContext context) {
 		U node = newNode();
 		setId(node, activity, context);
-		buildInternal(node, activity, context);
+		
+		buildInternal(node, (T)activity, context);
 		return new Bpmn20Node(createElement(node));
 	}
 	

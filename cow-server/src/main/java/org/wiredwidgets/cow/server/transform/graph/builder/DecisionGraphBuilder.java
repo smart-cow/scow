@@ -2,10 +2,10 @@ package org.wiredwidgets.cow.server.transform.graph.builder;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Option;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.DecisionTask;
@@ -18,7 +18,7 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 	private static Logger log = Logger.getLogger(DecisionGraphBuilder.class);
 
 	@Override
-	public boolean buildGraph(Decision decision, ActivityGraph graph) {
+	protected void buildInternal(Decision decision, ActivityGraph graph, Process process) {
 		
 		DecisionTask dt = new DecisionTask(decision.getTask());
 		graph.addVertex(dt);
@@ -48,24 +48,22 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 				// tie edge back to the DecisionTask
 				// this is used for variable name handling
 				optionEdge.setVarSource(dt);
-				
+				optionEdge.setExpression(option.getName());
 				graph.addEdge(optionActivity, converging);
+				factory.buildGraph(optionActivity, graph, process);
 			}
 			else {
 				// Provide support for a "do nothing" path directly from diverging to converging
 				optionEdge = graph.addEdge(diverging, converging);
 				optionEdge.setVarSource(dt);
+				optionEdge.setExpression(option.getName());
 			}
-			
-			// attach the option name to the outbound edge
-			optionEdge.setExpression(option.getName());
-			
+					
 			// we will need the options as inputs to the task
 			dt.addOption(option.getName());
 		}
 
 		graph.removeVertex(decision);
-		return true;
 	}
 
 	@Override

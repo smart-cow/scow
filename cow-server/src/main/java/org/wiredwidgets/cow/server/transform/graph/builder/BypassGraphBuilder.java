@@ -2,8 +2,8 @@ package org.wiredwidgets.cow.server.transform.graph.builder;
 
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
-import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.ComplexGatewayActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.ExclusiveGatewayActivity;
@@ -29,7 +29,7 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 	 * (3) converging exclusive gateway.
 	 */
 	@Override
-	public boolean buildGraph(Activity activity, ActivityGraph graph, Process process) {
+	protected void buildInternal(Activity activity, ActivityGraph graph, Process process) {
 	
 		GatewayActivity diverging = new ComplexGatewayActivity();
 		diverging.setDirection(GatewayActivity.DIVERGING);
@@ -41,13 +41,7 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 		graph.addVertex(converging);
 		moveIncomingEdges(graph, activity, diverging);
 		moveOutgoingEdges(graph, activity, converging);
-		
-		// remove it as a vertex to remove its old edges
-		// graph.removeVertex(activity);
-		
-		// add it back
-		// graph.addVertex(activity);
-		
+	
 		Task bypassTask = new Task();
 		bypassTask.setName("Bypass Task");
 		bypassTask.setAssignee(process.getBypassAssignee());
@@ -62,8 +56,9 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 		
 		// set to false so on the next pass we won't do this again.
 		activity.setBypassable(false);
-	
-		return true;
+		
+		factory.buildGraph(activity, graph, process);
+
 	}
 
 	/**
@@ -74,11 +69,4 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 	public Class<Activity> getType() {
 		return null;
 	}
-
-	@Override
-	public boolean buildGraph(Activity activity, ActivityGraph graph) {
-		// does not matter as it won't be called
-		return false;
-	}
-
 }

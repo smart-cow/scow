@@ -2,6 +2,7 @@ package org.wiredwidgets.cow.server.transform.graph.builder;
 
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Signal;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.EndActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.ExclusiveGatewayActivity;
@@ -17,12 +18,12 @@ public class ExitSignalBuilder extends AbstractGraphBuilder<EndActivity> {
 	}
 
 	/**
-	 * Create a converging gateway conneted to a Signal node that will
+	 * Create a converging gateway connected to a Signal node that will
 	 * catch events sent by the Exit script nodes.  This will cause the 
 	 * process to exit.
 	 */
 	@Override
-	public boolean buildGraph(EndActivity end, ActivityGraph graph) {
+	protected void buildInternal(EndActivity end, ActivityGraph graph, Process process) {
 		ExclusiveGatewayActivity ega = new ExclusiveGatewayActivity();
 		ega.setDirection(GatewayActivity.CONVERGING);
 		graph.addVertex(ega);
@@ -32,10 +33,7 @@ public class ExitSignalBuilder extends AbstractGraphBuilder<EndActivity> {
 		Signal signal = new Signal();
 		signal.setSignalId("_exit");
 		graph.addVertex(signal);
-		graph.addEdge(signal, ega);
-		
-		return false;
-		
+		graph.addEdge(signal, ega);	
 	}
 
 }

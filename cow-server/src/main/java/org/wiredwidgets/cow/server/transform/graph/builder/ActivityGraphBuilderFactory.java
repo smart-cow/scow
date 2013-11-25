@@ -12,28 +12,31 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 
 @Component
 public class ActivityGraphBuilderFactory {
 	
+	// assumes all builders are marked @Component and scanned
 	@Autowired
-	Collection<ActivityGraphBuilder<?>> builders;
+	Collection<ActivityGraphBuilder> builders;
 	
 	@Autowired
 	BypassGraphBuilder bypassBuilder;
 	
-	private Map<Class<? extends Activity>, Set<ActivityGraphBuilder<?>>> builderMap = 
-			new HashMap<Class<? extends Activity>, Set<ActivityGraphBuilder<?>>>();
+	private Map<Class<? extends Activity>, Set<ActivityGraphBuilder>> builderMap = 
+			new HashMap<Class<? extends Activity>, Set<ActivityGraphBuilder>>();
 	
 	private static Logger log = Logger.getLogger(ActivityGraphBuilderFactory.class);
 	
-	public  ActivityGraphBuilder<? extends Activity> getBuilder(Activity activity) {
+	private ActivityGraphBuilder getBuilder(Activity activity) {
 		// bypass builder is a special case as we have to test the instance
 		if (activity.isBypassable()) {
 			return bypassBuilder;
 		}
 		
-		Set<ActivityGraphBuilder<?>> candidates = builderMap.get(activity.getClass());
+		Set<ActivityGraphBuilder> candidates = builderMap.get(activity.getClass());
 		if (candidates != null) {
 			if (candidates.size() == 1) {
 				return candidates.iterator().next();
@@ -51,25 +54,29 @@ public class ActivityGraphBuilderFactory {
 		// create a default builder for the class and add it to the map
 		// so we go faster next time
 		
-		ActivityGraphBuilder<?> defaultBuilder = defaultBuilder(activity.getClass());
-		Set<ActivityGraphBuilder<?>> s = new HashSet<ActivityGraphBuilder<?>>();
+		ActivityGraphBuilder defaultBuilder = defaultBuilder(activity.getClass());
+		Set<ActivityGraphBuilder> s = new HashSet<ActivityGraphBuilder>();
 		s.add(defaultBuilder);
 		builderMap.put(activity.getClass(), s);
 		return defaultBuilder;
-
 	}
 	
-	private <T extends Activity> ActivityGraphBuilder<T> defaultBuilder(Class<T> type) {
+	public <T extends Activity> void buildGraph(T activity, ActivityGraph graph, Process process) {
+		ActivityGraphBuilder builder = getBuilder(activity);
+		builder.buildGraph(activity, graph, process);
+	}
+	
+	private <T extends Activity> ActivityGraphBuilder defaultBuilder(Class<T> type) {
 		return new DefaultGraphBuilder<T>(type);
 	}
 	
 	@PostConstruct
 	private void init() {
-		for (ActivityGraphBuilder<?> builder : builders) {
+		for (ActivityGraphBuilder builder : builders) {
 			// the Bypass builder returns null as it's a special case
 			if (builder.getType() != null) {
 				if (builderMap.get(builder.getType()) == null) {
-					builderMap.put(builder.getType(), new HashSet<ActivityGraphBuilder<?>>());
+					builderMap.put(builder.getType(), new HashSet<ActivityGraphBuilder>());
 				}
 				builderMap.get(builder.getType()).add(builder);
 			}

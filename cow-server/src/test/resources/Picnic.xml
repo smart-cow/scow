@@ -1,0 +1,222 @@
+<ns6:process name="Picnic" key="Picnic" maxId="94" xmlns:ns6="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns7="http://www.wiredwidgets.org/rem2/schema">
+   <ns6:activities sequential="true" name="base" key="base">
+      <ns6:task name="Step 1 Location" key="_2" bypassable="false">
+         <ns6:description>pick suitable location</ns6:description>
+         <ns6:assignee>tst</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:task name="Plan food" key="_3" bypassable="false">
+         <ns6:description>what to eat?</ns6:description>
+         <ns6:assignee>prema</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:decision name="Activities" key="" bypassable="false">
+         <ns6:description/>
+         <ns6:task name="What do do?" key="_4" bypassable="false">
+            <ns6:description/>
+            <ns6:assignee>prema</ns6:assignee>
+            <ns6:variables/>
+         </ns6:task>
+         <ns6:option name="Read a good book">
+            <ns6:activities sequential="false" name="Read a good bookoption" key="Read a good bookoption" bypassable="false">
+               <ns6:description>or have 1 read to you</ns6:description>
+               <ns6:task name="Bring books" key="_9" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>tst</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+               <ns6:task name="Audio books?" key="_10" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>tst</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Yea gamble!">
+            <ns6:activities sequential="false" name="Yea gamble!option" key="Yea gamble!option" bypassable="false">
+               <ns6:description/>
+               <ns6:activities sequential="true" name="Gamble1" key="Gamble" bypassable="false">
+                  <ns6:description/>
+                  <ns6:decision name="Game type" key="" bypassable="false">
+                     <ns6:description>decide if you want to play card games, slot machines or roulette</ns6:description>
+                     <ns6:task name="Cards or slots or roulette?" key="_11" bypassable="false">
+                        <ns6:description/>
+                        <ns6:assignee>tst</ns6:assignee>
+                        <ns6:variables/>
+                     </ns6:task>
+                     <ns6:option name="Slots">
+                        <ns6:activities sequential="true" name="Slotsoption" key="Slotsoption" bypassable="false">
+                           <ns6:description>diff slot machine types</ns6:description>
+                           <ns6:decision name="Slot machine type" key="" bypassable="false">
+                              <ns6:description/>
+                              <ns6:task name="Which type of slots to play?" key="_14" bypassable="false">
+                                 <ns6:description/>
+                                 <ns6:assignee>prema</ns6:assignee>
+                                 <ns6:variables/>
+                              </ns6:task>
+                              <ns6:option name="Dollar">
+                                 <ns6:activities sequential="true" name="Dollaroption" key="Dollaroption" bypassable="false">
+                                    <ns6:description/>
+                                    <ns6:task name="Play dollar slots" key="_17" bypassable="false">
+                                       <ns6:description>high roller slots!</ns6:description>
+                                       <ns6:assignee>prema</ns6:assignee>
+                                       <ns6:variables/>
+                                    </ns6:task>
+                                 </ns6:activities>
+                              </ns6:option>
+                              <ns6:option name="Penny">
+                                 <ns6:activities sequential="true" name="Pennyoption" key="Pennyoption" bypassable="false">
+                                    <ns6:description>not much money so play the penny slots</ns6:description>
+                                    <ns6:task name="Play penny slots" key="_18" bypassable="false">
+                                       <ns6:description>not so high roller.  put a penny in and see what comes out.</ns6:description>
+                                       <ns6:assignee>prema</ns6:assignee>
+                                       <ns6:variables/>
+                                    </ns6:task>
+                                 </ns6:activities>
+                              </ns6:option>
+                           </ns6:decision>
+                        </ns6:activities>
+                     </ns6:option>
+                     <ns6:option name="Card games">
+                        <ns6:activities sequential="true" name="Card gamesoption" key="Card gamesoption" bypassable="false">
+                           <ns6:description/>
+                           <ns6:decision name="Select card game" key="" bypassable="false">
+                              <ns6:description>Choose from blackjack or poker</ns6:description>
+                              <ns6:task name="Which card game?" key="_19" bypassable="false">
+                                 <ns6:description/>
+                                 <ns6:assignee>prema</ns6:assignee>
+                                 <ns6:variables/>
+                              </ns6:task>
+                              <ns6:option name="Blackjack">
+                                 <ns6:activities sequential="true" name="Blackjackoption" key="Blackjackoption" bypassable="false">
+                                    <ns6:description/>
+                                    <ns6:task name="Play blackjack" key="_22" bypassable="false">
+                                       <ns6:description/>
+                                       <ns6:assignee>prema</ns6:assignee>
+                                       <ns6:variables/>
+                                    </ns6:task>
+                                 </ns6:activities>
+                              </ns6:option>
+                              <ns6:option name="Poker">
+                                 <ns6:activities sequential="true" name="Pokeroption" key="Pokeroption" bypassable="false">
+                                    <ns6:description/>
+                                    <ns6:task name="Play poker" key="_23" bypassable="false">
+                                       <ns6:description/>
+                                       <ns6:assignee>prema</ns6:assignee>
+                                       <ns6:variables/>
+                                    </ns6:task>
+                                 </ns6:activities>
+                              </ns6:option>
+                           </ns6:decision>
+                        </ns6:activities>
+                     </ns6:option>
+                  </ns6:decision>
+               </ns6:activities>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Sports">
+            <ns6:activities sequential="true" name="Sportsoption" key="Sportsoption" bypassable="false">
+               <ns6:description>variety to choose from</ns6:description>
+               <ns6:task name="volleyball" key="_24" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>prema</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Option 1">
+            <ns6:activities sequential="true" name="Option 1option" key="Option 1option" bypassable="false">
+               <ns6:description/>
+               <ns6:task name="clean up" key="_25" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>lisa</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+      </ns6:decision>
+      <ns6:activities sequential="true" name="Gamble" key="" bypassable="false">
+         <ns6:description/>
+         <ns6:decision name="Game type" key="" bypassable="false">
+            <ns6:description>decide if you want to play card games, slot machines or roulette</ns6:description>
+            <ns6:task name="Cards or slots or roulette?" key="_26" bypassable="false">
+               <ns6:description/>
+               <ns6:assignee>tst</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:option name="Slots">
+               <ns6:activities sequential="true" name="Slotsoption" key="Slotsoption" bypassable="false">
+                  <ns6:description>diff slot machine types</ns6:description>
+                  <ns6:decision name="Slot machine type" key="" bypassable="false">
+                     <ns6:description/>
+                     <ns6:task name="Which type of slots to play?" key="_29" bypassable="false">
+                        <ns6:description/>
+                        <ns6:assignee>lisaM</ns6:assignee>
+                        <ns6:variables/>
+                     </ns6:task>
+                     <ns6:option name="Dollar">
+                        <ns6:activities sequential="true" name="Dollaroption" key="Dollaroption" bypassable="false">
+                           <ns6:description/>
+                           <ns6:task name="Play dollar slots" key="_32" bypassable="false">
+                              <ns6:description>high roller slots!</ns6:description>
+                              <ns6:assignee>DavidA</ns6:assignee>
+                              <ns6:variables/>
+                           </ns6:task>
+                        </ns6:activities>
+                     </ns6:option>
+                     <ns6:option name="Penny">
+                        <ns6:activities sequential="true" name="Pennyoption" key="Pennyoption" bypassable="false">
+                           <ns6:description>not much money so play the penny slots</ns6:description>
+                           <ns6:task name="Play penny slots" key="_33" bypassable="false">
+                              <ns6:description>not so high roller.  put a penny in and see what comes out.</ns6:description>
+                              <ns6:assignee>DavidA</ns6:assignee>
+                              <ns6:variables/>
+                           </ns6:task>
+                        </ns6:activities>
+                     </ns6:option>
+                  </ns6:decision>
+               </ns6:activities>
+            </ns6:option>
+            <ns6:option name="Card games">
+               <ns6:activities sequential="true" name="Card gamesoption" key="Card gamesoption" bypassable="false">
+                  <ns6:description/>
+                  <ns6:decision name="Select card game" key="" bypassable="false">
+                     <ns6:description>Choose from blackjack or poker</ns6:description>
+                     <ns6:task name="Which card game?" key="_34" bypassable="false">
+                        <ns6:description/>
+                        <ns6:assignee>Lisa</ns6:assignee>
+                        <ns6:variables/>
+                     </ns6:task>
+                     <ns6:option name="Blackjack">
+                        <ns6:activities sequential="true" name="Blackjackoption" key="Blackjackoption" bypassable="false">
+                           <ns6:description/>
+                           <ns6:task name="Play blackjack" key="_37" bypassable="false">
+                              <ns6:description/>
+                              <ns6:assignee>lisa</ns6:assignee>
+                              <ns6:variables/>
+                           </ns6:task>
+                        </ns6:activities>
+                     </ns6:option>
+                     <ns6:option name="Poker">
+                        <ns6:activities sequential="true" name="Pokeroption" key="Pokeroption" bypassable="false">
+                           <ns6:description/>
+                           <ns6:task name="Play poker" key="_38" bypassable="false">
+                              <ns6:description/>
+                              <ns6:assignee>lisa</ns6:assignee>
+                              <ns6:variables/>
+                           </ns6:task>
+                        </ns6:activities>
+                     </ns6:option>
+                  </ns6:decision>
+               </ns6:activities>
+            </ns6:option>
+         </ns6:decision>
+      </ns6:activities>
+      <ns6:task name="Go home" key="_39" bypassable="false">
+         <ns6:description/>
+         <ns6:assignee>prema</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+   </ns6:activities>
+   <ns6:bypassAssignee>admin</ns6:bypassAssignee>
+</ns6:process>

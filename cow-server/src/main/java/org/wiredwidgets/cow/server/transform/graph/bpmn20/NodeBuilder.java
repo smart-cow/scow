@@ -2,10 +2,10 @@ package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
-public interface NodeBuilder<T extends Activity> {
+public interface NodeBuilder {
 	
-	public Bpmn20Node build(T activity, Bpmn20ProcessContext context);
+	public Bpmn20Node build(Activity activity, Bpmn20ProcessContext context);
 	
-	public Class<T> getType();
+	public Class<? extends Activity> getType();
 
 }

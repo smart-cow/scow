@@ -60,76 +60,27 @@ public class TestGeneration {
 	}
 	
 	@Test
-	public void testSequential() {
-		Process process = unmarshalFromClassPathResource("user-tasks-only.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
+	public void testSamples() {
+		testProcess("user-tasks-only.xml");
+		testProcess("parallel-list-test.xml");
+		testProcess("csar_high_level.xml");
+		testProcess("day_in_life.xml");
+		testProcess("Picnic.xml");
+		testProcess("bypass.xml");
+		testProcess("v2-decision.xml");
+		testProcess("exit-test.xml");
+		testProcess("decisionTest.xml");
+		testProcess("exit-test.xml");
+		testProcess("exit-test.xml");
 		assertTrue(true);
 	}
-	
-	@Test
-	public void testParallel() {
-		Process process = unmarshalFromClassPathResource("parallel-list-test.xml", Process.class);
+				
+	private void testProcess(String fileName) {
+		Process process = unmarshalFromClassPathResource(fileName, Process.class);
 		Definitions defs = builder.build(process);
 		String xml = marshalToString(defs);
 		log.info("xml: " + xml);
-		assertTrue(true);
-	}	
-	
-	@Test
-	public void testCsar() {
-		Process process = unmarshalFromClassPathResource("csar_high_level.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
-		assertTrue(true);
-	}	
-	
-	@Test
-	public void testDayInLife() {
-		Process process = unmarshalFromClassPathResource("day_in_life.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
-		assertTrue(true);
-	}
-	
-	@Test
-	public void testBypass() {
-		Process process = unmarshalFromClassPathResource("bypass.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
-		assertTrue(true);
-	}
-	
-	@Test
-	public void testDecision() {
-		Process process = unmarshalFromClassPathResource("v2-decision.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
-		assertTrue(true);
-	}	
-	
-	@Test
-	public void testExit() {
-		Process process = unmarshalFromClassPathResource("exit-test.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
-		assertTrue(true);
-	}
-	
-	@Test
-	public void testDecisionTest() {
-		Process process = unmarshalFromClassPathResource("decisionTest.xml", Process.class);
-		Definitions defs = builder.build(process);
-		String xml = marshalToString(defs);
-		log.info("xml: " + xml);
-		assertTrue(true);
-	}	
+	}		
 	
 	private <T> T unmarshalFromClassPathResource(String resourceName, Class<T> type) {
 		try {

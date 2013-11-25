@@ -10,7 +10,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 
-public abstract class AbstractGraphBuilder<T extends Activity> implements ActivityGraphBuilder<T> {
+public abstract class AbstractGraphBuilder<T extends Activity> implements ActivityGraphBuilder {
 	
 	@Autowired
 	ActivityGraphBuilderFactory factory;
@@ -22,39 +22,26 @@ public abstract class AbstractGraphBuilder<T extends Activity> implements Activi
 	 * than one builder for a given Activity type.  In that case the builders
 	 * should implement Supports() to determine which one should be chosen
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean supports(Activity activity) {
+		return supportsInternal((T)activity);
+	}
+	
+	protected boolean supportsInternal(T activity) {
 		return false;
 	}
 	
-	/**
-	 * Most subclasses do not need the Process argument, so the default
-	 * implementation simply calls the buildGraph without a Process argument.
-	 * Subclasses can override this method if they need a Process as input
-	 */
 	@Override
-	public boolean buildGraph(T activity, ActivityGraph graph, Process process) {
-		return buildGraph(activity, graph);
+	public abstract Class<T> getType();	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void buildGraph(Activity activity, ActivityGraph graph, Process process) {
+		buildInternal((T)activity, graph, process);
 	}
 	
-	
-	/**
-	 * Most subclasses do not need a Process argument so will implement this
-	 * method rather than the one that includes a Process
-	 * @param activity
-	 * @param graph
-	 * @return
-	 */
-	public abstract boolean buildGraph(T activity, ActivityGraph graph);
-	
-	public abstract Class<T> getType();
-	
-//	protected void build(Activity activity, DirectedGraph<Activity, ActivityEdge> graph) {
-//		ActivityGraphBuilder builder = factory.getBuilder(activity);
-//		log.info("activity: " + activity.getClass().getSimpleName());
-//		log.info("factory: " + builder.getClass().getSimpleName());
-//		builder.buildGraph(activity, graph);
-//	}
+	protected abstract void buildInternal(T activity, ActivityGraph graph, Process process);	
 	
 	/**
 	 * Move incoming edges from one vertex to another

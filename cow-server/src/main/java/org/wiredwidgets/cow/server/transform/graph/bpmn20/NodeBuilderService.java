@@ -15,29 +15,27 @@ public class NodeBuilderService {
 	private static Logger log = Logger.getLogger(NodeBuilderService.class);
 	
 	@Autowired
-	private Set<NodeBuilder<?>> builders;
+	private Set<NodeBuilder> builders;
 	
-	private Map<Class<?>, NodeBuilder<?>> builderMap = new HashMap<Class<?>, NodeBuilder<?>>();
+	private Map<Class<?>, NodeBuilder> builderMap = new HashMap<Class<?>, NodeBuilder>();
 	
-	@SuppressWarnings("unchecked")
-	private <T extends Activity> NodeBuilder<T> getNodeBuilder(Class<T> activityClass) {
+	private <T extends Activity> NodeBuilder getNodeBuilder(Class<T> activityClass) {
 		if (builderMap.get(activityClass) != null) {
-			return (NodeBuilder<T>)builderMap.get(activityClass);
+			return builderMap.get(activityClass);
 		}
 		
-		for (NodeBuilder<? extends Activity> nodeBuilder : builders) {
+		for (NodeBuilder nodeBuilder : builders) {
 			if (nodeBuilder.getType().equals(activityClass)) {
 				builderMap.put(activityClass, nodeBuilder);
-				return (NodeBuilder<T>)nodeBuilder;
+				return nodeBuilder;
 			}
 		}
 		log.error("No builder found for type " + activityClass.getSimpleName());
 		return null;
 	}
 	
-	public <T extends Activity> Bpmn20Node buildNode(T activity, Bpmn20ProcessContext context) {
-		@SuppressWarnings("unchecked")
-		NodeBuilder<T> builder = (NodeBuilder<T>) getNodeBuilder(activity.getClass());
+	public Bpmn20Node buildNode(Activity activity, Bpmn20ProcessContext context) {
+		NodeBuilder builder = getNodeBuilder(activity.getClass());
 		return builder.build(activity, context);
 	}
 

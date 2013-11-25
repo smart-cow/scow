@@ -3,6 +3,7 @@ package org.wiredwidgets.cow.server.transform.graph.builder;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
@@ -16,7 +17,7 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 	private static Logger log = Logger.getLogger(LoopGraphBuilder.class);
 
 	@Override
-	public boolean buildGraph(Loop loop, ActivityGraph graph) {
+	protected void buildInternal(Loop loop, ActivityGraph graph, Process process) {
 		
 		// a loop consists of a sequence of:
 		// (1) converging gateway
@@ -59,8 +60,10 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 		repeatEdge.setExpression(loop.getRepeatName());
 		repeatEdge.setVarSource(dt);
 		
+		// build the activity
+		factory.buildGraph(loopActivity, graph, process);
+		
 		graph.removeVertex(loop);
-		return true;
 	}
 
 	@Override

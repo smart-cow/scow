@@ -1,6 +1,7 @@
 package org.wiredwidgets.cow.server.transform.graph.builder;
 
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 
 /**
@@ -19,8 +20,8 @@ public class DefaultGraphBuilder<T extends Activity> extends AbstractGraphBuilde
 	}
 
 	@Override
-	public boolean buildGraph(T activity, ActivityGraph graph) {
-		return false;
+	protected void buildInternal(T activity, ActivityGraph graph, Process process) {
+		// do nothing
 	}
 
 	@Override
