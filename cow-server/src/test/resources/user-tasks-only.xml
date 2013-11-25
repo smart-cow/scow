@@ -1,0 +1,36 @@
+<ns6:process name="v2-simple" key="v2-simple" maxId="4"
+	xmlns:ns6="http://www.wiredwidgets.org/cow/server/schema/model-v2"
+	xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI"
+	xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service"
+	xmlns:ns7="http://www.wiredwidgets.org/rem2/schema">
+	<ns6:activities sequential="true">
+		<ns6:task name="task one" key="_2">
+			<ns6:description>this is a description of task 1</ns6:description>
+			<ns6:assignee>jkranes</ns6:assignee>
+		</ns6:task>
+		<ns6:task name="task two" key="_3">
+			<ns6:description>this is a description of task 2</ns6:description>
+			<ns6:assignee>jkranes</ns6:assignee>
+		</ns6:task>
+		<ns6:activities sequential="true">
+			<ns6:activities sequential="true">
+				<ns6:task name="task three" key="_2">
+					<ns6:description>this is a description of task 1</ns6:description>
+					<ns6:assignee>jkranes</ns6:assignee>
+				</ns6:task>
+				<ns6:task name="task four" key="_3">
+					<ns6:description>this is a description of task 2</ns6:description>
+					<ns6:assignee>jkranes</ns6:assignee>
+				</ns6:task>
+			</ns6:activities>
+			<ns6:task name="task five" key="_3">
+				<ns6:description>this is a description of task 2</ns6:description>
+				<ns6:assignee>jkranes</ns6:assignee>
+			</ns6:task>
+		</ns6:activities>
+	</ns6:activities>
+	<ns6:variables>
+		<ns6:variable name="test" value="xxx" />
+	</ns6:variables>
+</ns6:process>

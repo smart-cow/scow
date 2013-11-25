@@ -1,0 +1,126 @@
+<ns6:process name="CSAR_high_level" key="CSAR_high_level" maxId="36" xmlns:ns6="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns7="http://www.wiredwidgets.org/rem2/schema">
+   <ns6:activities sequential="true" name="base" key="base">
+      <ns6:task name="AOC Notification and Verification of Downed Aircraft" key="_2" bypassable="false">
+         <ns6:description>UC-317 AOC Notification and Verification of Downed Aircraft. From AOC WS TRD 16 Nov. 09 AFTTP 3-1.aoc, Mar 10 JP 3-50, 5 Jan 07</ns6:description>
+         <ns6:assignee>prema</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:task name="AOC initiates CSAR" key="_3" bypassable="false">
+         <ns6:description>UC-317X</ns6:description>
+         <ns6:assignee>lew</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:task name="Downed Personnel Confirmed and Authenticated" key="_4" bypassable="false">
+         <ns6:description>UC-320
+I moved this outside the Mission re planning loop. The diagram suggests that this step is completed only once and is not repeated if re planning is required.</ns6:description>
+         <ns6:assignee>lew</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:task name="Downed Personnel Location" key="_5" bypassable="false">
+         <ns6:description>UC-321
+I moved this outside the Mission re planning loop. The diagram suggests that this step is completed only once and is not repeated if re planning is required.</ns6:description>
+         <ns6:assignee>lew</ns6:assignee>
+         <ns6:variables/>
+      </ns6:task>
+      <ns6:loop doneName="yes" repeatName="no" name="Mission (re)Planning" key="Loop 5" bypassable="false">
+         <ns6:description/>
+         <ns6:activities sequential="true" name="Mission (re)Planninglooped" key="Mission (re)Planninglooped" bypassable="false">
+            <ns6:description/>
+            <ns6:task name="ISR Adjustment Proposal and Approval" key="_7" bypassable="false">
+               <ns6:description>UC-318X</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Develop Alternate Courses of Action" key="_8" bypassable="false">
+               <ns6:description>UC-322</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Select Recovery Option" key="_9" bypassable="false">
+               <ns6:description>UC-323</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Request Adjustment to Airspace for DT Engagement" key="_10" bypassable="false">
+               <ns6:description>DTUC-4.3</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Review Selected Engagement Options" key="_11" bypassable="false">
+               <ns6:description>DTUC-4.4</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Approve Engagement Options" key="_12" bypassable="false">
+               <ns6:description>DTUC-5.1</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Direct CSAR execution" key="_13" bypassable="false">
+               <ns6:description>UC-324</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+            <ns6:task name="Manage CSAR Execution" key="_14" bypassable="false">
+               <ns6:description>UC-325</ns6:description>
+               <ns6:assignee>lew</ns6:assignee>
+               <ns6:variables/>
+            </ns6:task>
+         </ns6:activities>
+         <ns6:loopTask name="Has Planning and Execution run to completion?" key="_15" bypassable="false">
+            <ns6:description/>
+            <ns6:assignee>lew</ns6:assignee>
+            <ns6:variables/>
+         </ns6:loopTask>
+      </ns6:loop>
+      <ns6:decision name="Mission end" key="Decision 14" bypassable="false">
+         <ns6:description>Not in original diagram</ns6:description>
+         <ns6:task name="How did the mission end?" key="_17" bypassable="false">
+            <ns6:description/>
+            <ns6:assignee>lew</ns6:assignee>
+            <ns6:variables/>
+         </ns6:task>
+         <ns6:option name="Option 18">
+            <ns6:activities sequential="true" name="Option 18option" key="Option 18option" bypassable="false">
+               <ns6:description/>
+               <ns6:task name="RTB Paperwork" key="_20" bypassable="false">
+                  <ns6:description>not in original diagram</ns6:description>
+                  <ns6:assignee>lew</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Captured">
+            <ns6:activities sequential="true" name="Capturedoption" key="Capturedoption" bypassable="false">
+               <ns6:description>Not in original diagram</ns6:description>
+               <ns6:task name="Captured Paperwork" key="_21" bypassable="false">
+                  <ns6:description>Not in original diagram</ns6:description>
+                  <ns6:assignee>lew</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Abort">
+            <ns6:activities sequential="true" name="Abortoption" key="Abortoption" bypassable="false">
+               <ns6:description>Not in original diagram</ns6:description>
+               <ns6:task name="Abort Paperwork" key="_22" bypassable="false">
+                  <ns6:description/>
+                  <ns6:assignee>lew</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+         <ns6:option name="Success">
+            <ns6:activities sequential="true" name="Successoption" key="Successoption" bypassable="false">
+               <ns6:description/>
+               <ns6:task name="Success Paperwork" key="_23" bypassable="false">
+                  <ns6:description>Not in original diagram</ns6:description>
+                  <ns6:assignee>lew</ns6:assignee>
+                  <ns6:variables/>
+               </ns6:task>
+            </ns6:activities>
+         </ns6:option>
+      </ns6:decision>
+   </ns6:activities>
+   <ns6:bypassAssignee>admin</ns6:bypassAssignee>
+</ns6:process>

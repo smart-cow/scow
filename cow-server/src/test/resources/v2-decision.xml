@@ -1,0 +1,30 @@
+<ns7:process name="v2-decision" key="v2-decision" targetFormat="bpmn2" xmlns:ns7="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns6="http://www.wiredwidgets.org/rem2/schema">
+   <ns7:activities name="activities">
+      <ns7:decision name="decision">
+         <ns7:task name="decisiontask" key="_3">
+            <ns7:description>decision task description</ns7:description>
+            <ns7:candidateGroups>group1</ns7:candidateGroups>
+         </ns7:task>
+         <ns7:option name="option1">
+            <ns7:task name="optionTask1" key="_6">
+               <ns7:description>option 1 description</ns7:description>
+               <ns7:candidateGroups>group1</ns7:candidateGroups>
+            </ns7:task>
+         </ns7:option>
+         <ns7:option name="option2">
+            <ns7:task name="optionTask2" key="_7">
+               <ns7:description>option 2 description</ns7:description>
+               <ns7:candidateGroups>group1</ns7:candidateGroups>
+            </ns7:task>
+         </ns7:option>
+      </ns7:decision>
+      <ns7:task name="task99" key="_8">
+         <ns7:description>task 99 description</ns7:description>
+         <ns7:candidateGroups>group1</ns7:candidateGroups>
+      </ns7:task>
+   </ns7:activities>
+   <ns7:variables>
+      <ns7:variable name="var1" value="test1"/>
+      <ns7:variable name="var2" value="test2"/>
+   </ns7:variables>
+</ns7:process>

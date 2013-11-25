@@ -1,0 +1,13 @@
+<ns7:process name="exit-test" key="exit-test" xmlns:ns7="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:ns2="http://www.omg.org/spec/DD/20100524/DI" xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:ns4="http://www.omg.org/spec/DD/20100524/DC" xmlns:ns3="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:ns5="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:ns6="http://www.wiredwidgets.org/rem2/schema">
+   <ns7:activities sequential="false">
+      <ns7:activities sequential="true">
+         <ns7:task name="Task 1" key="_6">
+            <ns7:candidateGroups>group1</ns7:candidateGroups>
+         </ns7:task>
+         <ns7:exit state="exit 1"/>
+      </ns7:activities>
+      <ns7:task name="Task 2" key="_8">
+         <ns7:candidateGroups>group1</ns7:candidateGroups>
+      </ns7:task>
+   </ns7:activities>
+</ns7:process>
