@@ -47,7 +47,6 @@ import org.wiredwidgets.cow.server.api.service.HistoryTasks;
 import org.wiredwidgets.cow.server.api.service.Participations;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Tasks;
-import org.wiredwidgets.cow.server.listener.AmqpNotifier;
 import org.wiredwidgets.cow.server.service.TaskService;
 //import org.wiredwidgets.cow.server.rss.FeedFromTaskList;
 // import org.wiredwidgets.cow.server.test.TestHumanVars;
@@ -63,9 +62,7 @@ public class TasksController {
 
     @Autowired
     TaskService taskService;
-    
-    @Autowired
-    AmqpNotifier amqpNotifier;
+
     
     static Logger log = Logger.getLogger(TasksController.class);
 
@@ -162,10 +159,7 @@ public class TasksController {
 
         taskService.completeTask(Long.valueOf(id), task.getAssignee(), outcome, varMap);
 
-        response.setStatus(SC_NO_CONTENT); // 204
-
-        amqpNotifier.amqpTaskPublish(task, "process", "TaskCompleted", id);
-        
+        response.setStatus(SC_NO_CONTENT); // 204        
     }
 
     /**
@@ -192,7 +186,6 @@ public class TasksController {
         response.setStatus(SC_NO_CONTENT); // 204
 
         Task task = taskService.getTask(Long.valueOf(id));
-        amqpNotifier.amqpTaskPublish(task, "process", "TaskTaken", id);
     }
 
     /**

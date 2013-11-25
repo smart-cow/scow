@@ -1,41 +1,57 @@
 package org.wiredwidgets.cow.server.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
 import org.apache.log4j.Logger;
+import org.jbpm.task.Group;
 import org.jbpm.task.OrganizationalEntity;
-import org.jbpm.task.Task;
+import org.jbpm.task.User;
 import org.jbpm.task.event.DefaultTaskEventListener;
 import org.jbpm.task.event.entity.TaskUserEvent;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Component
-public class JbpmTaskEventListener extends DefaultTaskEventListener implements BeanFactoryAware  {
+public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 
 	private static Logger log = Logger.getLogger(JbpmTaskEventListener.class);
 
 	@Autowired
 	org.jbpm.task.TaskService taskClient;
 	
-	private BeanFactory beanFactory;
+	@Autowired 
+	ConversionService converter;
+		
+	private List<TasksEventListener> tasksListeners_;
 
+	@Resource(name="tasksListeners")
+	public void setListeners(List<TasksEventListener> listeners) {
+		tasksListeners_ = listeners;
+	}
+	
 	/**
 	 * This event is triggered when a task becomes available, EXCEPT in the case where 
 	 * the task is directly assigned to a user, in which case the taskClaimed event is
 	 * fired without any taskCreated
 	 */
 	@Override
-	public void taskCreated(TaskUserEvent event) {
-		log.info("taskCreated = " + event.getTaskId());
-		Task task = taskClient.getTask(event.getTaskId());
-		log.info("User: " + event.getUserId());
-		log.info("potential owners: ");
-		for (OrganizationalEntity e : task.getPeopleAssignments().getPotentialOwners()) {
-			log.info(e.toString());
-		}
+	public void taskCreated(TaskUserEvent event) {		
+		final TasksEventListener.EventParameters evtParams = getEventParams(event);	
+		
+		registerSyncCallback(new TransactionSynchronizationAdapter() {	
+			
+			public void afterCompletion(int i) {
+				for (TasksEventListener listener : tasksListeners_) {
+					listener.onCreateTask(evtParams);
+				}
+			}
+		});
 	}
 
 	/**
@@ -45,46 +61,64 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 	 */
 	@Override
 	public void taskClaimed(TaskUserEvent event) {
-		log.info("taskClaimed = " + event.getTaskId());
-		Task task = taskClient.getTask(event.getTaskId());
-		log.info("User: " + event.getUserId());
-		log.info("potential owners: ");
-		for (OrganizationalEntity e : task.getPeopleAssignments().getPotentialOwners()) {
-			log.info(e.toString());
-			if (e.getId().equals(event.getUserId())) {
-				log.info("New task created and assigned to owner");
+		final TasksEventListener.EventParameters evtParams = getEventParams(event);
+		
+		registerSyncCallback(new TransactionSynchronizationAdapter() {
+			public void afterCompletion(int i) {
+				for (TasksEventListener listener : tasksListeners_) {
+					listener.onTakeTask(evtParams);
+				}
 			}
-		}		
+		});
 	}
 
 	/**
-	 * This event is triggered when a task is started.  As currently implemented, this happens at the same time
-	 * as the task is completed, as we do not support a separate "start" event.
+	 * This event is triggered when a task is started.  As currently implemented, this happens 
+	 * at the same time as the task is completed, as we do not support a separate "start" event.
 	 */
-	@Override
-	public void taskStarted(TaskUserEvent event) {
-
-		log.info("taskStarted = " + event.getTaskId());
-		Long taskId = event.getTaskId();
-		try {
-			Task task = taskClient.getTask(taskId);
-			String processId = task.getTaskData().getProcessId() + "."
-					+ String.valueOf(task.getTaskData().getProcessInstanceId());
-
-			String info = "eventType=TaskReady;processID=" + processId
-					+ ";taskID=" + taskId;
-
-			AmqpMessageTransactionSynchronizationAdapter adapter = beanFactory.getBean(AmqpMessageTransactionSynchronizationAdapter.class);
-			adapter.setMessage(info);
-			adapter.setTopicName("process");
-			TransactionSynchronizationManager.registerSynchronization(adapter);
-			
-			// log.info("sending message: " + info);
-			// amqp.convertAndSend("amqp.topic", "process", info);
-		} catch (Exception e) {
-			log.info("ERROR in taskStarted event: " + e);
-		}/**/
-	}
+//	@Override
+//	public void taskStarted(TaskUserEvent event) {
+//
+//		log.info("taskStarted = " + event.getTaskId());
+//		Long taskId = event.getTaskId();
+//		try {
+//			org.jbpm.task.Task task = taskClient.getTask(taskId);
+//			String processId = task.getTaskData().getProcessId() + "."
+//					+ String.valueOf(task.getTaskData().getProcessInstanceId());
+//
+//			String info = "eventType=TaskReady;processID=" + processId
+//					+ ";taskID=" + taskId;
+//
+//			AmqpMessageTransactionSynchronizationAdapter adapter = beanFactory.getBean(AmqpMessageTransactionSynchronizationAdapter.class);
+//			adapter.setMessage(info);
+//			adapter.setTopicName("process");
+//			TransactionSynchronizationManager.registerSynchronization(adapter);
+//			
+//			// log.info("sending message: " + info);
+//			// amqp.convertAndSend("amqp.topic", "process", info);
+//		} catch (Exception e) {
+//			log.info("ERROR in taskStarted event: " + e);
+//		}/**/
+//	}
+	
+	
+//	@Override
+//	public void taskStarted(TaskUserEvent event) {
+//
+//		log.info("taskStarted = " + event.getTaskId());
+//		Long taskId = event.getTaskId();
+//		try {
+//			org.jbpm.task.Task jbpmTask = taskClient.getTask(taskId);
+//			//tasksListener.onCompleteTask(convert(jbpmTask));
+//			
+//			// log.info("sending message: " + info);
+//			// amqp.convertAndSend("amqp.topic", "process", info);
+//		} catch (Exception e) {
+//			log.info("ERROR in taskStarted event: " + e);
+//		}/**/
+//	}
+	
+	
 
 	@Override
 	public void taskStopped(TaskUserEvent event) {
@@ -97,12 +131,22 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 	}
 
 	/**
-	 * This event occurs when a task is completed by a user.  This is triggered after the afterNodeLeft event
-	 * on the ProcessEventListener
+	 * This event occurs when a task is completed by a user.  This is triggered after the 
+	 * afterNodeLeft event on the ProcessEventListener
 	 */
+	
 	@Override
 	public void taskCompleted(TaskUserEvent event) {
-		log.info("taskCompleted = " + event.getTaskId());
+
+		final TasksEventListener.EventParameters evtParams = getEventParams(event);
+		registerSyncCallback(new TransactionSynchronizationAdapter() {
+			public void afterCompletion(int i) {
+				for (TasksEventListener listener : tasksListeners_) {
+					listener.onCompleteTask(evtParams);
+				}
+			}
+		});
+
 	}
 
 	@Override
@@ -120,9 +164,55 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener implements B
 		log.info("taskForwarded = " + event.getTaskId());
 	}
 
-	@Override
-	public void setBeanFactory(BeanFactory factory) throws BeansException {
-		this.beanFactory = factory;
+
+	
+	
+	
+	private org.wiredwidgets.cow.server.api.service.Task convert(org.jbpm.task.Task jbpmtask) {
+		return converter.convert(jbpmtask, org.wiredwidgets.cow.server.api.service.Task.class);
+	}
+	
+	
+	private static void registerSyncCallback(TransactionSynchronizationAdapter syncAdapter) {
+		TransactionSynchronizationManager.registerSynchronization(syncAdapter);
 	}
 
+	
+	private TasksEventListener.EventParameters getEventParams(TaskUserEvent jbpmEvent) {
+		org.jbpm.task.Task jbpmTask = taskClient.getTask(jbpmEvent.getTaskId());
+		String eventUser = jbpmEvent.getUserId();
+	
+		return new TasksEventListener.EventParameters(convert(jbpmTask), getGroups(jbpmTask), 
+				getUsers(eventUser, jbpmTask));
+	}
+	
+	
+	private static List<String> getGroups(org.jbpm.task.Task jbpmTask) {
+		List<String> groups = new ArrayList<String>();
+		
+		List<OrganizationalEntity> owners = jbpmTask.getPeopleAssignments().getPotentialOwners();
+		for (OrganizationalEntity owner : owners) {
+			if (owner instanceof Group) {
+				groups.add(owner.getId());
+			}
+		}
+		return groups;
+	}
+	
+	
+	private static List<String> getUsers(String eventUser, org.jbpm.task.Task jbpmTask) {
+		List<String> users = new ArrayList<String>();
+		if (eventUser != null && !eventUser.isEmpty()) {
+			users.add(eventUser);
+		}
+		
+		List<OrganizationalEntity> owners = jbpmTask.getPeopleAssignments().getPotentialOwners();
+		for (OrganizationalEntity owner : owners) {
+			if (owner instanceof User) {
+				users.add(owner.getId());
+			}
+		}
+		return users;
+	}
+	
 }
