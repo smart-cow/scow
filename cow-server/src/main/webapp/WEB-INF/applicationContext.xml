@@ -51,7 +51,7 @@
        http://drools.org/schema/drools-spring 
        http://drools.org/schema/drools-spring.xsd
        http://www.springframework.org/schema/data/jpa
-       http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"
+       http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd"
 	default-init-method="init">
 
 	<!-- Enables support for annotations such as @Autowired -->
