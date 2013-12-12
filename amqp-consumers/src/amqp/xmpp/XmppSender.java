@@ -2,20 +2,17 @@ package amqp.xmpp;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
-import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smackx.muc.MultiUserChat;
 
 public class XmppSender 
 {
-	private Connection connection_;
+	private XMPPConnection connection_;
 	private ChatManager chatManager_;
 	private String usernameSuffix_;
     private Map<String, Chat> chats_ = new HashMap<String, Chat>();

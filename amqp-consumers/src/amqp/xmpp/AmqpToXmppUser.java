@@ -24,6 +24,7 @@ public class AmqpToXmppUser extends SimpleAmqpConsumer
 	
 	public AmqpToXmppUser(AmqpReceiver amqpReceiver, XmppSender xmppSender, 
 			ITranslateAmqpToXmpp translator) throws IOException {
+		
 		super(amqpReceiver, USERS_ROUTING_KEY);
 		xmppSender_ = xmppSender;
 		msgTranslator_ = translator;

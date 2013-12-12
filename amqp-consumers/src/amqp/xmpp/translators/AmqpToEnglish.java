@@ -8,7 +8,7 @@ public class AmqpToEnglish implements ITranslateAmqpToXmpp {
 	
 	@Override
 	public String translate(AmqpMessage message) {
-		sb_ = new StringBuilder("New notification");
+		sb_ = new StringBuilder("New notification\n");
 		
 		addItem("Workflow name", message.getWorkflowName());
 		addItem("Workflow id", message.getWorkflowId());

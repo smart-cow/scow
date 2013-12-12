@@ -3,10 +3,10 @@ package amqp.xmpp;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.Form;
@@ -15,12 +15,12 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 public class MultiuserChatManager {
 	
 	private String username_;
-	private Connection connection_;
+	private XMPPConnection connection_;
 	private Roster roster_;
 	private Map<String, MultiUserChat> chats_ = new HashMap<String, MultiUserChat>();
 	private String chatNameSuffix_;
 
-	public MultiuserChatManager(String username, Connection conn) {
+	public MultiuserChatManager(String username, XMPPConnection conn) {
 		username_ = username;
 		connection_ = conn;
 		roster_ = connection_.getRoster();
