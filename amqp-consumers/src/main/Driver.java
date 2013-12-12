@@ -1,8 +1,13 @@
-package amqp.xmpp;
+package main;
 
 import java.io.IOException;
 
 import org.jivesoftware.smack.XMPPException;
+
+import amqp.AmqpReceiver;
+import amqp.xmpp.AmqpToXmppGroup;
+import amqp.xmpp.AmqpToXmppUser;
+import amqp.xmpp.XmppSender;
 
 public class Driver {
 
@@ -17,8 +22,8 @@ public class Driver {
 		XmppSender xmppSender = new XmppSender(HOST, NOTIFIER_NAME, NOTIFIER_PASSWORD);
 		AmqpReceiver amqpReceiver = new AmqpReceiver(HOST, AMQP_EXCHANGE);
 		
-		AmqpToXmppUser.create(amqpReceiver, xmppSender);
-		AmqpToXmppGroup.create(amqpReceiver, xmppSender);
+		new AmqpToXmppUser(amqpReceiver, xmppSender);
+		new AmqpToXmppGroup(amqpReceiver, xmppSender);
 		
 	}
 }

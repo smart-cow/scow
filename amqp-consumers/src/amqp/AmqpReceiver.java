@@ -1,4 +1,4 @@
-package amqp.xmpp;
+package amqp;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -22,25 +22,11 @@ public class AmqpReceiver {
 	}
 	
 	
-    public static String getAssignee(String routingKey, String type)
-    {
-        if (routingKey.matches("(^|.*\\.)" + type + "\\.*$")) {
-            return "";
-        }
-
-        Pattern pattern = Pattern.compile("(^|\\.)" + type + "\\.(\\w+)");
-        Matcher matcher = pattern.matcher(routingKey);
-        if (!matcher.find()) {
-            return null;
-        }
-        return matcher.group(2);
-    }
-    
-    
     public Channel getChannel() 
     {
     	return channel_;
     }
+    
     
     public void addConsumer(Consumer consumer, String routingKey, Channel channel) 
     		throws IOException 
