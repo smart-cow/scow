@@ -12,6 +12,15 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+/**
+ * Used by XmppSender to manage Multiuser chats (chat rooms). Creates chat rooms based on
+ * group specified in an AMQP routing key. When a message is received, if there isn't a Multiuser
+ * chat with that name, a new Multiuser chat is created. When a message is received it, sends
+ * invites to users that in the group, online, and not already in the chat.
+ * 
+ * @author brosenberg
+ *
+ */
 public class MultiuserChatManager {
 	
 	private String username_;

@@ -6,13 +6,33 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
+/**
+ * Class to simplify receiving AMQP messages.
+ * 
+ * @author brosenberg
+ *
+ */
 public abstract class SimpleAmqpConsumer extends DefaultConsumer {
 
+	
+	/**
+	 * Instantiates an AMQP consumer. Adds this as a consumer to the specified amqpReceiver and
+	 * begins consuming.  
+	 * 
+	 * @param amqpReceiver The AmqpReceiver that will provide the AmqpMessages
+	 * @param routingKey The AMQP routing key this will be registered with
+	 * @throws IOException
+	 */
 	public SimpleAmqpConsumer(AmqpReceiver amqpReceiver, String routingKey) throws IOException {
 		super(amqpReceiver.getChannel());
 		amqpReceiver.addConsumer(this, routingKey);		
 	}
 	
+	/**
+	 * Called when an AMQP message is received.
+	 * 
+	 * @param amqpMessage The AMQP message that was received
+	 */
 	public abstract void handleAmqpMessage(AmqpMessage amqpMessage);
 	
 	

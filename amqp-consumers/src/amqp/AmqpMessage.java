@@ -1,5 +1,11 @@
 package amqp;
 
+/**
+ * Class that parses AMQP routing key and contains getters for AMQP parts.
+ * 
+ * @author brosenberg
+ *
+ */
 public class AmqpMessage {
 	
 	private String workflowName_;

@@ -10,6 +10,13 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
+/**
+ * 
+ * Class for sending Strings over XMPP
+ * 
+ * @author brosenberg
+ *
+ */
 public class XmppSender 
 {
 	private XMPPConnection connection_;

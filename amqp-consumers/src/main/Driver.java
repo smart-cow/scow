@@ -9,6 +9,31 @@ import amqp.xmpp.AmqpToXmppGroup;
 import amqp.xmpp.AmqpToXmppUser;
 import amqp.xmpp.XmppSender;
 
+/**
+ * Starts the application that takes messages from AMQP and sends them over XMPP.
+ * Takes configuration parameters from command line using the
+ * {@code -D<property name>=<property value>} syntax.
+ * 
+ * Properties are:
+ * <dl>
+ * 	<dt>amqp.host</dt>
+ * 		<dd> Host name where AMQP is running. Defaults to localhost</dd> 
+ * 	<dt>amqp.exchange</dt>
+ * 		<dd> Name of AMQP exchange to read from. Defaults to amq.topic </dd>
+ * 
+ * 	<dt>xmpp.notifier.username</dt>
+ * 		<dd> 
+ * 			XMPP username for the user that will send out the AMQP message. 
+ * 			Defaults to notifications 
+ * 		</dd> 
+ * 
+ * 	<dt>xmpp.notifier.password</dt>
+ * 		<dd> Password for xmpp.notifier.username. Defaults to password </dd>
+ * </dl>
+ * 
+ * @author brosenberg
+ *
+ */
 public class Driver {
 
 	private static final String AMQP_HOST;

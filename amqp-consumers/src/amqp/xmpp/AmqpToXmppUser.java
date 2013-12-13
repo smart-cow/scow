@@ -11,6 +11,13 @@ import amqp.translators.AmqpToEnglish;
 import amqp.translators.ITranslateAmqpMessage;
 
 
+/**
+ * Takes AMQP messages addressed to users and sends them to the XMPP user specified by the 
+ * received AMQP message's routing key.
+ * 
+ * @author brosenberg
+ *
+ */
 public class AmqpToXmppUser extends SimpleAmqpConsumer 
 {
 	public static final String USERS_ROUTING_KEY = "#.user.#";
@@ -22,6 +29,16 @@ public class AmqpToXmppUser extends SimpleAmqpConsumer
 		this(amqpReceiver, xmppSender, new AmqpToEnglish());
 	}
 	
+	
+	
+	/**
+	 * Configure where to read AMQP messages from and where to send XMPP messages to.
+	 * 
+	 * @param amqpReceiver
+	 * @param xmppSender
+	 * @param translator Specifies how to convert an AMQP message to a string to be sent over XMPP
+	 * @throws IOException
+	 */
 	public AmqpToXmppUser(AmqpReceiver amqpReceiver, XmppSender xmppSender, 
 			ITranslateAmqpMessage translator) throws IOException {
 		
@@ -30,9 +47,11 @@ public class AmqpToXmppUser extends SimpleAmqpConsumer
 		msgTranslator_ = translator;
 	}
 	
+	
 	public void setMessageTranslator(ITranslateAmqpMessage translator) {
 		msgTranslator_ = translator;
 	}
+	
 
 	@Override
 	public void handleAmqpMessage(AmqpMessage amqpMesssage) {
