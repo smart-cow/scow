@@ -11,16 +11,26 @@ import amqp.xmpp.XmppSender;
 
 public class Driver {
 
-	private static final String HOST = "localhost";
-	private static final String NOTIFIER_NAME = "notifications";
-	private static final String NOTIFIER_PASSWORD = "password";
-	private static final String AMQP_EXCHANGE = "amq.topic";
+	private static final String AMQP_HOST;
+	private static final String AMQP_EXCHANGE;
 	
+	private static final String XMPP_NOTIFIER_USERNAME;
+	private static final String XMPP_NOTIFIER_PASSWORD;
 
+	static {
+		AMQP_HOST = System.getProperty("amqp.host", "localhost");
+		AMQP_EXCHANGE = System.getProperty("amqp.exchange", "amq.topic");
+		
+		XMPP_NOTIFIER_USERNAME = System.getProperty("xmpp.notifier.username", "notifications");
+		XMPP_NOTIFIER_PASSWORD = System.getProperty("xmpp.notifier.password", "password");
+	}
+
+	
 	public static void main(String[] args) throws XMPPException, IOException 
 	{
-		XmppSender xmppSender = new XmppSender(HOST, NOTIFIER_NAME, NOTIFIER_PASSWORD);
-		AmqpReceiver amqpReceiver = new AmqpReceiver(HOST, AMQP_EXCHANGE);
+		XmppSender xmppSender = new XmppSender(AMQP_HOST, XMPP_NOTIFIER_USERNAME, 
+				XMPP_NOTIFIER_PASSWORD);
+		AmqpReceiver amqpReceiver = new AmqpReceiver(AMQP_HOST, AMQP_EXCHANGE);
 		
 		new AmqpToXmppUser(amqpReceiver, xmppSender);
 		new AmqpToXmppGroup(amqpReceiver, xmppSender);

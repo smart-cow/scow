@@ -1,7 +1,7 @@
-package amqp.xmpp.translators;
+package amqp.translators;
 
 import amqp.AmqpMessage;
 
-public interface ITranslateAmqpToXmpp {
+public interface ITranslateAmqpMessage {
 	public String translate(AmqpMessage message);
 }

@@ -13,7 +13,7 @@ public abstract class SimpleAmqpConsumer extends DefaultConsumer {
 		amqpReceiver.addConsumer(this, routingKey);		
 	}
 	
-	public abstract void handleAmqpMessage(AmqpMessage msg);
+	public abstract void handleAmqpMessage(AmqpMessage amqpMessage);
 	
 	
 	@Override

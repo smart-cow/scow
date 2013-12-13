@@ -7,8 +7,8 @@ import org.jivesoftware.smack.XMPPException;
 import amqp.AmqpMessage;
 import amqp.AmqpReceiver;
 import amqp.SimpleAmqpConsumer;
-import amqp.xmpp.translators.AmqpToEnglish;
-import amqp.xmpp.translators.ITranslateAmqpToXmpp;
+import amqp.translators.AmqpToEnglish;
+import amqp.translators.ITranslateAmqpMessage;
 
 
 public class AmqpToXmppUser extends SimpleAmqpConsumer 
@@ -16,21 +16,21 @@ public class AmqpToXmppUser extends SimpleAmqpConsumer
 	public static final String USERS_ROUTING_KEY = "#.user.#";
 	
 	private XmppSender xmppSender_;
-	private ITranslateAmqpToXmpp msgTranslator_;
+	private ITranslateAmqpMessage msgTranslator_;
 	
 	public AmqpToXmppUser(AmqpReceiver amqpReceiver, XmppSender xmppSender) throws IOException {
 		this(amqpReceiver, xmppSender, new AmqpToEnglish());
 	}
 	
 	public AmqpToXmppUser(AmqpReceiver amqpReceiver, XmppSender xmppSender, 
-			ITranslateAmqpToXmpp translator) throws IOException {
+			ITranslateAmqpMessage translator) throws IOException {
 		
 		super(amqpReceiver, USERS_ROUTING_KEY);
 		xmppSender_ = xmppSender;
 		msgTranslator_ = translator;
 	}
 	
-	public void setMessageTranslator(ITranslateAmqpToXmpp translator) {
+	public void setMessageTranslator(ITranslateAmqpMessage translator) {
 		msgTranslator_ = translator;
 	}
 

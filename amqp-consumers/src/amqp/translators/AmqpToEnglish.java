@@ -1,8 +1,8 @@
-package amqp.xmpp.translators;
+package amqp.translators;
 
 import amqp.AmqpMessage;
 
-public class AmqpToEnglish implements ITranslateAmqpToXmpp {
+public class AmqpToEnglish implements ITranslateAmqpMessage {
 
 	StringBuilder sb_;
 	
