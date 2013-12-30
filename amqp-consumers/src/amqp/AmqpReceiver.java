@@ -11,11 +11,16 @@ public class AmqpReceiver {
 	private Channel channel_;
 	private String exchangeName_;
 
-	public AmqpReceiver(String host, String exchangeName) throws IOException 
+	public AmqpReceiver(String host, int port,String username, String password,  
+						String exchangeName) throws IOException 
 	{
 		ConnectionFactory connFactory = new ConnectionFactory();
 		connFactory.setHost(host);
-		channel_ = connFactory.newConnection().createChannel();
+		connFactory.setPort(port);
+		connFactory.setUsername(username);
+		connFactory.setPassword(password);
+		
+		channel_ = connFactory.newConnection().createChannel();	
 		exchangeName_ = exchangeName;
 	}
 	

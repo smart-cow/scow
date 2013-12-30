@@ -65,7 +65,7 @@ public class AmqpToXmppUser extends SimpleAmqpConsumer
 				xmppSender_.sendToUser(translatedMessage, amqpMesssage.getUser());
 			}
 		} catch (XMPPException e) {
-			System.err.println("Unable to send xmpp message: \"%s\"" + translatedMessage);
+			System.err.printf("Unable to send xmpp message: \"%s\"\n", translatedMessage);
 			e.printStackTrace();
 		}
 

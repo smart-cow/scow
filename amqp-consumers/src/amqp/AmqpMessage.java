@@ -1,5 +1,8 @@
 package amqp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Class that parses AMQP routing key and contains getters for AMQP parts.
  * 
@@ -8,22 +11,14 @@ package amqp;
  */
 public class AmqpMessage {
 	
-	private String workflowName_;
-	private String workflowId_;
-	private String category_;
-	private String action_;
-	
-	private boolean isToAllGroups_;
-	private String groupName_;
-	
+	private boolean isToAllGroups_;	
 	private boolean isToAllUsers_;
-	private String username_;
-	
-	private String messageBody_;
+		
+	private Map<String, String> variables_ = new HashMap<String, String>();
 	
 	
 	public AmqpMessage(String routingKey, String messageBody) {
-		messageBody_ = messageBody;
+		variables_.put("messageBody", messageBody);
 		
 		/*
 		 * Possible Routing key formats
@@ -35,11 +30,11 @@ public class AmqpMessage {
 		if (rkParts.length < 4) {
 			throw new IllegalArgumentException("Routing key not in proper format");
 		}
-		
-		workflowName_ = rkParts[0];
-		workflowId_   = rkParts[1];
-		category_     = rkParts[2];
-		action_       = rkParts[3];
+		variables_.put("workflowName", rkParts[0]);
+		variables_.put("workflowId", rkParts[1]);
+		variables_.put("category", rkParts[2]);
+		variables_.put("action", rkParts[3]);
+
 		
 		/*
 		 * Done because to assignee info on key
@@ -73,45 +68,48 @@ public class AmqpMessage {
 		 *      v2-test.15.tasks.takeTask.user.brian length = 6
 		 */
 		if (isToGroup) {
-			groupName_ = rkParts[5];
+			variables_.put("groupName", rkParts[5]);
 			return;
 		}
 		if (isToUser) {
-			username_ = rkParts[5];
+			variables_.put("username", rkParts[5]);
 		}
 	}
 	
 	
 	public String getWorkflowName() {
-		return workflowName_;
+		return variables_.get("workflowName");
 	}
 	
 	public String getWorkflowId() {
-		return workflowId_;
+		return variables_.get("workflowId");
 	}
 	
 	public String getCategory() {
-		return category_;
+		return variables_.get("category");
 	}
 	
 	public String getAction() {
-		return action_;
+		return variables_.get("action");
 	}
 	
 	public boolean hasAssignees() {
-		return isToAllGroups_ || isToAllUsers_ || groupName_ != null || username_ != null;
+		return isToAllGroups_ || isToAllUsers_ || variables_.containsKey("groupName") || 
+				variables_.containsKey("username");
 	}
 	
+	
 	public boolean isToSingleGroup() {
-		return groupName_ != null;
+		return variables_.containsKey("groupName");
 	}
+	
 	
 	public boolean isToAllGroups() {
 		return isToAllGroups_;
 	}
 	
 	public String getGroup() {
-		return groupName_;
+		return variables_.get("groupName");
 	}
 	
 	public boolean isToAllUsers() {
@@ -119,16 +117,20 @@ public class AmqpMessage {
 	}
 	
 	public boolean isToSingleUser() {
-		return username_ != null;
+		return variables_.containsKey("username");
 	}
 	
 	public String getUser() {
-		return username_;
+		return variables_.get("username");
 	}
 	
 	
 	public String getMessageBody() {
-		return messageBody_;
+		return variables_.get("messageBody");
+	}
+	
+	public Map<String, String> getVariables() {
+		return variables_;
 	}
 	
 
