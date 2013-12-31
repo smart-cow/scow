@@ -26,10 +26,11 @@ public class XmppSender
 	private MultiuserChatManager mucManger;
 	
 	
-	public XmppSender(String host, String notfierUsername, String password) throws XMPPException 
+	public XmppSender(String host, String notfierUsername, String password) 
+			throws XMPPException, InterruptedException 
 	{
 		connection_ = new XMPPConnection(host);
-		connection_.connect();
+		connectWithRetry();
 		connection_.login(notfierUsername, password);
 		chatManager_ = connection_.getChatManager();
 
@@ -37,7 +38,29 @@ public class XmppSender
 		
 		mucManger = new MultiuserChatManager(notfierUsername, connection_);
 	}
+
 	
+	private void connectWithRetry() throws XMPPException, InterruptedException {
+		int reconnectDelay = 500;
+		while (!connection_.isConnected()) {
+			try {
+				connection_.connect();
+			}
+			catch (XMPPException e) {
+				if (e.getXMPPError().getCode() != 502) {
+					throw e;
+				}
+				//300000ms = 5 minutes 
+				if (reconnectDelay < 300000) { 
+					reconnectDelay *= 2;
+				}
+				System.err.printf(
+						"Connection to XMPP server failed.\nWill retry connection in %d seconds\n", 
+						reconnectDelay / 1000 );
+				Thread.sleep(reconnectDelay);
+			}
+		}
+	}
 
 	public void sendToUser(String message, String username) throws XMPPException 
 	{
