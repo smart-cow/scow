@@ -11,6 +11,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.muc.RoomInfo;
 
 /**
  * Used by XmppSender to manage Multiuser chats (chat rooms). Creates chat rooms based on
@@ -75,8 +76,16 @@ public class MultiuserChatManager {
 	private MultiUserChat createMultiUserChat(String groupName) throws XMPPException {
 		groupName = convertGroupName(groupName);
 		MultiUserChat muc = new MultiUserChat(connection_, groupName);
-		muc.create(username_);
-		muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+		try {
+			MultiUserChat.getRoomInfo(connection_, groupName);
+			muc.join(username_);
+		} catch (XMPPException e) {
+			if (e.getXMPPError().getCode() != 404) {
+				throw e;
+			}
+			muc.create(username_);
+			muc.sendConfigurationForm(new Form(Form.TYPE_SUBMIT));
+		}		
 		return muc;
 	}
 	

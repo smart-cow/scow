@@ -2,10 +2,7 @@ package org.wiredwidgets.cow.server.listener;
 
 import java.util.List;
 
-import org.jbpm.task.OrganizationalEntity;
-import org.wiredwidgets.cow.server.api.service.Group;
 import org.wiredwidgets.cow.server.api.service.Task;
-import org.wiredwidgets.cow.server.api.service.User;
 
 public interface TasksEventListener {
 	    

@@ -140,7 +140,7 @@ public class Driver {
 	}
 	
 	
-	public static void main(String[] args) throws XMPPException, IOException 
+	public static void main(String[] args) throws XMPPException, IOException, InterruptedException 
 	{
 		XmppSender xmppSender = new XmppSender(XMPP_HOST, XMPP_NOTIFY_USERNAME, 
 											   XMPP_NOTIFY_PASSWORD);

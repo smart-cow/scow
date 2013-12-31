@@ -40,7 +40,11 @@ public abstract class SimpleAmqpConsumer extends DefaultConsumer {
 	final public void handleDelivery(String consumerTag, Envelope envelope, 
 			AMQP.BasicProperties properties, byte[] message) {
 		
-		AmqpMessage amqpMessage = new AmqpMessage(envelope.getRoutingKey(), new String(message));
-		handleAmqpMessage(amqpMessage);
+		try {
+			AmqpMessage amqpMessage = new AmqpMessage(envelope.getRoutingKey(), new String(message));
+			handleAmqpMessage(amqpMessage);
+		} catch(IllegalArgumentException e) {
+			e.printStackTrace();
+		}
 	}
 }
