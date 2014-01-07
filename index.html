@@ -31,44 +31,86 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="custom-links" class="anchor" href="#custom-links"><span class="octicon octicon-link"></span></a>Custom Links</h3>
+        <h1>
+<a name="composable-operational-workflows-cow" class="anchor" href="#composable-operational-workflows-cow"><span class="octicon octicon-link"></span></a>Composable Operational Workflows (COW)</h1>
 
-<p><a href="http://www.wiredwidgets.org/cow">SCOW Documentation</a></p>
+<p>The COW project is comprised of five sub-projects.  Each is open-sourced and was hosted on
+BitBucket.org as a Mercurial repository.  Documentation is hosted via this
+WiredWidgets.org website.</p>
 
-<p><a href="site/apidocs/index.html">Server API Javadocs</a></p>
+<ul>
+<li><a href="http://www.wiredwidgets.org/cow">COW Documentation</a></li>
+<li><p><a href="http://smart-cow.github.io/scow/site/apidocs/index.html">Server API Javadocs</a></p></li>
+<li><p><a href="http://www.wiredwidgets.org/documentation/cow-server">COW Server</a>
+(Summary | <a href="https://bitbucket.org/wjk5828/wiredwidgets-cow-server">Code</a> |
+<a href="http://www.wiredwidgets.org/cow/cow-server-changelog">Changelog</a>)</p></li>
+<li>
+<a href="">COW Server API</a> (Summary | <a href="http://www.wiredwidgets.org/documentation/cow-server-api">Code</a> |
+<a href="http://www.wiredwidgets.org/cow/cow-server-api-changelog">Changelog</a>)</li>
+<li>COW Web Client ( <a href="http://www.wiredwidgets.org/cow#TOC-COW-Web-Application">Summary</a> |
+<a href="https://bitbucket.org/wjk5828/wiredwidgets-cow-webapp">Code</a>  |
+<a href="http://www.wiredwidgets.org/cow/cow-webapp-changelog">Changelog</a> )</li>
+<li>COW AgileClient Plugins (<a href="http://www.wiredwidgets.org/cow#TOC-COW-AgileClient-plugins">Summary</a> |
+<a href="https://bitbucket.org/wjk5828/wired-widgets-cow-agile-client">Code</a> |
+<a href="http://www.wiredwidgets.org/cow/cow-agile-client-changelog">Changelog</a>)</li>
+<li>COW Openfire Plugin (<a href="http://www.wiredwidgets.org/cow#TOC-COW-Openfire-plugin">Summary</a> |
+<a href="https://bitbucket.org/wjk5828/wiredwidgets-cow-openfire-plugin">Code</a> |
+<a href="http://www.wiredwidgets.org/cow/cow-openfire-plugin-changelog">Changelog</a>)</li>
+</ul><h2>
+<a name="project-overview" class="anchor" href="#project-overview"><span class="octicon octicon-link"></span></a>Project Overview</h2>
+
+<p>This is the general COW overview...</p>
+
+<h2>
+<a name="sub-project-descriptions" class="anchor" href="#sub-project-descriptions"><span class="octicon octicon-link"></span></a>Sub-project Descriptions</h2>
 
 <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+<a name="cow-server" class="anchor" href="#cow-server"><span class="octicon octicon-link"></span></a>COW Server</h3>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>The COW Server is a web application that providing a REST service API for interacting with the COW BPMN engine.  The engine is currently implemented using JBoss JBPM 5.4, but by design the COW Server is intended to decouple the underlying BPMN engine implementation from the API it exposes.</p>
 
 <h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<a name="cow-server-api" class="anchor" href="#cow-server-api"><span class="octicon octicon-link"></span></a>COW Server API</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>The COW Server API includes the XML schemas and generated java classes used by the COW Server to implement its REST API.  The API is managed as a separate project in order to create a clean separation between the COW Server implementation and the API that can be used by clients.</p>
 
 <h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a name="cow-web-application" class="anchor" href="#cow-web-application"><span class="octicon octicon-link"></span></a>COW Web Application</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>The COW webapp is a web GUI designed to be used in conjunction with the REST services procided by the COW server. The application is built using SmartGWT, a variant of GWT (Google Web Toolkit). GWT allows code to be written with a subset of Java and compiles into Javascript with multi-browser compatibility, and will compile into both a standard web page and an OpenSocial gadget with minimal code changes.</p>
+
+<p>The COW webapp is designed to demonstrate as many features that the COW server provides as possible. This includes creating and editing workflows, executing workflows and tracking their progress, completing tasks created from workflows in execution, and more.</p>
 
 <h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<a name="cow-agileclient-plugins" class="anchor" href="#cow-agileclient-plugins"><span class="octicon octicon-link"></span></a>COW AgileClient plugins</h3>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>The COW Agile Client plugins are a representative prototype of a Netbeans-based client to manage workflows and complete assigned tasks.  It connects to a COW server via REST calls defined by the COW Server API. The plugins are designed to run in the AgileClient platform (a customized Netbeans 6.9.1 platform) but could be tweaked to work with any "vanilla" Netbeans platform.</p>
+
+<p>There are three Netbeans modules (NBMs) that are contained within a single module suite.  All three are needed to function.</p>
+
+<ul>
+<li>cow-ac-client: the core module which contains all the source code for the actual client</li>
+<li>cow-ac-libs: wraps dependency libraries needed for Spring, message handling, server notifications, logging,   and so forth</li>
+<li>cow-server-api: wraps the cow-server-api jar into a NBM which provides access to java and the REST calls in use by the server</li>
+</ul><h3>
+<a name="cow-openfire-plugin" class="anchor" href="#cow-openfire-plugin"><span class="octicon octicon-link"></span></a>COW Openfire plugin</h3>
+
+<p>The COW Openfire plugin is a plugin that we have created to manage the users and groups on the COW server.  When a user or group is added, changed, or deleted on the Openfire server, the changes are replicated to the COW server via REST calls.  This also includes adding and removing users from groups.</p>
+
+<p>After the plugin has been deployed to the Openfire server, there will be a COW Admin Page.  This is located under Users/Groups-&gt;Users-&gt;COW Admin.  From this page, you can set the location of the COW Server.  This means you do not have to be running the Openfire server on the same machine as the COW server.  You can also "Push Users/Groups to COW" and "Pull Users/Groups from COW" if for some reason the two become out of sync.</p>
+
+<h2>
+<a name="troubleshooting-and-frequently-asked-questions" class="anchor" href="#troubleshooting-and-frequently-asked-questions"><span class="octicon octicon-link"></span></a>Troubleshooting and Frequently Asked Questions</h2>
+
+<p>All sub-projects are combined into a single page available here.</p>
+
+<p>Subpages (6):
+<a href="http://www.wiredwidgets.org/cow/cow-agile-client-changelog">COW AgileClient Changelog</a>
+<a href="http://www.wiredwidgets.org/cow/cow-openfire-plugin-changelog">COW Openfire Plugin Changelog</a>
+<a href="http://www.wiredwidgets.org/cow/cow-server-api-changelog">COW Server API ChangeLog</a>
+<a href="http://www.wiredwidgets.org/cow/cow-server-changelog">COW Server Changelog</a>
+<a href="http://www.wiredwidgets.org/cow/faq">COW - Troubleshooting and Frequently Asked Questions</a>
+<a href="http://www.wiredwidgets.org/cow/cow-webapp-changelog">cow-webapp-changelog</a></p>
       </section>
     </div>
 
