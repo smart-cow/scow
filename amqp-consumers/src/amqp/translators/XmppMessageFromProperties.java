@@ -112,6 +112,7 @@ public class XmppMessageFromProperties implements ITranslateAmqpMessage {
 			case '$':
 				sc.appendToMessage('$');
 				sc.setState(new Regular());
+				break;
 			case '{':
 				break;
 			case '\\':

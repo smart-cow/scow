@@ -137,16 +137,14 @@ public class AmqpSender {
 	}
 	
 	private void retryTemplateSend(final String routingKey, final Object body) {
-		
-		RetryCallback<Void> retryer = new RetryCallback<Void>() {
-			public Void doWithRetry(RetryContext context) throws Exception {	
-				amqpTemplate.convertAndSend(routingKey, body);
-				return null;
-			}	
-		};
-		
 		try {
-			retryTemplate_.execute(retryer);
+			retryTemplate_.execute(new RetryCallback<Void>() {
+				public Void doWithRetry(RetryContext ctx) throws Exception {
+					
+					amqpTemplate.convertAndSend(routingKey, body);
+					return null;
+				}
+			});
 			log.info("\nMessage Sent to: \n" + routingKey + "\n");
 		} 
 		catch (Exception e) {

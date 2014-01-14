@@ -77,7 +77,7 @@ public class JbpmProcessEventListener extends DefaultProcessEventListener{
     	
     	final org.wiredwidgets.cow.server.api.service.ProcessInstance pi = 
     			convert(event.getProcessInstance());
-    	
+
     	registerSync(new TransactionSynchronizationAdapter() {
     		public void afterCompletion(int i) {
     			for (ProcessInstancesListener pil : procInstancelisteners_) {
