@@ -1,9 +1,12 @@
 Composable Operational Workflows (COW)
 ==================================================
 
-The COW project is comprised of five sub-projects.  Each is open-sourced and hosted on
+The COW project is comprised of five sub-projects.  Each is open-sourced and was hosted on
 BitBucket.org as a Mercurial repository.  Documentation is hosted via this
 WiredWidgets.org website.
+
+* [COW Documentation](http://www.wiredwidgets.org/cow)
+* [Server API Javadocs](http://smart-cow.github.io/scow/site/apidocs/index.html)
 
 * [COW Server](http://www.wiredwidgets.org/documentation/cow-server)
     (Summary | [Code](https://bitbucket.org/wjk5828/wiredwidgets-cow-server) |
