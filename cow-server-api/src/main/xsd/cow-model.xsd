@@ -96,6 +96,7 @@
         </attribute>
         <attribute name="type" type="string" />
         <attribute name="required" type="boolean" default="false">
+        	<annotation>
 	            <documentation>
 	            	<![CDATA[
 	            	Indicates that a value MUST be provided for this variable.  Applies only where output=true.

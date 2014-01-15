@@ -126,7 +126,11 @@ public class TasksController {
      */
     @RequestMapping(value = "/active/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void completeTask(@PathVariable("id") String id, @RequestParam(value = "outcome", required = false) String outcome, @RequestParam(value = "var", required = false) String variables, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    public void completeTask(@PathVariable("id") String id, 
+    						 @RequestParam(value = "outcome", required = false) String outcome, 
+    						 @RequestParam(value = "var", required = false) String variables, 
+    						 HttpServletResponse response, 
+    						 HttpServletRequest request) throws IOException {
         // verify existence
 
         Task task = taskService.getTask(Long.valueOf(id));       
