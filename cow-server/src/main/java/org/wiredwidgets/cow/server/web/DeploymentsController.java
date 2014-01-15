@@ -61,11 +61,14 @@ public class DeploymentsController {
     
     /**
      * Retrieve all deployments
+     * Deprecated: use GET /processDefinitions instead to get a list of existing
+     * process defininitions.
      * @return a Deployments object, which wraps multiple Deployment objects
      * @throws Exception 
      */
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
+    @Deprecated
     public Deployments listDeployments() throws Exception {
         Deployments deployments = new Deployments();
         deployments.getDeployments().addAll(processService.findAllDeployments());

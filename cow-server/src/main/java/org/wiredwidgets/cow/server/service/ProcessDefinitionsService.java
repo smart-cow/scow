@@ -17,6 +17,8 @@
 package org.wiredwidgets.cow.server.service;
 
 import java.util.List;
+
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 
 /**
@@ -47,5 +49,10 @@ public interface ProcessDefinitionsService {
      * @return true if at least one found, false if none found
      */
     boolean deleteProcessDefinitionsByKey(String key);
+
+	public ProcessDefinition saveProcessDefinition(Process v2Process);
+
+	public abstract String getRem2WorkflowLocation();
+
 
 }

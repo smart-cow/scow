@@ -38,7 +38,14 @@ public class DecisionTaskNodeBuilder extends AbstractUserTaskNodeBuilder<Decisio
 	 * @return
 	 */
 	public static String getDecisionVarName(String id) {
-		return id + "_decision";
+		// return id + "_decision";
+		
+		// strip out "-" characters as they are not valid in java variables
+		String name = "";
+		for (String s : id.split("-")) {
+			name += s;
+		}
+		return "var_" + name + "_decision";
 	}
 	
     private String getOptionsString(DecisionTask dt) {

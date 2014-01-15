@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.completion.Evaluator;
@@ -165,10 +166,11 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
 		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
 		org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pil.getProcessId());
+
+		String instanceId = process.getKey() + "." + processInstanceId;
+		
 		ProcessInstanceInfo info = new ProcessInstanceInfo(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), 
 				getProcessInstanceVariables(processInstanceId));
-		
-		String instanceId = process.getKey() + "." + processInstanceId;
 		
 		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(instanceId, process, info);
 		evaluator.evaluate();
@@ -177,6 +179,13 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 		pi.setProcess(process);
 		pi.getStatusSummaries().addAll(info.getStatusSummary());
         return pi;
+    }
+    
+    @Override
+	public Map<String, Object> getProcessInstanceStatusGraph(Long processInstanceId) {
+    	ProcessInstance pi = getProcessInstanceStatus(processInstanceId);
+    	Process process = pi.getProcess();
+    	return processService.getProcessGraph(process);
     }
 
     @Override

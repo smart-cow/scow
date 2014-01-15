@@ -226,7 +226,7 @@
         <property name="connectionFactory" ref="connectionFactory"/>
         <property name="exchange" value="amq.topic" />
         <property name="messageConverter">
-            <bean class="org.springframework.amqp.support.converter.JsonMessageConverter">
+            <bean class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter">
                 <!-- if necessary, override the DefaultClassMapper -->
                 <!-- <property name="classMapper" ref="customClassMapper"/> -->
             </bean>

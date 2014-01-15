@@ -64,5 +64,11 @@ public interface ProcessService {
 	public abstract Definitions getBpmn20Process(String key);
 
 	public abstract Map<String, Object> getProcessGraph(String key);
+	
+	public abstract Map<String, Object> getProcessGraph(Process process);
+
+	public abstract void loadWorkflow(Definitions defs);
+
+	public abstract void saveInRem2(org.wiredwidgets.cow.server.api.model.v2.Process process);
     
 }

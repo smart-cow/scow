@@ -2,6 +2,7 @@ package org.wiredwidgets.cow.server.transform.graph.builder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,16 @@ public abstract class AbstractGraphBuilder<T extends Activity> implements Activi
 	@SuppressWarnings("unchecked")
 	@Override
 	public void buildGraph(Activity activity, ActivityGraph graph, Process process) {
+		
+		// replace any non GUID keys
+		if (activity.getKey() != null && !activity.getKey().contains("-")) {
+			activity.setKey(null);
+		}
+		
+
+		if (activity.getKey() == null || activity.getKey().isEmpty() ) {
+			activity.setKey("_" + UUID.randomUUID().toString().toUpperCase());
+		}
 		buildInternal((T)activity, graph, process);
 	}
 	

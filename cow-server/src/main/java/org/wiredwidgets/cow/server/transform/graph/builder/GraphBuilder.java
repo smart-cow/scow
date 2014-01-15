@@ -8,6 +8,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Exit;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.EndActivity;
+import org.wiredwidgets.cow.server.transform.graph.activity.GatewayActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.StartActivity;
 
 @Component
@@ -40,6 +41,10 @@ public class GraphBuilder {
 		graph.addEdge(start, main);
 		graph.addEdge(main, end);
 		
+		// "build" the start and end nodes.  Really this just generates the IDs
+		factory.buildGraph(start, graph, process);
+		factory.buildGraph(end, graph, process);
+		
 		// build the Activities (this will build everything else)
 		factory.buildGraph(main, graph, process);
 				
@@ -66,5 +71,28 @@ public class GraphBuilder {
 		}
 		return false;
 	}
+	
+/*	private void fixGraph(ActivityGraph graph) {
+		for (Activity activity : graph.vertexSet()) {
+			
+			// Converging gateway must have at least two incoming paths
+			
+			if (activity instanceof GatewayActivity) {
+				GatewayActivity gateway = (GatewayActivity)activity;
+				if (gateway.getDirection().equals(GatewayActivity.CONVERGING)) {
+					if (graph.incomingEdgesOf(gateway).size() < 2) {
+						
+						// bypass the gateway and connect directly to the outgoing node
+						// use a loop here but really there should be only one
+						for (ActivityEdge edge : graph.incomingEdgesOf(gateway)) {
+							
+						}
+						
+					}
+				}
+			}
+			
+		}
+	}*/
 
 }

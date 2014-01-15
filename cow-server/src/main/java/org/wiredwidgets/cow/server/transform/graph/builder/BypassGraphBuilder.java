@@ -5,9 +5,9 @@ import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
-import org.wiredwidgets.cow.server.transform.graph.activity.ComplexGatewayActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.ExclusiveGatewayActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.GatewayActivity;
+import org.wiredwidgets.cow.server.transform.graph.activity.ParallelGatewayActivity;
 
 /**
  * Special case builder to handle bypassable activities
@@ -31,7 +31,7 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 	@Override
 	protected void buildInternal(Activity activity, ActivityGraph graph, Process process) {
 	
-		GatewayActivity diverging = new ComplexGatewayActivity();
+		GatewayActivity diverging = new ParallelGatewayActivity();
 		diverging.setDirection(GatewayActivity.DIVERGING);
 		diverging.setName("diverging");
 		GatewayActivity converging = new ExclusiveGatewayActivity();

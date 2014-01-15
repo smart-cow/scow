@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -73,9 +74,8 @@ public class ProcessInstancesController extends CowServerController{
     ProcessInstanceService processInstanceService;
     
     @Autowired
-    TaskService taskService;
-    
-
+    TaskService taskService; 
+   
     /**
      * Starts execution of a new process instance.  The processInstance representation
      * must contain, at minimum, a processDefinitionKey element to identify the process,
@@ -169,23 +169,23 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping("/active")
     @ResponseBody
     public ProcessInstances getAllProcessInstances() {
-        //return createProcessInstances(processInstanceService.findAllProcessInstances());
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);              
-            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
-                public ProcessInstances doWithRetry(RetryContext context) {                            
-                    return createProcessInstances(processInstanceService.findAllProcessInstances());                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getAllProcessInstances = " + e);            
-            log.error(e);
-        }
-        return new ProcessInstances();
+        return createProcessInstances(processInstanceService.findAllProcessInstances());
+//        try{
+//            SimpleRetryPolicy retry = new SimpleRetryPolicy();
+//            retry.setMaxAttempts(50);
+//            RetryTemplate retryTemplate = new RetryTemplate();               
+//            retryTemplate.setRetryPolicy(retry);              
+//            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
+//                public ProcessInstances doWithRetry(RetryContext context) {                            
+//                    return createProcessInstances(processInstanceService.findAllProcessInstances());                           
+//                }                       
+//            });
+//            return result;
+//        }catch(Exception e){
+//            log.info("ERROR in getAllProcessInstances = " + e);            
+//            log.error(e);
+//        }
+//        return new ProcessInstances();
     }
     
     /**
@@ -250,6 +250,11 @@ public class ProcessInstancesController extends CowServerController{
         return processInstanceService.getProcessInstanceStatus(ext);
     }
     
+    @RequestMapping(value="/active/{id}.{ext}/status/graph", produces="application/json")
+    @ResponseBody
+    public Map<String, Object> getProcessInstanceStatusGraph(@PathVariable("id") String id, @PathVariable("ext") Long ext, HttpServletResponse response) {
+        return processInstanceService.getProcessInstanceStatusGraph(ext);
+    }    
     
     @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="signal")
     public void signalProcessInstance(@PathVariable String id, @PathVariable long ext, 

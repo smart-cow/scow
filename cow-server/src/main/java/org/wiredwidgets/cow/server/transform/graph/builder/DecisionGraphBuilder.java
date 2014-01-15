@@ -24,43 +24,63 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 		graph.addVertex(dt);
 		moveIncomingEdges(graph, decision, dt);
 		
-		GatewayActivity diverging = new ExclusiveGatewayActivity();
-		diverging.setDirection(GatewayActivity.DIVERGING);
-		diverging.setName("diverging");
-		graph.addVertex(diverging);
-		graph.addEdge(dt, diverging);
+		if (decision.getOptions().size() == 1) {
+			// A decision with only one option should not be allowed from the UI.  However we will 
+			// handle it anyway so that we don't build an invalid graph.
+			// in this case we don't need to worry about expressions for the edge, as
+			// there is only one path
 		
-		GatewayActivity converging = new ExclusiveGatewayActivity();
-		converging.setDirection(GatewayActivity.CONVERGING);
-		converging.setName("converging");
-		graph.addVertex(converging);
-		
-		moveOutgoingEdges(graph, decision, converging);
-		
-		for (Option option : decision.getOptions()) {
+			Activity option = decision.getOptions().get(0).getActivity().getValue();
+			graph.addVertex(option);
+			graph.addEdge(dt, option);
+			moveOutgoingEdges(graph, decision, option);
 			
-			ActivityEdge optionEdge = null;
-			if (option.getActivity() != null) {
-				Activity optionActivity = option.getActivity().getValue();
-				graph.addVertex(optionActivity);
-				optionEdge = graph.addEdge(diverging, optionActivity);
-				
-				// tie edge back to the DecisionTask
-				// this is used for variable name handling
-				optionEdge.setVarSource(dt);
-				optionEdge.setExpression(option.getName());
-				graph.addEdge(optionActivity, converging);
-				factory.buildGraph(optionActivity, graph, process);
-			}
-			else {
-				// Provide support for a "do nothing" path directly from diverging to converging
-				optionEdge = graph.addEdge(diverging, converging);
-				optionEdge.setVarSource(dt);
-				optionEdge.setExpression(option.getName());
-			}
-					
-			// we will need the options as inputs to the task
+			// the user has to choose something.  though it won't really matte in this case
 			dt.addOption(option.getName());
+
+			factory.buildGraph(option, graph, process);			
+			
+		}
+		else {
+		
+			GatewayActivity diverging = new ExclusiveGatewayActivity();
+			diverging.setDirection(GatewayActivity.DIVERGING);
+			diverging.setName("diverging");
+			graph.addVertex(diverging);
+			graph.addEdge(dt, diverging);
+			
+			GatewayActivity converging = new ExclusiveGatewayActivity();
+			converging.setDirection(GatewayActivity.CONVERGING);
+			converging.setName("converging");
+			graph.addVertex(converging);
+			
+			moveOutgoingEdges(graph, decision, converging);
+			
+			for (Option option : decision.getOptions()) {
+				
+				ActivityEdge optionEdge = null;
+				if (option.getActivity() != null) {
+					Activity optionActivity = option.getActivity().getValue();
+					graph.addVertex(optionActivity);
+					optionEdge = graph.addEdge(diverging, optionActivity);
+					
+					// tie edge back to the DecisionTask
+					// this is used for variable name handling
+					optionEdge.setVarSource(dt);
+					optionEdge.setExpression(option.getName());
+					graph.addEdge(optionActivity, converging);
+					factory.buildGraph(optionActivity, graph, process);
+				}
+				else {
+					// Provide support for a "do nothing" path directly from diverging to converging
+					optionEdge = graph.addEdge(diverging, converging);
+					optionEdge.setVarSource(dt);
+					optionEdge.setExpression(option.getName());
+				}
+						
+				// we will need the options as inputs to the task
+				dt.addOption(option.getName());
+			}
 		}
 
 		graph.removeVertex(decision);

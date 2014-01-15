@@ -8,8 +8,9 @@ import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
-import org.wiredwidgets.cow.server.transform.graph.activity.ComplexGatewayActivity;
+import org.wiredwidgets.cow.server.transform.graph.activity.ExclusiveGatewayActivity;
 import org.wiredwidgets.cow.server.transform.graph.activity.GatewayActivity;
+import org.wiredwidgets.cow.server.transform.graph.activity.ParallelGatewayActivity;
 
 @Component
 public class ParallelActivitiesGraphBuilder extends AbstractGraphBuilder<Activities> {
@@ -19,23 +20,34 @@ public class ParallelActivitiesGraphBuilder extends AbstractGraphBuilder<Activit
 	@Override
 	protected void buildInternal(Activities activity, ActivityGraph graph, Process process) {
 		
-		GatewayActivity diverging = new ComplexGatewayActivity();
-		diverging.setDirection(GatewayActivity.DIVERGING);
-		diverging.setName("diverging");
-		GatewayActivity converging = new ComplexGatewayActivity();
-		converging.setName("converging");
-		converging.setDirection(GatewayActivity.CONVERGING);
-		graph.addVertex(diverging);
-		graph.addVertex(converging);
-		moveIncomingEdges(graph, activity, diverging);
-		moveOutgoingEdges(graph, activity, converging);
-		
-		for (JAXBElement<? extends Activity> element : activity.getActivities()) {
-			Activity current = element.getValue();
-			graph.addVertex(current);
-			graph.addEdge(diverging, current);
-			graph.addEdge(current, converging);
-			factory.buildGraph(current, graph, process);
+		// special case if there is only one activity.  JBPM does not allow gateways with only one path.
+		if (activity.getActivities().size() == 1) {
+			Activity single = activity.getActivities().get(0).getValue();
+			graph.addVertex(single);
+			moveIncomingEdges(graph, activity, single);
+			moveOutgoingEdges(graph, activity, single);
+			factory.buildGraph(single, graph, process);
+		}
+		else { 
+			// two or more activities.  Use gateways
+			GatewayActivity diverging = new ParallelGatewayActivity();
+			diverging.setDirection(GatewayActivity.DIVERGING);
+			diverging.setName("diverging");
+			GatewayActivity converging = new ParallelGatewayActivity();
+			converging.setName("converging");
+			converging.setDirection(GatewayActivity.CONVERGING);
+			graph.addVertex(diverging);
+			graph.addVertex(converging);
+			moveIncomingEdges(graph, activity, diverging);
+			moveOutgoingEdges(graph, activity, converging);
+			
+			for (JAXBElement<? extends Activity> element : activity.getActivities()) {
+				Activity current = element.getValue();
+				graph.addVertex(current);
+				graph.addEdge(diverging, current);
+				graph.addEdge(current, converging);
+				factory.buildGraph(current, graph, process);
+			}
 		}
 		
 		graph.removeVertex(activity);

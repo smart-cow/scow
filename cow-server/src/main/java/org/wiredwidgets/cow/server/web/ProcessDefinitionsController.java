@@ -16,20 +16,28 @@
 
 package org.wiredwidgets.cow.server.web;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.log4j.Logger;
-import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
-import org.wiredwidgets.cow.server.api.service.ProcessDefinitions;
-import org.wiredwidgets.cow.server.service.ProcessDefinitionsService;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.api.service.Deployment;
+import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
+import org.wiredwidgets.cow.server.api.service.ProcessDefinitions;
+import org.wiredwidgets.cow.server.service.ProcessDefinitionsService;
+import org.wiredwidgets.cow.server.service.ProcessService;
 
 /**
  * Handles REST API for the /processDefinitions resource
@@ -41,8 +49,17 @@ public class ProcessDefinitionsController extends CowServerController {
 
     @Autowired
     ProcessDefinitionsService processDefsService;
+    
+    @Autowired
+    ProcessService processService;
 
     private static Logger log = Logger.getLogger(ProcessDefinitionsController.class);
+    
+    @RequestMapping(method=RequestMethod.POST)    
+    @ResponseBody
+    public ProcessDefinition saveProcessDefinition(@RequestBody Process process) {
+        return processDefsService.saveProcessDefinition(process);
+    }
 
     /**
      * GET method for URL /processDefinitions.  Returns the latest version for each unique processDefinition key
@@ -127,6 +144,6 @@ public class ProcessDefinitionsController extends CowServerController {
     @ResponseBody
     public ProcessDefinition getProcessDef(@PathVariable("id") String id) {
         return processDefsService.getProcessDefinition(decode(id));
-    }
+    }    
       
 }

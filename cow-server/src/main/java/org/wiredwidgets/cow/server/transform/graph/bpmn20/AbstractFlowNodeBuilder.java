@@ -1,10 +1,12 @@
 package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import org.apache.log4j.Logger;
 import org.omg.spec.bpmn._20100524.model.Assignment;
 import org.omg.spec.bpmn._20100524.model.DataInput;
 import org.omg.spec.bpmn._20100524.model.DataInputAssociation;
@@ -24,7 +26,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Variable;
 public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlowNode> implements NodeBuilder {
 	
 	protected static org.omg.spec.bpmn._20100524.model.ObjectFactory factory = new org.omg.spec.bpmn._20100524.model.ObjectFactory();
-	// private static Logger log = Logger.getLogger(AbstractFlowNodeBuilder.class);
+	private static Logger log = Logger.getLogger(AbstractFlowNodeBuilder.class);
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -56,18 +58,31 @@ public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlo
     	// Legacy workflows created before the new ID system will have keys but the
     	// maxID will not be set for the process.  So, we handle those as "new" workflows
     	// the first time they are saved, in order to get the maxID set correctly.
-    	if (context.isRevised() && activity != null && activity.getKey() != null  && !activity.getKey().isEmpty()) {
-    		id = activity.getKey();
-    	}
-    	else {
-    		id = context.generateId("_");
-    	}
-
-    	node.setId(id);
+//    	if (context.isRevised() && activity != null && activity.getKey() != null  && !activity.getKey().isEmpty()) {
+//    		id = activity.getKey();
+//    	}
+//    	else {
+//    		id = context.generateId("_");
+//    	}
+//
+//    	node.setId(id);
     	
-    	if (activity != null) {
-    		activity.setKey(id);  	
+//    	if (activity != null) {
+//    		activity.setKey(id);  	
+//    	}
+    	
+    	if (activity.getKey() != null && !activity.getKey().contains("-")) {
+    		// log.info("replacing old style key: " + activity.getKey());
+    		activity.setKey(null);
     	}
+    	
+    	if (activity.getKey() == null ) {
+    		activity.setKey(UUID.randomUUID().toString().toUpperCase());
+    	}
+    	
+    	node.setId(activity.getKey());
+    	
+    	
     }	
 	
 	protected final void addDataInputFromExpression(String name, String value, TActivity node) {     

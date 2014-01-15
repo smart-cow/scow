@@ -23,6 +23,7 @@ package org.wiredwidgets.cow.server.transform.v2;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 
@@ -78,7 +79,10 @@ public abstract class AbstractProcessContext<T extends Object, T2 extends Object
         }
         count = new Integer(count.intValue() + 1);
         nodeCounter.put(key, count);
-        return (key + count.toString());
+ 		return (key + count.toString());
+        
+        //return key + UUID.randomUUID().toString();
+
     }
     
     @Override

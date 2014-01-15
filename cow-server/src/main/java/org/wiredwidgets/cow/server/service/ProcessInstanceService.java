@@ -6,8 +6,9 @@ package org.wiredwidgets.cow.server.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
-import org.wiredwidgets.cow.server.api.model.v2.Process;
 
 /**
  *
@@ -76,6 +77,8 @@ public interface ProcessInstanceService {
     List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended);
 
 	public void signalProcessInstance(long id, String signal, String value);
+
+	public abstract Map<String, Object> getProcessInstanceStatusGraph(Long processInstanceId);
 
 
 }

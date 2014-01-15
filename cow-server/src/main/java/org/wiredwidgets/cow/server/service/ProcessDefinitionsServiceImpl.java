@@ -21,7 +21,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.drools.KnowledgeBase;
+import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +33,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20NewProcessBuilder;
 
 import com.sun.syndication.feed.rss.Channel;
 import com.sun.syndication.feed.rss.Item;
@@ -44,20 +50,41 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
 	
 	@Autowired
 	RestTemplate restTemplate;
+	
+	@Autowired
+	KnowledgeBase kbase;
+	
+    @Autowired
+    Bpmn20NewProcessBuilder bpmn20ProcessBuilder;	
+   
+    @Autowired
+    ProcessService processService;
+	
+    @Value("${rem2.url}")
+    String REM2_URL;	
 
-    // private static TypeDescriptor JBPM_PROCESS_DEFINITION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.ProcessDefinition.class));
     private static TypeDescriptor COW_PROCESS_DEFINITION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessDefinition.class));
+    
+    private static Logger log = Logger.getLogger(ProcessDefinitionsServiceImpl.class);
+    
+	@Override
+    public ProcessDefinition saveProcessDefinition(Process v2Process) {
+       Definitions d = bpmn20ProcessBuilder.build(v2Process);
+       processService.saveInRem2(v2Process);
+       processService.loadWorkflow(d);
+       return findLatestVersionProcessDefinitionByKey(v2Process.getKey());
+    }    
     
     @Transactional(readOnly = true)
     @Override
     public List<ProcessDefinition> findAllProcessDefinitions() {
-        // return this.convertProcessDefinitions(repositoryService.createProcessDefinitionQuery().list());
-    	return new ArrayList<ProcessDefinition>();//throw new UnsupportedOperationException("Not supported yet.");
+    	return getDefsFromRem2();
     }
     
 
     @Transactional(readOnly = true)
     @Override
+    @Deprecated
     public List<ProcessDefinition> findProcessDefinitionsByKey(String key) {
         // return this.convertProcessDefinitions(repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).list());
     	return new ArrayList<ProcessDefinition>();//throw new UnsupportedOperationException("Not supported yet.");
@@ -71,9 +98,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     @Transactional(readOnly = true)
     @Override
     public ProcessDefinition findLatestVersionProcessDefinitionByKey(String key) {
-//        List<org.jbpm.api.ProcessDefinition> defs = this.filterLatestVersions(repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).list());
-//        return (defs.isEmpty()? null : this.converter.convert(defs.get(0), ProcessDefinition.class) );
-    	return new ProcessDefinition();//throw new UnsupportedOperationException("Not supported yet.");
+    	return getProcessDefinition(key);
     }
 
     /** Finds the latest version of each process definition
@@ -87,14 +112,16 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     	return getDefsFromRem2();
     }
 
-
-
     @Transactional(readOnly = true)
     @Override
     public ProcessDefinition getProcessDefinition(String id) {
-        // return this.converter.convert(repositoryService.createProcessDefinitionQuery().processDefinitionId(id).uniqueResult(), ProcessDefinition.class);
-    	return new ProcessDefinition();//throw new UnsupportedOperationException("Not supported yet.");
+    	return converter.convert(kbase.getProcess(id), ProcessDefinition.class);
     }
+    
+    @Override
+	public String getRem2WorkflowLocation(){
+        return this.REM2_URL +"/cms/workflows";        
+    }    
     
     private List<ProcessDefinition> getDefsFromRem2() {
     	List<ProcessDefinition> defs = new ArrayList<ProcessDefinition>();
@@ -134,8 +161,5 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     	return true; 
     	
     }
-
-    
-    
-    
+        
 }

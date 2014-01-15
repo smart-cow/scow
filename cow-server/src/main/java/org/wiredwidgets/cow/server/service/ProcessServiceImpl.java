@@ -20,6 +20,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.drools.builder.KnowledgeBuilder;
+import org.drools.builder.KnowledgeBuilderError;
 import org.drools.builder.KnowledgeBuilderFactory;
 import org.drools.builder.ResourceType;
 import org.drools.io.Resource;
@@ -144,8 +145,12 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     }
     
     @Override
-	public Map<String, Object> getProcessGraph(String key) {
-    	Process process = getV2Process(key);
+    public Map<String, Object> getProcessGraph(String key) {
+    	return getProcessGraph(getV2Process(key));
+    }
+    
+    @Override
+	public Map<String, Object> getProcessGraph(Process process) {
     	ActivityGraph graph = graphBuilder.buildGraph(process);
     	
     	// put into a List so we have a defined order
@@ -192,7 +197,6 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	List<ProcessDefinition> defs = processDefsService.findLatestVersionProcessDefinitions();
     	for (ProcessDefinition def : defs) {
     		try {
-	    		log.info("Loading process: " + def.getKey());
 	    		Definitions d = getBpmn20Process(def.getKey());
 	    		loadWorkflow(d);		
     		}
@@ -210,7 +214,8 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
         node.getProperties().add(p);
     }    
     
-    private void saveInRem2(org.wiredwidgets.cow.server.api.model.v2.Process process) {
+    @Override
+	public void saveInRem2(org.wiredwidgets.cow.server.api.model.v2.Process process) {
         Node node = new Node();
         node.setType("rem:marketplace");
         node.setName(process.getName());
@@ -250,6 +255,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
         	throw new RuntimeException(e);
         }
         byte[] bytes = out.toByteArray();
+        String test = new String(bytes);
         return new ByteArrayInputStream(bytes);
     }
     
@@ -258,21 +264,36 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	return restTemplate.getForObject(url, StreamSource.class);
     }
     
-    
-    private void loadWorkflow(Definitions defs) {
+    @Override
+	public void loadWorkflow(Definitions defs) {
     	try {
     		log.info("Loading process into knowledge base: " + defs.getName());
 	        KnowledgeBuilder kBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
 	        InputStream stream = marshalToInputStream(defs);
 	        Resource resource = ResourceFactory.newInputStreamResource(stream);
 	        kBuilder.add(resource, ResourceType.BPMN2);
-	        kBase.addKnowledgePackages(kBuilder.getKnowledgePackages()); 
+	        if (kBuilder.hasErrors()) {
+	        	log.error("Errors found in process " + defs.getName());
+	        	for (KnowledgeBuilderError error : kBuilder.getErrors()) {
+	        		String lines = "";
+	        		for (int line : error.getLines()) {
+	        			lines += (line + " ");
+	        		}
+	        		log.error("Lines: " + lines.trim());
+	        		log.error("Message: " + error.getMessage());
+	        	}
+	        }
+	        else {
+	        	kBase.addKnowledgePackages(kBuilder.getKnowledgePackages()); 
+		        // verify, just in case.
+	        	// this may be unnecessary if we assume lack of errors always means successful load
+		        org.drools.definition.process.Process process = kBase.getProcess(defs.getName());
+		        if (process == null) {
+		        	log.error("Process failed to load: " + defs.getName());
+		        }
+	        }
 	        
-	        // test
-	        // org.drools.runtime.process.ProcessInstance pi = kSession.startProcess(defs.getName());
-	        // kSession.abortProcessInstance(pi.getId());
-	            
-	        
+
     	}
     	catch  (Exception e) {
     		log.error("Error loading process: " + defs.getName());
@@ -280,5 +301,4 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	}
     }
    
-  
 }

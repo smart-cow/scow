@@ -20,9 +20,16 @@ public class ExitGraphBuilder extends AbstractGraphBuilder<Exit> {
 		
 		// remove any outgoing edges
 		// note we must create a collection here to avoid concurrentModificationException
-		Collection<ActivityEdge> edges = new HashSet<ActivityEdge>();
-		edges.addAll(graph.outgoingEdgesOf(exit));	
-		graph.removeAllEdges(edges);
+		// Collection<ActivityEdge> edges = new HashSet<ActivityEdge>();
+		// edges.addAll(graph.outgoingEdgesOf(exit));	
+		// graph.removeAllEdges(edges);
+		
+		// XXX *** change this to leave outgoing edges in place 
+		// otherwise we have a possibility of ending up with a converging gateway
+		// with only one incoming path which is not valid in jbpm.
+		// consider changing in the future so that we remove the outgoing edges and then
+		// modify the graph as necessary to make it valid. (this could get tricky...)
+		
 	}
 
 	@Override
