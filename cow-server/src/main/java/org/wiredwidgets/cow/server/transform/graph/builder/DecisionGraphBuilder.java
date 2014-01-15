@@ -25,7 +25,7 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 		moveIncomingEdges(graph, decision, dt);
 		
 		if (decision.getOptions().size() == 1) {
-			// A decision with only one option should not be allowed from the UI.  However we will 
+			// A decision with only one option really should not be allowed from the UI.  However we will 
 			// handle it anyway so that we don't build an invalid graph.
 			// in this case we don't need to worry about expressions for the edge, as
 			// there is only one path
