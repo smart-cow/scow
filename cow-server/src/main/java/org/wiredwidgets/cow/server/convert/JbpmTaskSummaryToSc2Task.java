@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.AbstractUserTaskNodeBuilder;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 
@@ -121,7 +121,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         
         // get ad-hoc variables map
        
-        Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+        Map<String, Object> contentMap = (Map<String, Object>) map.get(AbstractUserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME);
         if (contentMap != null) {
 	        for (Entry<String, Object> entry : contentMap.entrySet()) {
 	        	log.debug(entry.getKey() + "=" + entry.getValue());
