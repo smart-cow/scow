@@ -171,7 +171,8 @@
 		<!-- This causes problems when invoked from IE, which accepts application/xaml+xml -->
 		<!-- thus causing the service to return application/xaml+xml, which IE 
 			then tries to handle as a WPF application -->
-		<property name="supportedMediaTypes" value="application/xml" />
+	
+		<property name="supportedMediaTypes" value="application/xml" />  
 	</bean>
 
 	<bean id="stringHttpMessageConverter"
@@ -194,7 +195,9 @@
 	<!-- this allows it to handle XML content stored in a String object -->
 	<bean id="xmlStringHttpMessageConverter"
 		class="org.springframework.http.converter.StringHttpMessageConverter">
-		<property name="supportedMediaTypes" value="application/xml" />
+		<!--  brian change -->
+		<!-- <property name="supportedMediaTypes" value="application/xml" /> -->
+		<property name="supportedMediaTypes" value="text/xml" />
 	</bean>
 
 	<!-- Instance of RestTemplate, used by RestServiceInvoker -->

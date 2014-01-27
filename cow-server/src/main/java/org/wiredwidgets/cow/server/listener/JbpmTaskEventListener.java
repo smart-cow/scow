@@ -16,6 +16,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StopWatch.TaskInfo;
 
 @Component
 public class JbpmTaskEventListener extends DefaultTaskEventListener  {
@@ -118,6 +119,10 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 //		}/**/
 //	}
 	
+	@Override
+	public void taskStarted(TaskUserEvent event) {
+		log.info("taskStarted = " + event.getTaskId());
+	}
 	
 
 	@Override
@@ -137,7 +142,8 @@ public class JbpmTaskEventListener extends DefaultTaskEventListener  {
 	
 	@Override
 	public void taskCompleted(TaskUserEvent event) {
-
+		log.info("taskCompleted=" + event.getTaskId());
+		
 		final TasksEventListener.EventParameters evtParams = getEventParams(event);
 		registerSyncCallback(new TransactionSynchronizationAdapter() {
 			public void afterCompletion(int i) {
