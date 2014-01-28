@@ -66,6 +66,7 @@ public class Bpmn20ServiceTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TTas
         addDataInputFromExpression("url", st.getUrl());
         addDataInputFromExpression("content", st.getContent());
         addDataInputFromExpression("var", st.getVar());
+        addDataInputFromExpression("resultSelectorXPath", st.getResultSelectorXPath());
 
     }
     
