@@ -245,5 +245,7 @@
     	<bean class="org.wiredwidgets.cow.server.listener.amqp.ProcessInstancesAmqpSender" />
    	</util:list>
 
+	
+	<bean id="workflowStorage" class="${workflow.storage.class}" />
 
 </beans>

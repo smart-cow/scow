@@ -3,11 +3,9 @@
  * and open the template in the editor.
  */
 package org.wiredwidgets.cow.server.service;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,33 +13,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.drools.builder.KnowledgeBuilder;
 import org.drools.builder.KnowledgeBuilderError;
 import org.drools.builder.KnowledgeBuilderFactory;
 import org.drools.builder.ResourceType;
-import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.Deployment;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.cow.server.api.service.ResourceNames;
+import org.wiredwidgets.cow.server.service.workflow.storage.IWorkflowStorage;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20NewProcessBuilder;
 import org.wiredwidgets.cow.server.transform.graph.builder.GraphBuilder;
-import org.wiredwidgets.rem2.schema.Node;
-import org.wiredwidgets.rem2.schema.Property;
 
 /**
  *
@@ -56,8 +50,6 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Autowired
     Bpmn20NewProcessBuilder bpmn20ProcessBuilder;
     
-    @Autowired
-    RestTemplate restTemplate;
     
     @Autowired
     ProcessDefinitionsService processDefsService;
@@ -65,12 +57,9 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Autowired
     GraphBuilder graphBuilder;
     
-    @Value("${rem2.url}")
-    String REM2_URL;
+    @Resource
+    IWorkflowStorage workflowStorage;
     
-    public String getRem2WorkflowLocation(){
-        return this.REM2_URL +"/cms/workflows";        
-    }
     
     @Override
     public Deployment createDeployment(Definitions definitions) {
@@ -128,20 +117,15 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     public Deployment saveV2Process(Process v2Process) {
        Definitions d = bpmn20ProcessBuilder.build(v2Process);
        log.debug("built bpmn20 process");
-       saveInRem2(v2Process);
+       save(v2Process);
        return createDeployment(d);
     }
-
-    @Transactional(readOnly = true)
-    @Override
-    public InputStream getResourceAsStream(String key, String extension) {
-    	return getProcessFromRem2(key).getInputStream();
-    }
-
+    
+    
     @Transactional(readOnly = true)
     @Override
     public Process getV2Process(String key) {
-    	return (Process) marshaller.unmarshal(getProcessFromRem2(key));
+    	return workflowStorage.get(key);
     }
     
     @Override
@@ -207,41 +191,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	}
     }
     
-    private void addProperty(Node node, String name, String value) {
-        Property p = new Property();
-        p.setName(name);
-        p.setValue(value);
-        node.getProperties().add(p);
-    }    
-    
-    @Override
-	public void saveInRem2(org.wiredwidgets.cow.server.api.model.v2.Process process) {
-        Node node = new Node();
-        node.setType("rem:marketplace");
-        node.setName(process.getName());
-        
-        addProperty(node, "rem:name", process.getName());
-        addProperty(node, "rem:description", process.getName());
-        addProperty(node, "rem:type", "workflow");
-        
-        Node content = new Node();
-        content.setName("jcr:content");
-        content.setType("nt:resource");
-        
-        StringWriter sw = new StringWriter();
-        marshaller.marshal(process, new StreamResult(sw));
-        
-        addProperty(content, "jcr:data", sw.toString()); 
-        addProperty(content, "jcr:mimeType", "application/xml");
-        node.getNodes().add(content);
-             
-        log.debug("calling rem2");
-        RestTemplate restTemplate = new RestTemplate();
-        //URI location = restTemplate.postForLocation("http://scout.mitre.org:8080/rem2/cms/workflows", node);
-        
-        log.info("\nrem2.url = " + this.getRem2WorkflowLocation());
-        URI location = restTemplate.postForLocation(this.getRem2WorkflowLocation(), node);
-    } 
+  
     
     private InputStream marshalToInputStream(Object source) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -259,10 +209,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
         return new ByteArrayInputStream(bytes);
     }
     
-    private StreamSource getProcessFromRem2(String processName) {
-    	String url = REM2_URL + "/cms/workflows/" + processName;
-    	return restTemplate.getForObject(url, StreamSource.class);
-    }
+
     
     @Override
 	public void loadWorkflow(Definitions defs) {
@@ -270,7 +217,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     		log.info("Loading process into knowledge base: " + defs.getName());
 	        KnowledgeBuilder kBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
 	        InputStream stream = marshalToInputStream(defs);
-	        Resource resource = ResourceFactory.newInputStreamResource(stream);
+	        org.drools.io.Resource resource = ResourceFactory.newInputStreamResource(stream);
 	        kBuilder.add(resource, ResourceType.BPMN2);
 	        if (kBuilder.hasErrors()) {
 	        	log.error("Errors found in process " + defs.getName());
@@ -300,5 +247,8 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     		log.error(e);
     	}
     }
-   
+ 
+    public URI save(org.wiredwidgets.cow.server.api.model.v2.Process process) {
+    	return workflowStorage.save(process);
+    }
 }

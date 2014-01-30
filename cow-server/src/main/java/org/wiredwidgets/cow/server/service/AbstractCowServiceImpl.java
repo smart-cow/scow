@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
  */
 public class AbstractCowServiceImpl {
 	
-	protected @Value("${rem2.url}") String REM2_URL;
 		
     @Autowired
     protected KnowledgeBase kBase;

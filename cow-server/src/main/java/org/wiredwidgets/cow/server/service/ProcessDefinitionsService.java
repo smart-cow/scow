@@ -52,7 +52,5 @@ public interface ProcessDefinitionsService {
 
 	public ProcessDefinition saveProcessDefinition(Process v2Process);
 
-	public abstract String getRem2WorkflowLocation();
-
 
 }
