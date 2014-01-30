@@ -1,12 +1,1 @@
-<jboss-deployment-structure>
-    <deployment>
-        <!-- Exclusions allow you to prevent the server from automatically adding some dependencies -->
-        <exclusions>
-            <module name="org.apache.log4j" />
-            <module name="org.apache.commons.logging" />
-            <module name="org.slf4j" />
-            <module name="org.slf4j.jcl-over-slf4j" />
-            <module name="org.jboss.logging.jul-to-slf4j-stub" />
-        </exclusions>
-    </deployment>
-</jboss-deployment-structure>
+<jboss-deployment-structure />

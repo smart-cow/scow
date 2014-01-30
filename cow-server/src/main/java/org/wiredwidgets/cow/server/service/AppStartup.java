@@ -1,16 +1,12 @@
 package org.wiredwidgets.cow.server.service;
 
-import java.io.IOException;
-
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.jbpm.process.workitem.wsht.LocalHTWorkItemHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.listener.JbpmTaskEventListener;
 import org.wiredwidgets.cow.server.manager.TaskServiceSessionManager;
@@ -73,12 +69,12 @@ public class AppStartup implements ApplicationListener<ApplicationContextEvent> 
 				}
 			}
 		} else if (event instanceof ContextStartedEvent) {
-			try {
-				PropertyConfigurator.configure(new ClassPathResource(
-						"log4j.properties").getInputStream());
-			} catch (IOException e) {
-				log.error(e);
-			}
+//			try {
+//				PropertyConfigurator.configure(new ClassPathResource(
+//						"log4j.properties").getInputStream());
+//			} catch (IOException e) {
+//				log.error(e);
+//			}
 		}
 	}
 

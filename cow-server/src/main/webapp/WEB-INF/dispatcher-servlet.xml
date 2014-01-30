@@ -32,7 +32,7 @@
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context-3.2.xsd">
                            
-    <import resource="no-security.xml"/>                           
+    <import resource="security.xml"/>                           
 
     <!-- Enables annotation based type conversion and formatting.
          For example, the @DateTimeFormat annotation

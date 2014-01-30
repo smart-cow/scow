@@ -35,36 +35,22 @@
     
     <context:property-placeholder location="file:${COW_APPS_HOME}/cow-server/config/cow-server.properties" />
     
-    <http auto-config="false" entry-point-ref="http403EntryPoint" >
+    <http create-session="stateless" auto-config="false"  >
+    	<!-- entry-point-ref="http403EntryPoint" -->
     	<intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" />
-    	<custom-filter ref="preAuthFilter" position="PRE_AUTH_FILTER"/>
-    </http>
-    
-    <!-- Assume the request has already been authenticated, and the user's ID is in the COW_USER header -->
-    <b:bean id="preAuthFilter" class="org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter" >
-    	<b:property name="principalRequestHeader" value="COW_USER" />
-    	<b:property name="authenticationManager" ref="authenticationManager" />
-    </b:bean>
+    	<http-basic />
+    </http>    
     
     <!-- If pre-authentication fails, there is nothing to do but respond with a 403 -->
     <b:bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
-    
-    <!-- The provider is used to obtain user information based on the preauth ID -->
-    <b:bean id="preAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider" >
-    	<b:property name="preAuthenticatedUserDetailsService" ref="userDetailsWrapper" />
-    </b:bean>
-    
+      
     <ldap-server id="ldapServer" url="ldap://${ldap.host}:${ldap.port}/dc=smart-cow,dc=org" />
     
     <ldap-user-service id="ldapUserService" server-ref="ldapServer" user-search-filter="(uid={0})" user-search-base="ou=People" 
     		group-search-base="ou=Roles"/>
     		
-    <!-- Wraps the ldapUserService so it can be used as an AuthenticationUserDetailsService -->		
-	<b:bean id="userDetailsWrapper" class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper"
-		c:userDetailsService-ref="ldapUserService" />    		
-    
     <authentication-manager alias="authenticationManager">
-    	<authentication-provider ref="preAuthProvider" />
+    	<ldap-authentication-provider />
     </authentication-manager>
     
 </b:beans>

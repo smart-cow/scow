@@ -21,12 +21,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.xml.transform.stream.StreamSource;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.apache.http.HttpHost;
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.web.client.RestTemplate;
 import org.wiredwidgets.cow.webapp.client.BpmService;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.kytkemo.preemptiveauthenticationresttemplate.web.client.PreemptiveAuthenticationRestTemplate;
+import com.kytkemo.preemptiveauthenticationresttemplate.web.client.PreemptiveAuthenticationScheme;
 
 
 /**
@@ -36,10 +42,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements BpmService {
 
     private static final long serialVersionUID = 1L;
-    //private static Logger logger = Logger.getLogger(BpmServiceImpl.class);
+    private static Logger log = Logger.getLogger(BpmServiceImpl.class);
     private String baseURL;
-    @Autowired
-    RestTemplate restTemplate;
 
     public void setBaseURL(String baseURL) {
         this.baseURL = baseURL;
@@ -54,25 +58,25 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
     }
 
     public String getProcess(String key) {
-        return restTemplate.getForObject(baseURL + "/processes/{key}?format=sc2", String.class, key);
+        return getRestTemplate().getForObject(baseURL + "/processes/{key}?format=sc2", String.class, key);
     }
 
     public String getNativeProcess(String key) {
-        return restTemplate.getForObject(baseURL + "/processes/{key}?format=native", String.class, key);
+        return getRestTemplate().getForObject(baseURL + "/processes/{key}?format=native", String.class, key);
     }
 
     public String createNativeDeployment(String processXml) {
-        return restTemplate.postForObject(baseURL + "/deployments/native", processXml, String.class);
+        return getRestTemplate().postForObject(baseURL + "/deployments/native", processXml, String.class);
     }
 
     public String createDeployment(String processXml) {
         StreamSource source = new StreamSource();
         source.setReader(new StringReader(processXml));
-        return restTemplate.postForObject(baseURL + "/deployments/sc2?name=test", source, String.class);
+        return getRestTemplate().postForObject(baseURL + "/deployments/sc2?name=test", source, String.class);
     }
 
     public String getForObject(String url, String[] args ) {
-        return restTemplate.getForObject(baseURL + url, String.class, (Object[])args);
+    	return getRestTemplate().getForObject(baseURL + url, String.class, (Object[])args);
     }
 
     public String postForObject(String url, String request, String[] args) {
@@ -80,7 +84,7 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
         // SourceHttpMessageConverter, which will cause the request body
         // to be marked as application/xml, as required by the REST service.
         StreamSource source = new StreamSource(new StringReader(request));
-        return restTemplate.postForObject(baseURL + url, source, String.class, (Object[])args);
+        return getRestTemplate().postForObject(baseURL + url, source, String.class, (Object[])args);
     }
 
     public String postForLocation(String url, String request, String[] args) {
@@ -91,25 +95,44 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
         if (request != null && !request.equals("")) {
         	source = new StreamSource(new StringReader(request));
         }
-        return restTemplate.postForLocation(baseURL + url, source, (Object[]) args).toString();
+        return getRestTemplate().postForLocation(baseURL + url, source, (Object[]) args).toString();
 
     }
 
     public void delete(String url, String[] args) {
-        restTemplate.delete(baseURL + url, (Object[])args);
+        getRestTemplate().delete(baseURL + url, (Object[])args);
     }
     
     public void delete(String url) {
     	URI uri;
 		try {
 			uri = new URI(baseURL + url);
-			restTemplate.delete(uri);
+			getRestTemplate().delete(uri);
 		} catch (URISyntaxException e) {
 			//logger.error("Error parsing DELETE URL", e);
 		}
     }
 
     public void postForNoContent(String url, String[] args) {
-        restTemplate.execute(baseURL + url, HttpMethod.POST, null, null, (Object[])args);
+        getRestTemplate().execute(baseURL + url, HttpMethod.POST, null, null, (Object[])args);
+    }
+    
+    private RestTemplate getRestTemplate() {
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	LdapUserDetails user = (LdapUserDetails)auth.getPrincipal();
+    	
+    	URI uri = null;
+    	try {
+    		uri = new URI(baseURL);
+    	}
+    	catch (Exception e) {
+    		log.error(e);
+    		// URI must be bad or missing.  Since this is fatal, just keep going and we'll get an NPE soon....
+    	}
+    	
+    	HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+    	PreemptiveAuthenticationRestTemplate restTemplate = new PreemptiveAuthenticationRestTemplate();
+    	restTemplate.setCredentials(host, PreemptiveAuthenticationScheme.BASIC_AUTHENTICATION, user.getUsername(), user.getPassword());
+    	return restTemplate;	
     }
 }

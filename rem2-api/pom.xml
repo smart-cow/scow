@@ -5,9 +5,9 @@
     <parent>
         <groupId>org.wiredwidgets</groupId>
 		<artifactId>scow-projects-parent</artifactId>
-		<version>1.0</version>
+		<version>1.01-SNAPSHOT</version>
     </parent>
-    <!--groupId>org.wiredwidgets</groupId-->
+    
     <artifactId>rem2-api</artifactId>
     <packaging>jar</packaging>
 
