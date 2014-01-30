@@ -17,6 +17,7 @@
 package org.wiredwidgets.cow.server.service;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -55,8 +56,6 @@ public interface ProcessService {
 
     Deployment saveV2Process(Process v2Process);
 
-    InputStream getResourceAsStream(String key, String extension);
-
     org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(String key);
 
 	public abstract void loadAllProcesses();
@@ -69,6 +68,6 @@ public interface ProcessService {
 
 	public abstract void loadWorkflow(Definitions defs);
 
-	public abstract void saveInRem2(org.wiredwidgets.cow.server.api.model.v2.Process process);
+	public abstract URI save(org.wiredwidgets.cow.server.api.model.v2.Process process);
     
 }

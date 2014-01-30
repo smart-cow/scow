@@ -44,6 +44,7 @@ public class ServiceTaskNodeBuilder extends AbstractFlowNodeBuilder<ServiceTask,
         addDataInputFromExpression("url", st.getUrl(), t);
         addDataInputFromExpression("content", st.getContent(), t);
         addDataInputFromExpression("var", st.getVar(), t);	
+        addDataInputFromExpression("resultSelectorXPath", st.getResultSelectorXPath(), t);
 	}
 	
 	

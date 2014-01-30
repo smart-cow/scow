@@ -18,8 +18,6 @@ package org.wiredwidgets.cow.server.web;
 
 import java.util.Map;
 
-import javax.xml.transform.stream.StreamSource;
-
 import org.apache.log4j.Logger;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,9 +72,10 @@ public class ProcessesController extends CowServerController {
      */
     @RequestMapping(value = "/{key}", params = "format=cow", produces="application/xml")
     @ResponseBody
-    public StreamSource getCowProcess(@PathVariable("key") String key) {
+    public org.wiredwidgets.cow.server.api.model.v2.Process getCowProcess(@PathVariable("key") String key) {
         return getV2Process(key);
-    }    
+    }  
+    
 
     /**
      * For backward compatibility.  'cow' is preferred over 'v2'.
@@ -87,9 +86,11 @@ public class ProcessesController extends CowServerController {
      */
     @RequestMapping(value = "/{key}", params = "format=v2", produces="application/xml")
     @ResponseBody
-    public StreamSource getV2Process(@PathVariable("key") String key) {  
-        return new StreamSource(service.getResourceAsStream(decode(key), ProcessService.V2_EXTENSION));
+    public org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(@PathVariable("key") String key) {  
+        return service.getV2Process(key);
     }
+    
+    
     
     @RequestMapping(value = "/{key}", params = "format=graph", produces="application/json")
     @ResponseBody
