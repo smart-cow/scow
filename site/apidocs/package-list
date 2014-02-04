@@ -12,11 +12,17 @@ org.wiredwidgets.cow.server.completion
 org.wiredwidgets.cow.server.convert
 org.wiredwidgets.cow.server.helper
 org.wiredwidgets.cow.server.listener
+org.wiredwidgets.cow.server.listener.amqp
 org.wiredwidgets.cow.server.manager
 org.wiredwidgets.cow.server.parse
 org.wiredwidgets.cow.server.repo
 org.wiredwidgets.cow.server.service
+org.wiredwidgets.cow.server.service.workflow.storage
 org.wiredwidgets.cow.server.test
+org.wiredwidgets.cow.server.transform.graph
+org.wiredwidgets.cow.server.transform.graph.activity
+org.wiredwidgets.cow.server.transform.graph.bpmn20
+org.wiredwidgets.cow.server.transform.graph.builder
 org.wiredwidgets.cow.server.transform.v2
 org.wiredwidgets.cow.server.transform.v2.bpmn20
 org.wiredwidgets.cow.server.web
