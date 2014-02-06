@@ -73,9 +73,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         // COW-65 save history for all variables
         // org.jbpm.api.ProcessInstance pi = executionService.startProcessInstanceByKey(instance.getProcessDefinitionKey(), vars);
         
-        if (vars.size() > 0) {
-        	processVars.put(Bpmn20ProcessBuilder.VARIABLES_PROPERTY, vars);
-        }
+        processVars.put(Bpmn20ProcessBuilder.VARIABLES_PROPERTY, vars);
         
         if (instance.getName() != null) {
         	processVars.put(Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY, instance.getName());

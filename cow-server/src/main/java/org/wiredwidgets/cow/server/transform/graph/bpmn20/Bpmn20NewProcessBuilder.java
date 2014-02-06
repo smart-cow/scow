@@ -23,6 +23,7 @@ package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -40,8 +41,6 @@ import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.builder.GraphBuilder;
 import org.wiredwidgets.cow.server.transform.v2.AbstractProcessBuilder;
-
-import com.sun.xml.xsom.impl.scd.Iterators.Map;
 
 
 /**
