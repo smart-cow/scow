@@ -6,6 +6,8 @@ import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TScriptTask;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Script;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 @Component
 public class ScriptNodeBuilder extends AbstractFlowNodeBuilder<Script, TScriptTask> {
@@ -53,9 +55,15 @@ public class ScriptNodeBuilder extends AbstractFlowNodeBuilder<Script, TScriptTa
         
         bpmn20Script.getContent().add(scriptLine);
         
+        // Brian modification to support input/output variables
+        Property varsProperty = context.getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+        addDataInputFromProperty(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty, node);
+        // end Brian modification
+        
         node.setScriptFormat(script.getScriptFormat());
         node.setScript(bpmn20Script);	
 		
+        
 	}
 	
 }
