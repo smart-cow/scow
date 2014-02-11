@@ -41,7 +41,6 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
-import org.wiredwidgets.cow.server.manager.TaskServiceFactory;
 import org.wiredwidgets.cow.server.repo.TaskRepository;
 
 /**
@@ -192,7 +191,20 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	log.debug("Copying input map: " + inputVarsMap);
         	outputVarsMap.putAll(inputVarsMap);
         }
-                   
+        
+
+        //Copy variables from cow task to output variables
+        for(org.wiredwidgets.cow.server.api.service.Variable var : 
+        			cowTask.getVariables().getVariables()) {
+        	String varName = var.getName();
+        	if (inputMap.containsKey(varName)) {
+        		outputVarsMap.put(varName, inputMap.get(varName));
+        	}
+        	else {
+        		outputVarsMap.put(varName, var.getValue());
+        	}
+        }
+        
         if (variables != null && variables.size() > 0) {
         	log.debug("Adding variables: " + variables);
         	// update with any new or modified values
