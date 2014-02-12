@@ -296,7 +296,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasksByProcessInstance(Long id) {
-        List<Status> status = Arrays.asList(Status.Completed, Status.Created, Status.Error, Status.Exited, Status.Failed, Status.InProgress, Status.Obsolete, Status.Ready, Status.Reserved, Status.Suspended);
+        //List<Status> status = Arrays.asList(Status.Completed, Status.Created, Status.Error, Status.Exited, Status.Failed, Status.InProgress, Status.Obsolete, Status.Ready, Status.Reserved, Status.Suspended);
+    	List<Status> status = Arrays.asList(Status.Ready);
         //return this.convertTaskSummarys(jbpmTaskService.getTasksByStatusByProcessId(id, status, "en-UK"));
         return this.convertTaskSummarys(taskClient.getTasksByStatusByProcessId(id, status, "en-UK"));
     }

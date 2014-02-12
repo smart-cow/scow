@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.completion.Evaluator;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
@@ -104,7 +105,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Transactional(readOnly = true)
     @Override
     public ProcessInstance getProcessInstance(Long id) {
-    	return converter.convert(JPAProcessInstanceDbLog.findProcessInstance(id), ProcessInstance.class);
+    	ProcessInstance procInstance = converter.convert(
+    			JPAProcessInstanceDbLog.findProcessInstance(id), ProcessInstance.class);
+    	return procInstance;
     }
 
     //@Transactional(readOnly = true)

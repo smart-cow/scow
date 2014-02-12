@@ -150,6 +150,40 @@ where
           </query>
           <!-- hint name="org.hibernate.timeout" value="200"/ -->
       </named-query>
+      <named-query name="TasksByStatusByProcessId">
+      		<query>
+ select
+     new org.jbpm.task.query.TaskSummary(
+     t.id,
+     t.taskData.processInstanceId,
+     name.text,
+     subject.text,
+     description.text,
+     t.taskData.status,
+     t.priority,
+     t.taskData.skipable,
+     actualOwner,
+     createdBy,
+     t.taskData.createdOn,
+     t.taskData.activationTime,
+     t.taskData.expirationTime,
+     t.taskData.processId,
+     t.taskData.processSessionId)
+from
+    Task t
+    left join t.taskData.createdBy createdBy
+    left join t.taskData.actualOwner actualOwner
+    left join t.subjects as subject
+    left join t.descriptions as description
+    left join t.names as name
+where
+	t.taskData.processInstanceId = :processInstanceId AND
+	('hello' = :language OR 'hello' != :language OR (t.taskData.status in (:status)) ) 
+	
+	
+    
+      		</query>
+      </named-query>
             <named-query name="TasksAssignedAsPotentialOwnerWithGroups">
           <query>
 select

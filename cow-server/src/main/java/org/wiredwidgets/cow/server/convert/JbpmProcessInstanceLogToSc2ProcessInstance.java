@@ -27,8 +27,10 @@ import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
+import org.wiredwidgets.cow.server.service.TaskService;
 
 /**
  * 
@@ -47,8 +49,11 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends
 	@Autowired(required=false)
 	KnowledgeBase kbase;
 
+    @Autowired
+    TaskService taskService;
+    
 	@Override
-	public ProcessInstance convert(ProcessInstanceLog source) {
+	public ProcessInstance convert(ProcessInstanceLog source) {		
 		ProcessInstance target = new ProcessInstance();
 		target.setProcessDefinitionId(source.getProcessId());
 		target.setKey(source.getProcessId());
@@ -100,6 +105,10 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends
 		else {
 			addVariables(target, source.getProcessInstanceId());
 		}
+		
+    	List<Task> tasks = taskService
+    			.findAllTasksByProcessInstance(source.getProcessInstanceId());
+    	target.getTasks().addAll(tasks);
 
 		return target;
 	}

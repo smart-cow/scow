@@ -394,28 +394,9 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "processInstance")
     @ResponseBody
     public Tasks getTasksByProcessInstance(@RequestParam("processInstance") String processInstance) {
-        /*Tasks tasks = new Tasks();
+        Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(Long.decode(processInstance)));
-        return tasks;*/
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);
-            final String pi = processInstance;
-            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
-                public Tasks doWithRetry(RetryContext context) { 
-                    Tasks tasks = new Tasks();
-                    tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(Long.decode(pi)));
-                    return tasks;                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getTasksByProcessInstance = " + e);            
-            log.error(e);
-        }
-        return new Tasks();
+        return tasks;
     }
 
     /**
