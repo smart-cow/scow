@@ -97,11 +97,11 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 		}
 		
 		Map<String, Object> outputMap = new HashMap<String, Object>();
+		outputMap.put("Variables", variables);
 		// update the result variable, if specified
 		
-		if (var != null && !var.trim().equals("")){  	
+		if (var != null && !var.trim().equals("")) {  	
 			variables.put(var, result);
-			outputMap.put("Variables", variables);
 		}   
 	
 		manager.completeWorkItem(item.getId(), outputMap);		

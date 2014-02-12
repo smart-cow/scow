@@ -192,17 +192,20 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	outputVarsMap.putAll(inputVarsMap);
         }
         
-
+        
         //Copy variables from cow task to output variables
-        for(org.wiredwidgets.cow.server.api.service.Variable var : 
-        			cowTask.getVariables().getVariables()) {
-        	String varName = var.getName();
-        	if (inputMap.containsKey(varName)) {
-        		outputVarsMap.put(varName, inputMap.get(varName));
-        	}
-        	else {
-        		outputVarsMap.put(varName, var.getValue());
-        	}
+        org.wiredwidgets.cow.server.api.service.Variables cowVariables = cowTask.getVariables();
+        if (cowVariables != null) {
+	        for(org.wiredwidgets.cow.server.api.service.Variable var : 
+	        		cowVariables.getVariables()) {
+	        	String varName = var.getName();
+	        	if (inputMap.containsKey(varName)) {
+	        		outputVarsMap.put(varName, inputMap.get(varName));
+	        	}
+	        	else {
+	        		outputVarsMap.put(varName, var.getValue());
+	        	}
+	        }
         }
         
         if (variables != null && variables.size() > 0) {

@@ -56,8 +56,8 @@ public class ScriptNodeBuilder extends AbstractFlowNodeBuilder<Script, TScriptTa
         bpmn20Script.getContent().add(scriptLine);
         
         // Brian modification to support input/output variables
-        Property varsProperty = context.getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
-        addDataInputFromProperty(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty, node);
+//        Property varsProperty = context.getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+//        addDataInputFromProperty(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty, node);
         // end Brian modification
         
         node.setScriptFormat(script.getScriptFormat());
