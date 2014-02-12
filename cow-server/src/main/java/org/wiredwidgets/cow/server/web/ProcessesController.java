@@ -120,6 +120,11 @@ public class ProcessesController extends CowServerController {
     }
     
     
+    /**
+     * Retrieves the list of running instances for a given process
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "/{id}/processInstances")
     @ResponseBody
     public ProcessInstances getProcessInstances(@PathVariable("id") String id) {
@@ -131,6 +136,16 @@ public class ProcessesController extends CowServerController {
     }
     
     
+    /**
+     * Create a new process. Attempts to use process.getKey() as the id. If the id is taken the
+     * process's key will be set to a unique value. The response body will contain the process
+     * with its key updated. The uri that can be used to get the newly created process can be 
+     * found in the response's "Location" header.
+     * 
+     * @param process
+     * @param uriBuilder
+     * @return
+     */
     @RequestMapping(method = POST)
     @ResponseBody
     public ResponseEntity<Process> createProcess(
@@ -145,6 +160,19 @@ public class ProcessesController extends CowServerController {
     }
     
     
+    /**
+     * Attempts to update the specified process. If the process updates normally the response
+     * will have status code 200. If the process doesn't already exist it will be created
+     * and the response will have status code 201.
+     * A process cannot be modified when there are instances of it running. If there are instances
+     * of the process running the response will have status code 409, and the body will contain
+     * the running instances of the process.
+     * 
+     * @param id
+     * @param process
+     * @param uriBuilder
+     * @return
+     */
     @RequestMapping(value = "/{id}", method = PUT)
     @ResponseBody
     public ResponseEntity<?> updateProcess(
@@ -175,6 +203,14 @@ public class ProcessesController extends CowServerController {
     	}    	
     }
     
+    
+    /**
+     * A process cannot be modified when there are instances of it running. If there are instances
+     * of the process running the response will have status code 409, and the body will contain
+     * the running instances of the process.
+     * @param id
+     * @return 204 if successful, 404 if not found, 409 if running instances
+     */
     @RequestMapping(value = "/{id}", method = DELETE)
     @ResponseBody
     public ResponseEntity<?> deleteProcess(@PathVariable("id") String id) {
