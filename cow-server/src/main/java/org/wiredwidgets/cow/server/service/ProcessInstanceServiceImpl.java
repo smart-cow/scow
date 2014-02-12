@@ -186,7 +186,8 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 	public Map<String, Object> getProcessInstanceStatusGraph(Long processInstanceId) {
     	ProcessInstance pi = getProcessInstanceStatus(processInstanceId);
     	Process process = pi.getProcess();
-    	return processService.getProcessGraph(process);
+    	List<Task> tasks = pi.getTasks();
+    	return processService.getProcessGraph(process, tasks);
     }
 
     @Override

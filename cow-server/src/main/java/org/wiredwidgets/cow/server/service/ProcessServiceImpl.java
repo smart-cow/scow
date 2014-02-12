@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.Deployment;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.cow.server.api.service.ResourceNames;
+import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.service.workflow.storage.IWorkflowStorage;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
@@ -133,11 +135,11 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     
     @Override
     public Map<String, Object> getProcessGraph(String key) {
-    	return getProcessGraph(getV2Process(key));
+    	return getProcessGraph(getV2Process(key), Collections.<Task>emptyList());
     }
     
     @Override
-	public Map<String, Object> getProcessGraph(Process process) {
+	public Map<String, Object> getProcessGraph(Process process, List<Task> activeTasks) {
     	ActivityGraph graph = graphBuilder.buildGraph(process);
     	
     	// put into a List so we have a defined order
@@ -161,6 +163,16 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	for (Activity activity : activities) {
     		Map<String, Object> node = new HashMap<String, Object>();
     		node.put("type", activity.getClass().getSimpleName());
+    		
+    		if (activity instanceof org.wiredwidgets.cow.server.api.model.v2.Task) {
+	    		for (Task task : activeTasks) {
+	    			if (task.getActivityName().equals(activity.getKey())) {
+	    				((org.wiredwidgets.cow.server.api.model.v2.Task) activity)
+	    					.setAssignee(task.getAssignee());
+	    			}
+	    		}
+    		}
+    		
     		node.put("details", activity);
     		nodeList.add(node);
     	}

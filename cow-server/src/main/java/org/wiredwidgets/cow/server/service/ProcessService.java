@@ -25,6 +25,7 @@ import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.Deployment;
 import org.wiredwidgets.cow.server.api.service.ResourceNames;
+import org.wiredwidgets.cow.server.api.service.Task;
 
 /**
  *
@@ -64,7 +65,7 @@ public interface ProcessService {
 
 	public abstract Map<String, Object> getProcessGraph(String key);
 	
-	public abstract Map<String, Object> getProcessGraph(Process process);
+	public abstract Map<String, Object> getProcessGraph(Process process, List<Task> activeTasks);
 
 	public abstract void loadWorkflow(Definitions defs);
 
