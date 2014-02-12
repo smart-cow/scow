@@ -16,15 +16,26 @@
 
 package org.wiredwidgets.cow.server.web;
 
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.api.service.ProcessInstances;
+import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 import org.wiredwidgets.cow.server.service.ProcessService;
 
 /**
@@ -37,6 +48,9 @@ public class ProcessesController extends CowServerController {
 
     @Autowired
     ProcessService service;
+    
+    @Autowired
+    ProcessInstanceService processInstanceService;
     
     private static Logger log = Logger.getLogger(ProcessesController.class);
 
@@ -76,6 +90,13 @@ public class ProcessesController extends CowServerController {
         return getV2Process(key);
     }  
     
+    
+    @RequestMapping(value = "/{id}")
+    @ResponseBody
+    public Process getProcess(@PathVariable("id") String id) {
+    	return getCowProcess(id);
+    }
+    
 
     /**
      * For backward compatibility.  'cow' is preferred over 'v2'.
@@ -96,5 +117,90 @@ public class ProcessesController extends CowServerController {
     @ResponseBody
     public Map<String, Object> getCowProcessGraph(@PathVariable("key") String key) {
         return service.getProcessGraph(key);
-    }      
+    }
+    
+    
+    @RequestMapping(value = "/{id}/processInstances")
+    @ResponseBody
+    public ProcessInstances getProcessInstances(@PathVariable("id") String id) {
+        ProcessInstances pi = new ProcessInstances();
+        // note: decoding is applied to the id primarily to handle possible "/" characters
+        pi.getProcessInstances().addAll(
+        		processInstanceService.findProcessInstancesByKey(decode(id)));
+        return pi;
+    }
+    
+    
+    @RequestMapping(method = POST)
+    @ResponseBody
+    public ResponseEntity<Process> createProcess(
+    		@RequestBody Process process, UriComponentsBuilder uriBuilder) {
+    	
+    	String id = process.getKey();
+    	id = getUniqueKey(id);
+    	process.setKey(id);
+    	service.save(process);
+	
+    	return getCreatedResponse("/processes/{id}", id, uriBuilder, getV2Process(id));
+    }
+    
+    
+    @RequestMapping(value = "/{id}", method = PUT)
+    @ResponseBody
+    public ResponseEntity<?> updateProcess(
+    		@PathVariable("id") String id, 
+    		@RequestBody Process process, 
+    		UriComponentsBuilder uriBuilder) {
+    	
+    	process.setKey(id);
+    	Process existingProcess = service.getV2Process(id);
+    	
+    	if (existingProcess == null) {
+    		//201 created
+    		service.save(process);
+    		return getCreatedResponse("/processes/{id}", id, uriBuilder, process);
+    	}
+    	
+    	
+    	ProcessInstances runningInstances = getProcessInstances(id);
+    	
+    	if (runningInstances.getProcessInstances().isEmpty()) {
+    		//200 OK
+    		service.save(process);
+    		return new ResponseEntity<Process>(getV2Process(id), HttpStatus.OK);
+    	}
+    	else {
+    		//409 need to delete process instances
+    		return new ResponseEntity<ProcessInstances>(runningInstances, HttpStatus.CONFLICT);
+    	}    	
+    }
+    
+    @RequestMapping(value = "/{id}", method = DELETE)
+    @ResponseBody
+    public ResponseEntity<?> deleteProcess(@PathVariable("id") String id) {
+    	Process process = service.getV2Process(id);
+    	if (process == null) {
+    		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+    	}
+    	
+    	ProcessInstances runningInstances = getProcessInstances(id);
+    	if (runningInstances.getProcessInstances().isEmpty()) {
+    		service.deleteProcess(id);
+    		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    	}
+    	else {
+    		//409 need to delete process instances
+    		return new ResponseEntity<ProcessInstances>(runningInstances, HttpStatus.CONFLICT);
+    	}
+    }
+    
+    private String getUniqueKey(String key)  {
+    	String orginalKey = key;
+    	int i = 1;
+    	while (getCowProcess(key) != null) {
+    		key = orginalKey + i;
+    		i++;
+    	}
+    	return key;
+    }
 }

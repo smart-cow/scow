@@ -40,9 +40,9 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
 	public URI save(org.wiredwidgets.cow.server.api.model.v2.Process process) {
         Node node = new Node();
         node.setType("rem:marketplace");
-        node.setName(process.getName());
+        node.setName(process.getKey());
         
-        addProperty(node, "rem:name", process.getName());
+        addProperty(node, "rem:name", process.getKey());
         addProperty(node, "rem:description", process.getName());
         addProperty(node, "rem:type", "workflow");
         
@@ -94,8 +94,14 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
 	@Override
 	public org.wiredwidgets.cow.server.api.model.v2.Process get(String key) {
     	String url = getRem2WorkflowLocation() + '/' + key;
-    	return restTemplate.getForObject(url, 
-    			org.wiredwidgets.cow.server.api.model.v2.Process.class);
+    	try {
+    		return restTemplate.getForObject(url, 
+    				org.wiredwidgets.cow.server.api.model.v2.Process.class);
+    	}
+    	catch (HttpClientErrorException e) {
+    		e.printStackTrace();
+    		return null;
+    	}
 	}
 	
 	

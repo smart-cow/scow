@@ -73,7 +73,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     
     @Override
     public void deleteDeployment(String id) {
-        kBase.removeProcess(id);
+    	deleteProcess(id);
     }
 
     @Transactional(readOnly = true)
@@ -107,6 +107,9 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Override
     public Deployment getDeployment(String id) {
         org.drools.definition.process.Process p = kBase.getProcess(id);
+        if (p == null) {
+        	return null;
+        }
         Deployment d = new Deployment();
         d.setId(p.getId());
         d.setName(p.getName());
@@ -249,6 +252,15 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     }
  
     public URI save(org.wiredwidgets.cow.server.api.model.v2.Process process) {
-    	return workflowStorage.save(process);
+        Definitions d = bpmn20ProcessBuilder.build(process);
+        log.debug("built bpmn20 process");
+        URI uri = workflowStorage.save(process);
+        createDeployment(d);
+    	return uri;
+    }
+    
+    public boolean deleteProcess(String id) {
+    	kBase.removeProcess(id);
+    	return workflowStorage.delete(id);
     }
 }

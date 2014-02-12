@@ -21,8 +21,14 @@
 package org.wiredwidgets.cow.server.web;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
+
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Abstract base class with utility methods for use by controllers
@@ -48,4 +54,23 @@ public abstract class CowServerController {
         return result;
     }    
     
+    
+    protected static <T> ResponseEntity<T> getCreatedResponse(
+    		String uriPattern, Object id, UriComponentsBuilder uriBuilder, T body) {
+
+    	HttpHeaders headers = getHeadersWithLocation(uriPattern, id, uriBuilder); 	
+    	return new ResponseEntity<T>(body, headers, HttpStatus.CREATED);
+    }
+    
+    
+    protected static HttpHeaders getHeadersWithLocation(String uriPattern, Object id, 
+    		UriComponentsBuilder uriBuilder) {
+    	URI uri = uriBuilder
+    				.path(uriPattern)
+    				.buildAndExpand(id)
+    				.toUri();
+    	HttpHeaders headers = new HttpHeaders();
+    	headers.setLocation(uri);
+    	return headers;
+    }
 }

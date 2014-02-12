@@ -56,7 +56,7 @@ public interface ProcessService {
 
     Deployment saveV2Process(Process v2Process);
 
-    org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(String key);
+    Process getV2Process(String key);
 
 	public abstract void loadAllProcesses();
 
@@ -68,6 +68,7 @@ public interface ProcessService {
 
 	public abstract void loadWorkflow(Definitions defs);
 
-	public abstract URI save(org.wiredwidgets.cow.server.api.model.v2.Process process);
+	public URI save(Process process);
     
+	public boolean deleteProcess(String id);
 }
