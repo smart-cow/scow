@@ -99,7 +99,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
          */
         
         // construct a process instance ID in the required format
-        return pi.getProcessId() + "." + Long.toString(pi.getId());
+        String key = pi.getProcessId() + "." + Long.toString(pi.getId());
+        instance.setKey(key);
+        return key;
     }
 
     @Transactional(readOnly = true)

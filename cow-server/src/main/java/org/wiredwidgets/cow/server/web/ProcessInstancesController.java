@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.HistoryActivities;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
@@ -91,15 +92,20 @@ public class ProcessInstancesController extends CowServerController{
      * @param response
      * @param req 
      */
-    @RequestMapping(value = "/active", method = POST, params = "!execute")
-    public void startExecution(@RequestBody ProcessInstance pi, @RequestParam(value = "init-vars", required = false) boolean initVars, HttpServletResponse response, HttpServletRequest req) {
+    @RequestMapping(value = {"", "/active"}, method = POST, params = "!execute")
+    public ResponseEntity<ProcessInstance> startExecution(
+    		@RequestBody ProcessInstance pi, 
+    		@RequestParam(value = "init-vars", required = false) boolean initVars, 
+    		UriComponentsBuilder uriBuilder) {
+    	
         log.debug("startExecution: " + pi.getProcessDefinitionKey());
         
         // option to initialize the process instance with variables / values set in the master process
         if (initVars) {
             Process process = processService.getV2Process(pi.getProcessDefinitionKey());
             if (process.getVariables() != null) {
-	            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
+	            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : 
+	            		process.getVariables().getVariables()) {
 	                addVariable(pi, var.getName(), var.getValue());
 	            }
             }
@@ -107,22 +113,34 @@ public class ProcessInstancesController extends CowServerController{
         
         String id = processInstanceService.executeProcess(pi);
         
-        //Map<String, Object> params = new HashMap<String, Object>();
-        /*if (pi.getVariables() != null) {
-            for (Variable variable : pi.getVariables().getVariables()) {
-                params.put(variable.getName(), variable.getValue());
-            }
-        }*/
-        // COW-65 save history for all variables
-        // org.jbpm.api.ProcessInstance pi = executionService.startProcessInstanceByKey(instance.getProcessDefinitionKey(), vars);
-        
-        //params.put("content", new HashMap<String,Object>());
-        //org.drools.runtime.process.ProcessInstance pi2 = kSession.startProcess(pi.getProcessDefinitionKey(), params);
         
         System.out.println("STARTED PROCESS ID " + id);
-        response.setStatus(SC_CREATED); // 201
-        response.setHeader("Location", req.getRequestURL() + "/" + id);
-        //pi.getKey();
+        return getCreatedResponse("/processInstances/{id}", id, uriBuilder, pi);
+    }
+    
+    /**
+     * Simplified variation of startExecution to execute a process with no initial variables
+     * Requires no XML body content
+     * @param execute the process definition key to execute
+     * @param name a name to be used for this process instance.  Not strictly required to be
+     * unique, but as this is often used for display to users, it should at least be unique relative
+     * to other active processes.
+     * @param response
+     * @param req 
+     */ 
+    @RequestMapping(value = {"", "/active"}, method = POST, params = "execute")
+    public ResponseEntity<ProcessInstance> startExecutionSimple(
+    		@RequestParam("execute") String execute, 
+    		@RequestParam(value = "name", required = false) String name,
+    		UriComponentsBuilder uriBuilder) {
+    	
+        ProcessInstance pi = new ProcessInstance();
+        pi.setProcessDefinitionKey(execute);
+        if (name == null) {
+        	name = execute + "name";
+        }
+        pi.setName(name);
+        return startExecution(pi, false, uriBuilder);
     }
     
     private void addVariable(ProcessInstance pi, String name, String value) {
@@ -147,48 +165,34 @@ public class ProcessInstancesController extends CowServerController{
      * then the return value will be an ProcessInstances object.  If a single ProcessInstance is requested and it does not exist,
      * a 404 response will be returned.
      */
-    @RequestMapping(value = "/active/{id}.{ext}", method = GET)
+    @RequestMapping(value = {"/{id}.{ext}", "/active/{id}.{ext}"}, method = GET)
     @ResponseBody
-    public Object getProcessInstance(@PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
+    public ResponseEntity<?> getProcessInstance(
+    		@PathVariable("id") String id, 
+    		@PathVariable("ext") String ext) {
+    	
         if (ext.equals("*")) {
             ProcessInstances pi = new ProcessInstances();
-            // note: decoding is applied to the id primarily to handle possible "/" characters
-            pi.getProcessInstances().addAll(processInstanceService.findProcessInstancesByKey(decode(id)));
-            return pi;
-        } else {
-            ProcessInstance instance = processInstanceService.getProcessInstance(Long.decode(ext));
-            if (instance == null) {
-                response.setStatus(SC_NOT_FOUND); // 404
-            }
-            return instance;
-        }
+            
+            pi.getProcessInstances().addAll(processInstanceService
+            		.findProcessInstancesByKey(id));
+            return ok(pi);
+        } 
+        long pid = convertProcessInstanceKeyToId(ext);    
+        ProcessInstance instance = processInstanceService.getProcessInstance(pid);
+        return createGetResponse(instance);
     }
-    
+
+
     
     /**
      * Retrieve all active process instances
      * @return a ProcessInstances object as XML
      */
-    @RequestMapping("/active")
+    @RequestMapping({"", "/active"})
     @ResponseBody
     public ProcessInstances getAllProcessInstances() {
         return createProcessInstances(processInstanceService.findAllProcessInstances());
-//        try{
-//            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-//            retry.setMaxAttempts(50);
-//            RetryTemplate retryTemplate = new RetryTemplate();               
-//            retryTemplate.setRetryPolicy(retry);              
-//            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
-//                public ProcessInstances doWithRetry(RetryContext context) {                            
-//                    return createProcessInstances(processInstanceService.findAllProcessInstances());                           
-//                }                       
-//            });
-//            return result;
-//        }catch(Exception e){
-//            log.info("ERROR in getAllProcessInstances = " + e);            
-//            log.error(e);
-//        }
-//        return new ProcessInstances();
     }
     
     /**
@@ -197,24 +201,25 @@ public class ProcessInstancesController extends CowServerController{
      * @param ext the process instance number, or "*" to delete all for the key
      * @param response
      */
-    @RequestMapping(value = "/active/{id}.{ext}", method = DELETE)
-    public void deleteProcessInstance(@PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
-    	String instanceId = null;
+    @RequestMapping(value = {"/{id}.{ext}", "/active/{id}.{ext}"}, method = DELETE)
+    public ResponseEntity<?> deleteProcessInstance(
+    		@PathVariable("id") String id, 
+    		@PathVariable("ext") String ext) {
+    	
     	id = decode(id);
         if (ext.equals("*")) {
             processInstanceService.deleteProcessInstancesByKey(id);
-            response.setStatus(SC_NO_CONTENT); // 204
-        } else {
-            instanceId = id + '.' + ext;
-            if (processInstanceService.deleteProcessInstance(Long.decode(ext))) {
-                response.setStatus(SC_NO_CONTENT); // 204
-            } else {
-                response.setStatus(SC_NOT_FOUND); // 404
-            }
+            return noContent();
         }
+        if (processInstanceService.deleteProcessInstance(Long.decode(ext))) {
+        	return noContent();
+        }
+        return notFound();
     }
     
-    private ProcessInstances createProcessInstances(List<org.wiredwidgets.cow.server.api.service.ProcessInstance> instances) {
+
+    
+    private ProcessInstances createProcessInstances(List<ProcessInstance> instances) {
         ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(instances);
         return pi;
@@ -229,9 +234,11 @@ public class ProcessInstancesController extends CowServerController{
      * @param response
      * @return a HistoryActivities object as XML
      */
-    @RequestMapping("/active/{id}.{ext}/activities")
+    @RequestMapping({"/{id}.{ext}/activities", "/active/{id}.{ext}/activities"})
     @ResponseBody
-    public HistoryActivities getProcessInstanceActivities(@PathVariable("id") String id, @PathVariable("ext") Long ext, HttpServletResponse response) {
+    public HistoryActivities getProcessInstanceActivities(
+    		@PathVariable("id") String id,
+    		@PathVariable("ext") Long ext) {
         HistoryActivities ha = new HistoryActivities();
         List<HistoryActivity> activities = taskService.getHistoryActivities(ext);
         ha.getHistoryActivities().addAll(activities);
@@ -247,9 +254,11 @@ public class ProcessInstancesController extends CowServerController{
      * @return
      * @see org.wiredwidgets.cow.server.completion.CompletionState
      */
-    @RequestMapping("/active/{id}.{ext}/status")
+    @RequestMapping({"/{id}.{ext}/status", "/active/{id}.{ext}/status"})
     @ResponseBody
-    public ProcessInstance getProcessInstanceStatus(@PathVariable("id") String id, @PathVariable("ext") Long ext, HttpServletResponse response) {
+    public ProcessInstance getProcessInstanceStatus(
+    		@PathVariable("id") String id, 
+    		@PathVariable("ext") Long ext) {
         return processInstanceService.getProcessInstanceStatus(ext);
     }
     
@@ -259,12 +268,16 @@ public class ProcessInstancesController extends CowServerController{
         return processInstanceService.getProcessInstanceStatusGraph(ext);
     }    
     
+    
     @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="signal")
-    public void signalProcessInstance(@PathVariable String id, @PathVariable long ext, 
-    			@RequestParam String signal, @RequestParam String value, HttpServletResponse response) {
+    public ResponseEntity<?> signalProcessInstance(
+    		@PathVariable String id, 
+    		@PathVariable long ext, 
+    		@RequestParam String signal, 
+    		@RequestParam String value) {
     	
     	processInstanceService.signalProcessInstance(ext, signal, value);
-    	response.setStatus(SC_NO_CONTENT);
+    	return noContent();
     }
     
     /**
@@ -275,7 +288,10 @@ public class ProcessInstancesController extends CowServerController{
      * @param response
      */
     @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="!signal")
-    public void updateProcessInstance(@RequestBody ProcessInstance pi, @PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
+    public ResponseEntity<?> updateProcessInstance(
+    		@RequestBody ProcessInstance pi, 
+    		@PathVariable("id") String id,
+    		@PathVariable("ext") String ext) {
         // use ID of the URL
         /*pi.setId(decode(id) + "." + ext);
         if (processInstanceService.updateProcessInstance(pi)) {
@@ -284,25 +300,10 @@ public class ProcessInstancesController extends CowServerController{
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }*/
         //throw new UnsupportedOperationException("Not supported yet.");
+    	return notImplemented();
     }
     
-    /**
-     * Simplified variation of startExecution to execute a process with no initial variables
-     * Requires no XML body content
-     * @param execute the process definition key to execute
-     * @param name a name to be used for this process instance.  Not strictly required to be
-     * unique, but as this is often used for display to users, it should at least be unique relative
-     * to other active processes.
-     * @param response
-     * @param req 
-     */ 
-    @RequestMapping(value = "/active", method = POST, params = "execute")
-    public void startExecutionSimple(@RequestParam("execute") String execute, @RequestParam("name") String name, HttpServletResponse response, HttpServletRequest req) {
-        org.wiredwidgets.cow.server.api.service.ProcessInstance pi = new org.wiredwidgets.cow.server.api.service.ProcessInstance();
-        pi.setProcessDefinitionKey(execute);
-        pi.setName(name);
-        startExecution(pi, false, response, req);
-    }
+
     
     /**
      * Retrieve the history for a specified process key
@@ -314,32 +315,15 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping("/history")
     @ResponseBody
-    public ProcessInstances getHistoryProcessInstances(@RequestParam(value = "key", required = false) String key, @RequestParam(value = "endedAfter", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endedAfter, @RequestParam(value = "ended", defaultValue = "true") boolean ended) {
-        /*ProcessInstances pi = new ProcessInstances();
+    public ProcessInstances getHistoryProcessInstances(
+    		@RequestParam(value = "key", required = false) String key, 
+    		@RequestParam(value = "endedAfter", required = false) 
+    		@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endedAfter, 
+    		@RequestParam(value = "ended", defaultValue = "true") boolean ended) {
+        ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(key, endedAfter, ended));
-        return pi;*/
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);            
-            final String k = key; 
-            final Date ea = endedAfter; 
-            final Boolean e = ended; 
-            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                
-                public ProcessInstances doWithRetry(RetryContext context) { 
-                    ProcessInstances pi = new ProcessInstances();
-                    pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(k, ea, e));
-                    return pi;
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getHistoryProcessInstances = " + e);            
-            log.error(e);
-        }
-        return new ProcessInstances();
-    }  
+        return pi;
+    }
     
     /**
      * Retrieve all processInstances that have open tasks, and include the tasks with
@@ -350,10 +334,10 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping("/tasks")
     @ResponseBody
-    public ProcessInstances getProcessInstancesWithTasks() {
-        
+    public ResponseEntity<ProcessInstances> getProcessInstancesWithTasks() {     
         //return createProcessInstances(mergeTasks(taskService.findAllTasks()));
-        return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
+        //return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
+    	return notImplemented();
     }
     
     /**
@@ -365,25 +349,9 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping(value = "/tasks", params = "assignee")
     @ResponseBody
-    public ProcessInstances getProcessInstancesWithTasksForAssignee(@RequestParam("assignee") String assignee) {
-        //return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);
-            final String assign = assignee;  
-            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
-                public ProcessInstances doWithRetry(RetryContext context) {                            
-                    return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assign)));                            
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getProcessInstancesWithTasksForAssignee = " + e);            
-            log.error(e);
-        }
-        return new ProcessInstances();
+    public ProcessInstances getProcessInstancesWithTasksForAssignee(
+    		@RequestParam("assignee") String assignee) {
+    	return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
     }
     
     /**
@@ -394,9 +362,10 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping(value = "/tasks", params = "unassigned=true")
     @ResponseBody
-    public ProcessInstances getProcessInstancesWithUnassignedTasks() {
+    public ResponseEntity<ProcessInstances> getProcessInstancesWithUnassignedTasks() {
         //return createProcessInstances(mergeTasks(taskService.findAllUnassignedTasks()));
-        return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
+        //return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
+    	return notImplemented();
     }
     
     /**
@@ -407,25 +376,9 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping(value = "/tasks", params = "candidate")
     @ResponseBody
-    public ProcessInstances getProcessInstancesWithTasksForCandidate(@RequestParam("candidate") String candidate) {
-        //return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);            
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);
-            final String candi = candidate;  
-            ProcessInstances result = retryTemplate.execute(new RetryCallback<ProcessInstances>() {                     
-                public ProcessInstances doWithRetry(RetryContext context) {                            
-                    return createProcessInstances(mergeTasks(taskService.findGroupTasks(candi)));                            
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getProcessInstancesWithTasksForCandidate = " + e);            
-            log.error(e);
-        }
-        return new ProcessInstances(); 
+    public ProcessInstances getProcessInstancesWithTasksForCandidate(
+    		@RequestParam("candidate") String candidate) {
+        return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
     }  
     
     private List<ProcessInstance> mergeTasks(List<Task> tasks) {
