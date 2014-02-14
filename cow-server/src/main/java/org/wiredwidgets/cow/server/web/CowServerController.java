@@ -73,4 +73,41 @@ public abstract class CowServerController {
     	headers.setLocation(uri);
     	return headers;
     }
+    
+    protected static <T> ResponseEntity<T> createGetResponse(T body) {
+    	if (body == null) {
+    		return notFound();
+    	}
+    	return ok(body);
+    }
+    
+    
+    protected static <T> ResponseEntity<T> ok(T body) {
+    	return new ResponseEntity<T>(body, HttpStatus.OK);
+    }
+    
+    protected static <T> ResponseEntity<T> notFound() {
+    	return new ResponseEntity<T>(HttpStatus.NOT_FOUND);
+    }
+    
+    protected static <T> ResponseEntity<T> noContent() {
+    	return new ResponseEntity<T>(HttpStatus.NO_CONTENT);
+    }
+    
+    protected static <T> ResponseEntity<T> conflict(T body) {
+    	return new ResponseEntity<T>(body, HttpStatus.CONFLICT);
+    }
+    
+    protected static <T> ResponseEntity<T> notImplemented() {
+    	return new ResponseEntity<T>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    protected static Long convertProcessInstanceKeyToId(String processInstanceKey) {
+        int dotPos = processInstanceKey.indexOf('.');
+        processInstanceKey = processInstanceKey.substring(dotPos + 1);
+        return Long.valueOf(processInstanceKey);
+    }
+    
+    
+    
 }

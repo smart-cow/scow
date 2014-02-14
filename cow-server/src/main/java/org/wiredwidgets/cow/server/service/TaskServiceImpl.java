@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityNotFoundException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
@@ -114,9 +115,14 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public Task getTask(Long id) {
-    	//org.jbpm.task.Task task = jbpmTaskService.getTask(id);
-        org.jbpm.task.Task task = taskClient.getTask(id);
-        return this.converter.convert(task, Task.class);
+    	try {
+    		org.jbpm.task.Task task = taskClient.getTask(id);
+    		return converter.convert(task, Task.class);
+    	}
+    	catch (EntityNotFoundException e) {
+    		log.error("Task with id: " + id + " not found.");
+    		return null;
+    	}
     }
 
     @Override
@@ -127,7 +133,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     }
 
     @Override
-    public void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables) {
+    public void completeTask(Long id, String assignee, String outcome, Map<String, ?> variables) {
     	// should be handled upstream in controller
     	assert(assignee != null);
     	

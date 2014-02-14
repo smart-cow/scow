@@ -47,7 +47,7 @@ public interface TaskService {
 
     // HistoryTask getHistoryTask(String id);
 
-    void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables);
+    void completeTask(Long id, String assignee, String outcome, Map<String, ?> variables);
 
     List<Task> findAllUnassignedTasks();
 

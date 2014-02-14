@@ -14,12 +14,8 @@
  */
 package org.wiredwidgets.cow.server.web;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_CREATED;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.policy.SimpleRetryPolicy;
@@ -42,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.HistoryTasks;
 import org.wiredwidgets.cow.server.api.service.Participations;
@@ -53,18 +51,32 @@ import org.wiredwidgets.cow.server.service.TaskService;
 
 /**
  * Handles REST API methods for the /tasks resource
- *
  * @author JKRANES
  */
 @Controller
 @RequestMapping("/tasks")
-public class TasksController {
+public class TasksController extends CowServerController {
 
     @Autowired
     TaskService taskService;
 
     
     static Logger log = Logger.getLogger(TasksController.class);
+    
+    
+    /**
+     * Retrieve all active tasks
+     *
+     * @return a Tasks object as XML
+     */
+    @RequestMapping({"", "/active"})
+    @ResponseBody
+    public Tasks getAllTasks() {
+        Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findAllTasks());
+        return tasks;      
+    }
+    
 
     /**
      * Create a new ad-hoc task, i.e. one not associated with any process
@@ -73,40 +85,31 @@ public class TasksController {
      * provides the URL of the new task.
      *
      * @param task a task object in XML sent as the request body
-     * @param request
-     * @param response
+     * @param task
+     * @param uriBuilder
      */
     @RequestMapping(method = RequestMethod.POST)
-    public void createTask(@RequestBody Task task, HttpServletRequest request, HttpServletResponse response) {
-        String id = this.taskService.createAdHocTask(task);
-        response.setStatus(SC_CREATED); // 201
-        response.setHeader("Location", request.getRequestURL() + "/active/" + id);
+    @ResponseBody
+    public ResponseEntity<Task> createTask(@RequestBody Task task, 
+    		UriComponentsBuilder uriBuilder) {
+    	String id = taskService.createAdHocTask(task);
+    	return getCreatedResponse("/tasks/active/{id}", id, uriBuilder, 
+    			taskService.getTask(Long.valueOf(id)));
     }
-
+    
     /**
      * Retrieve a single task by its ID
      *
      * @param id the task ID
      * @return the Task object as XML
-     */
-    @RequestMapping("/active/{id}")
+     */    
+    @RequestMapping({"/{id}", "/active/{id}"})
     @ResponseBody
-    public Task getTask(@PathVariable("id") String id, HttpServletResponse response) {
-        
-        try{            
-        Task task = taskService.getTask(Long.valueOf(id));
-        if (task == null) {
-            response.setStatus(SC_NOT_FOUND);
-            return null;
-        } else {
-            return task;
-        }
-        }catch(Exception e){
-            log.error(e);
-            response.setStatus(SC_NOT_FOUND);
-            return null;
-        }
+    public ResponseEntity<Task> getTask(@PathVariable("id") long id) {
+    	Task task = taskService.getTask(id);
+    	return createGetResponse(task);
     }
+
 
     /**
      * Mark a task as complete The choice of DELETE here is based on the fact
@@ -124,48 +127,44 @@ public class TasksController {
      * provided (e.g. ?variable=name1:value1&variable=name2:value2 etc)
      * @param response
      */
-    @RequestMapping(value = "/active/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = {"/{id}", "/active/{id}"}, method = RequestMethod.DELETE)
     @ResponseBody
-    public void completeTask(@PathVariable("id") String id, 
-    						 @RequestParam(value = "outcome", required = false) String outcome, 
-    						 @RequestParam(value = "var", required = false) String variables, 
-    						 HttpServletResponse response, 
-    						 HttpServletRequest request) throws IOException {
-        // verify existence
-
-        Task task = taskService.getTask(Long.valueOf(id));       
-
-        if (task == null) {
-            response.setStatus(SC_NOT_FOUND); // 404
-            return;
-        }
-    	if (task.getAssignee() == null) {
-    		response.sendError(SC_BAD_REQUEST, "Task is unassigned.  Cannot complete");
-    		return;
+    public ResponseEntity<?> completeTask(
+    		@PathVariable("id") long id, 
+    		@RequestParam(value = "outcome", required = false) String outcome, 
+    		@RequestParam(value = "var", required = false) String[] variables) {
+    	
+    	Task task = taskService.getTask(id);
+    	if (task == null) {
+    		return notFound();
     	}
-        		
-    	Map<String, Object> varMap = new HashMap<String, Object>();
-        if (variables != null) {
-            // Note: allowing Spring to create the array has some undesired behaviors in some cases.  For example
-            // if the query string contains a comma, Spring treats it as multi-valued.
-            // Since we don't want that, we instead use the underlying request object to get the array.
-            String[] vars = request.getParameterValues("var");
-            for (String variable : vars) {
-                // variable is a string in the format name:value
-                // Only split on the first ":" found; the value section may contain additional ":" tokens.
-                String[] split = variable.split(":", 2);
-                varMap.put(split[0], split[1]);
-                log.debug(split[0] + "=" + split[1]);
-            }
-        }
-        log.debug("Completing task: id=" + id + " outcome=" + outcome);
+    	if (task.getAssignee() == null) {
+    		conflict(task);
+    	}
+    	
+    	Map<String, String> varMap = getVarMap(variables);
+    	log.debug("Completing task: id=" + id + " outcome=" + outcome);
         log.debug("Vars: " + varMap);
-
-        taskService.completeTask(Long.valueOf(id), task.getAssignee(), outcome, varMap);
-
-        response.setStatus(SC_NO_CONTENT); // 204        
+        
+    	taskService.completeTask(id, task.getAssignee(), outcome, varMap);
+    	
+    	return noContent();
     }
-
+    
+    private static Map<String, String> getVarMap(String[] varPairs) {
+    	Map<String, String> varMap = new HashMap<String, String>();
+    	if (varPairs == null) {
+    		return varMap;
+    	}
+    	for(String varPair : varPairs) {
+            // variable is a string in the format name:value
+            // Only split on the first ":" found; the value section may contain additional ":" tokens.
+    		String[] split = varPair.split(":", 2);
+			varMap.put(split[0], split[1]);
+    	}
+    	return varMap;
+    }
+    
     /**
      * Assign a task to a user, or return a task to unassigned status. A task
      * can only be assigned if is currently in an unassigned state, otherwise an
@@ -179,17 +178,19 @@ public class TasksController {
      * (?assignee=) to return the task to unassigned status
      * @param response
      */
-    @RequestMapping(value = "/active/{id}", method = RequestMethod.POST, params = "assignee")
-    public void takeTask(@PathVariable("id") String id, @RequestParam("assignee") String assignee, HttpServletResponse response) {
-        // a request with a blank query string, e.g. ?assignee=, results in an empty string value
-        if (assignee.equals("")) {
-            taskService.removeTaskAssignment(Long.valueOf(id));
-        } else {
-            taskService.takeTask(Long.valueOf(id), assignee);
-        }
-        response.setStatus(SC_NO_CONTENT); // 204
-
-        Task task = taskService.getTask(Long.valueOf(id));
+    @RequestMapping(value = {"/{id}/take", "/active/{id}"}, method = RequestMethod.POST, 
+    		params = "assignee")
+    @ResponseBody
+    public ResponseEntity<Task> takeTask(
+    		@PathVariable("id") long id, 
+    		@RequestParam("assignee") String assignee) {
+    	Task task = taskService.getTask(id);
+    	if (task == null) {
+    		return notFound();
+    	}
+    	taskService.takeTask(id, assignee);
+    	task = taskService.getTask(id);
+    	return ok(task);
     }
 
     /**
@@ -202,52 +203,31 @@ public class TasksController {
      * @param response
      */
     @RequestMapping(value = "/active/{id}", method = RequestMethod.POST)
-    public void updateTask(@PathVariable("id") String id, @RequestBody Task task, HttpServletResponse response) {
-        // use ID from the URL
-        
-        if (task.getId() == null || !task.getId().equals(id)) {
-            task.setId(id); 
-        } 
-        this.taskService.updateTask(task);
-        response.setStatus(SC_NO_CONTENT);
+    @ResponseBody
+    public ResponseEntity<Task> updateTaskPost(
+    		@PathVariable("id") long id, 
+    		@RequestBody Task task, 
+    		UriComponentsBuilder uriBuilder) {
+    	return updateTask(id, task, uriBuilder);
+    }
+    
+    
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity<Task> updateTask(
+    		@PathVariable("id") long id, 
+    		@RequestBody Task task,
+    		UriComponentsBuilder uriBuilder) {
+    	
+    	task.setId(String.valueOf(id));
+    	if (taskService.getTask(id) == null) {
+    		// Task doesn't exist, create ad-hoc test
+    		return createTask(task, uriBuilder);
+    	}
+    	taskService.updateTask(task);
+    	return ok(taskService.getTask(id));
     }
 
-    /**
-     * Retrieve all active tasks
-     *
-     * @return a Tasks object as XML
-     */
-    @RequestMapping("/active")
-    @ResponseBody
-    public Tasks getAllTasks() {
-        /*Tasks tasks = new Tasks();
-        try{        
-        tasks.getTasks().addAll(taskService.findAllTasks()); 
-        //return tasks;
-        }catch(Exception e){
-            log.error(e);
-        }
-        return tasks;
-        */
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);              
-            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
-                public Tasks doWithRetry(RetryContext context) { 
-                    Tasks tasks = new Tasks();
-                    tasks.getTasks().addAll(taskService.findAllTasks());
-                    return tasks;                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getAllTasks = " + e);            
-            log.error(e);
-        }
-        return new Tasks();       
-    }
 
     /**
      * Retrieve all assigned active tasks for a specified assignee
@@ -255,36 +235,12 @@ public class TasksController {
      * @param assignee the user ID
      * @return a Tasks object as XML
      */
-    @RequestMapping(value = "/active", params = "assignee")
+    @RequestMapping(value = {"", "/active"}, params = "assignee")
     @ResponseBody
     public Tasks getTasksByAssignee(@RequestParam("assignee") String assignee) {
-        /*Tasks tasks = new Tasks();
-        try{        
-        tasks.getTasks().addAll(taskService.findPersonalTasks(assignee));        
-        }catch(Exception e){
-            log.error(e);            
-        }
-        return tasks;
-        */
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);
-            final String assign = assignee;
-            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
-                public Tasks doWithRetry(RetryContext context) { 
-                    Tasks tasks = new Tasks();
-                    tasks.getTasks().addAll(taskService.findPersonalTasks(assign));
-                    return tasks;                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getTasksByAssignee = " + e);            
-            log.error(e);
-        }
-        return new Tasks();
+    	Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findPersonalTasks(assignee));
+        return tasks;   
     }
 
     /**
@@ -295,7 +251,7 @@ public class TasksController {
      */
     @RequestMapping(value = "/active", params = {"format=rss", "assignee"})
     @ResponseBody
-    public String getTasksForRSS(@RequestParam("assignee") String assignee, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> getTasksForRSS(@RequestParam("assignee") String assignee) {
         /*
          * FeedFromTaskList fList = new FeedFromTaskList(); String feed =
          * fList.buildFeedByAssignee(assignee,
@@ -303,7 +259,7 @@ public class TasksController {
          * taskService); response.setContentType("application/xml;
          * charset=UTF-8"); return feed;
          */
-        return "Not supported yet.";
+        return notImplemented();
     }
 
     /**
@@ -313,36 +269,18 @@ public class TasksController {
      */
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
-    public Tasks getUnassignedTasks() {
-        /*Tasks tasks = new Tasks();
-        try{        
-            tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
-        //return tasks;
-        }catch(Exception e){
-            log.error(e);
-        }
-        return tasks;
-        */
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);              
-            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
-                public Tasks doWithRetry(RetryContext context) { 
-                    Tasks tasks = new Tasks();
-                    tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
-                    return tasks;                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getUnassignedTasks = " + e);            
-            log.error(e);
-        }
-        return new Tasks();
+    public Tasks getUnassignedTasksActive() {
+    	return getUnassignedTasks();
     }
-
+    
+    @RequestMapping(value = "/unassigned")
+    @ResponseBody
+    public Tasks getUnassignedTasks() {
+    	Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
+        return tasks;   
+    }
+    
     /**
      * Retrieve all active unassigned tasks for which a user is an eligible
      * candidate. This includes both tasks for which the user is directly a
@@ -353,36 +291,12 @@ public class TasksController {
      * @param candidate the user ID
      * @return a Tasks object as XML
      */
-    @RequestMapping(value = "/active", params = "candidate")
+    @RequestMapping(value = {"", "/active"}, params = "candidate")
     @ResponseBody
     public Tasks getUnassignedTasksByCandidate(@RequestParam("candidate") String candidate) {
-        /*Tasks tasks = new Tasks();
-        try{        
-        tasks.getTasks().addAll(taskService.findGroupTasks(candidate));        
-        }catch(Exception e){
-            log.error(e);
-        }
-        return tasks;
-        */
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);
-            final String candi = candidate;
-            Tasks result = retryTemplate.execute(new RetryCallback<Tasks>() {                     
-                public Tasks doWithRetry(RetryContext context) { 
-                    Tasks tasks = new Tasks();
-                    tasks.getTasks().addAll(taskService.findGroupTasks(candi));
-                    return tasks;                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getUnassignedTasksByCandidate = " + e);            
-            log.error(e);
-        }
-        return new Tasks();
+    	Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findGroupTasks(candidate));
+        return tasks; 
     }
 
     /**
@@ -391,11 +305,14 @@ public class TasksController {
      * @param processInstance the processInstance ID
      * @return a Tasks object as XML
      */
-    @RequestMapping(value = "/active", params = "processInstance")
+    @RequestMapping(value = {"", "/active"}, params = "processInstance")
     @ResponseBody
-    public Tasks getTasksByProcessInstance(@RequestParam("processInstance") String processInstance) {
+    public Tasks getTasksByProcessInstance(
+    		@RequestParam("processInstance") String processInstance) {
+    	       
+        long id = convertProcessInstanceKeyToId(processInstance);
         Tasks tasks = new Tasks();
-        tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(Long.decode(processInstance)));
+        tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(id));
         return tasks;
     }
 
@@ -407,11 +324,13 @@ public class TasksController {
      */
     @RequestMapping(value = "/active", params = "processKey")
     @ResponseBody
-    public Tasks getTasksByProcessKey(@RequestParam("processKey") String processKey) {
-        
+    public ResponseEntity<?> getTasksByProcessKey(@RequestParam("processKey") String processKey) {
+        /*
          Tasks tasks = new Tasks();
          //tasks.getTasks().addAll(taskService.findAllTasksByProcessKey(processKey));
          return tasks;
+         */
+    	return notImplemented();
     }
 
     /**
@@ -425,16 +344,11 @@ public class TasksController {
      */
     @RequestMapping("/history/{id}")
     @ResponseBody
-    public HistoryTask getHistoryTask(@PathVariable("id") Long id, HttpServletResponse response) {
-        
+    public ResponseEntity<HistoryTask> getHistoryTask(@PathVariable("id") long id) {    
          HistoryTask task = taskService.getHistoryTask(id); 
-         if (task == null) {
-        	 response.setStatus(HttpServletResponse.SC_NOT_FOUND); 
-        	 return null;
-         } else{ 
-        	 return task; 
-         }
+         return createGetResponse(task);
     }
+
 
     /**
      * Retrieves a set of HistoryTasks selected by various criteria. Parameters
@@ -488,34 +402,13 @@ public class TasksController {
      */
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "process")
     @ResponseBody
-    public HistoryTasks getHistoryTasks(@RequestParam(value = "process", required = true) String process) {       
-         /*HistoryTasks tasks = new HistoryTasks();
-         Long processInstanceId = Long.valueOf(process.split("\\.")[1]);
-         tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId));
-         return tasks;*/
-        try{
-            SimpleRetryPolicy retry = new SimpleRetryPolicy();
-            retry.setMaxAttempts(50);
-            RetryTemplate retryTemplate = new RetryTemplate();               
-            retryTemplate.setRetryPolicy(retry);
-            final String p = process;
-            HistoryTasks result = retryTemplate.execute(new RetryCallback<HistoryTasks>() {                     
-                public HistoryTasks doWithRetry(RetryContext context) { 
-                    HistoryTasks tasks = new HistoryTasks();
-                    Long processInstanceId = Long.valueOf(p.split("\\.")[1]);
-                    tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId));
-                    return tasks;                           
-                }                       
-            });
-            return result;
-        }catch(Exception e){
-            log.info("ERROR in getHistoryTasks = " + e);            
-            log.error(e);
-        }
-        return new HistoryTasks();
-         
+    public HistoryTasks getHistoryTasks2(@RequestParam(value = "process") String process) {
+    	long id = convertProcessInstanceKeyToId(process);
+    	
+    	HistoryTasks tasks = new HistoryTasks();
+    	tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(id));
+    	return tasks;
     }
-
 
     /*
      * NOTE: The /participations methods expose underlying JBPM functionality
@@ -525,51 +418,73 @@ public class TasksController {
      */
     @RequestMapping(value = "/participations/{taskId}")
     @ResponseBody
-    public Participations getParticipations(@PathVariable("taskId") String id) {
+    public ResponseEntity<?> getParticipations(@PathVariable("taskId") String id) {
         /*
          * Participations p = new Participations();
          * p.getParticipations().addAll(this.taskService.getTaskParticipations(id));
          * return p;
          */
-        return new Participations();//throw new UnsupportedOperationException("Not supported yet.");
+        //return new Participations();//throw new UnsupportedOperationException("Not supported yet.");
+    	return notImplemented();
     }
 
-    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, params = "group")
-    public void addGroupParticipation(@PathVariable("taskId") String taskId, @RequestParam("group") String group, @RequestParam("type") String type, HttpServletResponse response) {
+    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
+    		params = "group")
+    public ResponseEntity<?> addGroupParticipation(
+    		@PathVariable("taskId") String taskId, 
+    		@RequestParam("group") String group, 
+    		@RequestParam("type") String type) {
         /*
          * this.taskService.addTaskParticipatingGroup(taskId, group, type);*/
-        response.setStatus(SC_NO_CONTENT); // 204
+        //response.setStatus(SC_NO_CONTENT); // 204
+    	return notImplemented();
     }
 
-    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, params = "group")
-    public void deleteGroupParticipation(@PathVariable("taskId") String taskId, @RequestParam("group") String group, @RequestParam("type") String type, HttpServletResponse response) {
+    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
+    		params = "group")
+    public ResponseEntity<?> deleteGroupParticipation(
+    		@PathVariable("taskId") String taskId, 
+    		@RequestParam("group") String group, 
+    		@RequestParam("type") String type) {
         /*
          * this.taskService.removeTaskParticipatingGroup(taskId, group, type);*/
-        response.setStatus(SC_NO_CONTENT); // 204
+        //response.setStatus(SC_NO_CONTENT); // 204
+    	return notImplemented();
     }
 
-    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, params = "user")
-    public void addUserParticipation(@PathVariable("taskId") String taskId, @RequestParam("user") String user, @RequestParam("type") String type, HttpServletResponse response) {
+    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
+    		params = "user")
+    public ResponseEntity<?> addUserParticipation(
+    		@PathVariable("taskId") String taskId, 
+    		@RequestParam("user") String user, 
+    		@RequestParam("type") String type) {
         /*
          * this.taskService.addTaskParticipatingUser(taskId, user, type);*/
-        response.setStatus(SC_NO_CONTENT); // 204
+        //response.setStatus(SC_NO_CONTENT); // 204
+    	return notImplemented();
     }
 
-    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, params = "user")
-    public void deleteUserParticipation(@PathVariable("taskId") String taskId, @RequestParam("user") String user, @RequestParam("type") String type, HttpServletResponse response) {
+    @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
+    		params = "user")
+    public ResponseEntity<?> deleteUserParticipation(
+    		@PathVariable("taskId") String taskId, 
+    		@RequestParam("user") String user, 
+    		@RequestParam("type") String type) {
         /*
          * this.taskService.removeTaskParticipatingUser(taskId, user, type);*/
-        response.setStatus(SC_NO_CONTENT); // 204
+        //response.setStatus(SC_NO_CONTENT); // 204
+    	return notImplemented();
     }
 
     @RequestMapping(value = "/orphaned")
     @ResponseBody
-    public Tasks findOrphanedTasks() {
+    public ResponseEntity<?> findOrphanedTasks() {
         /*
          * Tasks tasks = new Tasks();
          * tasks.getTasks().addAll(taskService.findOrphanedTasks()); return
          * tasks;
          */
-        return new Tasks();//throw new UnsupportedOperationException("Not supported yet.");
+        //return new Tasks();//throw new UnsupportedOperationException("Not supported yet.");
+    	return notImplemented();
     }
 }

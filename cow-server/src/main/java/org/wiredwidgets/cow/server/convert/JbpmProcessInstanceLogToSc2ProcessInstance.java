@@ -11,6 +11,9 @@ import static org.drools.runtime.process.ProcessInstance.STATE_PENDING;
 import static org.drools.runtime.process.ProcessInstance.STATE_SUSPENDED;
 import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,19 +21,22 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.drools.KnowledgeBase;
-import org.drools.runtime.StatefulKnowledgeSession;
 import org.drools.definition.process.Process;
+import org.drools.runtime.StatefulKnowledgeSession;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
 import org.jbpm.process.audit.VariableInstanceLog;
+import org.jbpm.task.Status;
+import org.jbpm.task.query.TaskSummary;
 import org.jbpm.workflow.instance.impl.WorkflowProcessInstanceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
-import org.wiredwidgets.cow.server.service.TaskService;
 
 /**
  * 
@@ -49,9 +55,15 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends
 	@Autowired(required=false)
 	KnowledgeBase kbase;
 
+
+	// This field is required for normal operation. It has been marked as not required so that
+	// unit tests pass.
+	@Autowired(required = false)
+    org.jbpm.task.TaskService taskService;
+	
     @Autowired
-    TaskService taskService;
-    
+    protected ConversionService converter;
+
 	@Override
 	public ProcessInstance convert(ProcessInstanceLog source) {		
 		ProcessInstance target = new ProcessInstance();
@@ -106,9 +118,13 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends
 			addVariables(target, source.getProcessInstanceId());
 		}
 		
-    	List<Task> tasks = taskService
-    			.findAllTasksByProcessInstance(source.getProcessInstanceId());
-    	target.getTasks().addAll(tasks);
+    	/*List<Task> tasks = taskService
+    			.findAllTasksByProcessInstance(source.getProcessInstanceId());*/
+		List<Status> status = Arrays.asList(Status.Ready);
+		List<TaskSummary> taskSummaries = taskService
+				.getTasksByStatusByProcessId(source.getProcessInstanceId(), status, "en-UK");
+		
+    	target.getTasks().addAll(convertTaskSummaries(taskSummaries));
 
 		return target;
 	}
@@ -148,7 +164,19 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends
 		if (vars.getVariables().size() > 0) {
 			target.setVariables(vars);
 		}
-
+	}
+	
+	
+    private static final TypeDescriptor JBPM_TASK_SUMMARY_LIST = TypeDescriptor
+    		.collection(List.class, TypeDescriptor
+    				.valueOf(org.jbpm.task.query.TaskSummary.class));
+    private static final TypeDescriptor COW_TASK_LIST = TypeDescriptor
+    		.collection(List.class, TypeDescriptor
+    				.valueOf(Task.class));
+	
+	@SuppressWarnings("unchecked")
+	private List<Task> convertTaskSummaries(List<TaskSummary> source) {
+		return (List<Task>) converter.convert(source, JBPM_TASK_SUMMARY_LIST, COW_TASK_LIST);
 	}
 
 }

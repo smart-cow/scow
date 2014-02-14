@@ -129,9 +129,7 @@ public class ProcessesController extends CowServerController {
     @ResponseBody
     public ProcessInstances getProcessInstances(@PathVariable("id") String id) {
         ProcessInstances pi = new ProcessInstances();
-        // note: decoding is applied to the id primarily to handle possible "/" characters
-        pi.getProcessInstances().addAll(
-        		processInstanceService.findProcessInstancesByKey(decode(id)));
+        pi.getProcessInstances().addAll(processInstanceService.findProcessInstancesByKey(id));
         return pi;
     }
     
@@ -195,11 +193,11 @@ public class ProcessesController extends CowServerController {
     	if (runningInstances.getProcessInstances().isEmpty()) {
     		//200 OK
     		service.save(process);
-    		return new ResponseEntity<Process>(getV2Process(id), HttpStatus.OK);
+    		return ok(getV2Process(id));
     	}
     	else {
     		//409 need to delete process instances
-    		return new ResponseEntity<ProcessInstances>(runningInstances, HttpStatus.CONFLICT);
+    		return conflict(runningInstances);
     	}    	
     }
     
@@ -216,17 +214,17 @@ public class ProcessesController extends CowServerController {
     public ResponseEntity<?> deleteProcess(@PathVariable("id") String id) {
     	Process process = service.getV2Process(id);
     	if (process == null) {
-    		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+    		return notFound();
     	}
     	
     	ProcessInstances runningInstances = getProcessInstances(id);
     	if (runningInstances.getProcessInstances().isEmpty()) {
     		service.deleteProcess(id);
-    		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    		return noContent();
     	}
     	else {
     		//409 need to delete process instances
-    		return new ResponseEntity<ProcessInstances>(runningInstances, HttpStatus.CONFLICT);
+    		return conflict(runningInstances);
     	}
     }
     
