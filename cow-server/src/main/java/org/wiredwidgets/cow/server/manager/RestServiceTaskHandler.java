@@ -109,7 +109,7 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 
 
 	
-	private static Pattern regexPattern = Pattern.compile("\\$\\{(.*)\\}");
+	private static Pattern regexPattern = Pattern.compile("\\$\\{(.*?)\\}");
 	
 	private static String replaceVariables(String format, Map<String, Object> vars) {	
 		Matcher matcher = regexPattern.matcher(format);
