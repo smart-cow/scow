@@ -12,7 +12,7 @@ def getInput(items, itemType, prompt = 'Select a %s: \n'):
     prompt = prompt % itemType
     selection = ''
     while not selection.isdigit():
-        print prompt, 
+        print prompt,
         for index, element in enumerate(items):
             print '%s: %s' % (index, element.name)
         selection = raw_input(prompt)
@@ -21,7 +21,7 @@ def getInput(items, itemType, prompt = 'Select a %s: \n'):
         elif selection[0] == 'q':
             exit()
     return items[int(selection)]
-        
+
 
 
 
@@ -55,7 +55,7 @@ def chooseParameters(method):
             print 'Enter value for ', p.name
             print p
             pValue = raw_input('Enter value for %s: ' % p.name)
-            if (pValue == 'reset'): 
+            if (pValue == 'reset'):
                 params = {}
                 break;
             params[p.name] = pValue
@@ -85,8 +85,8 @@ def main():
     global controllers
     global client
     controllers = loadControllers('scowMethods.pickle')
-    client = ScowClient('http://localhost:8080/cow-server/')
-    #client = ScowClient('http://scout3:8080/cow-server/')
+    #client = ScowClient('http://localhost:8080/cow-server/')
+    client = ScowClient('http://scout2:8080/cow-server/')
     while True:
         try:
             controller = getInput(controllers, 'controller')
@@ -103,6 +103,9 @@ def main():
             prettyPrint(resp)
         else :
             print 'No response'
+
+
+
 
 
 if __name__ == "__main__":
