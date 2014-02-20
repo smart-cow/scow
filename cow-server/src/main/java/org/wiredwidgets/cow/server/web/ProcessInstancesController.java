@@ -26,6 +26,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -351,7 +352,7 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForAssignee(
     		@RequestParam("assignee") String assignee) {
-    	return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
+    	return getProcInstancesForTaskList(taskService.findPersonalTasks(assignee));
     }
     
     /**
@@ -370,6 +371,9 @@ public class ProcessInstancesController extends CowServerController{
     
     /**
      * Same as above, but retrieve only unassigned tasks. 
+     * 
+     *  !!! This removes completed tasks for the sole purpose of not knowing how to change the 
+     *      webapp
      * @return 
      * @see #getProcessInstancesWithTasks() 
      * @see TasksController#getUnassignedTaskssByCandidate(String candidate)
@@ -378,28 +382,34 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(
     		@RequestParam("candidate") String candidate) {
-        return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
+    	
+    	return getProcInstancesForTaskList(taskService.findGroupTasks(candidate));
     }  
     
-    private List<ProcessInstance> mergeTasks(List<Task> tasks) {
-        List<ProcessInstance> instances = processInstanceService.findAllProcessInstances();
-        Map<String, List<Task>> taskMap = new HashMap<String, List<Task> >();
-        List<ProcessInstance> instancesWithTasks = new ArrayList<ProcessInstance>();
-        for (Task task : tasks) {
-            if (taskMap.get(task.getProcessInstanceId()) == null) {
-                taskMap.put(task.getProcessInstanceId(), new ArrayList<Task>());
-            }
-            taskMap.get(task.getProcessInstanceId()).add(task);
-        }
-        
-        for (ProcessInstance pi : instances) {
-            if (taskMap.get(pi.getId()) != null) {          
-                pi.getTasks().addAll(taskMap.get(pi.getId()));
-                instancesWithTasks.add(pi);
-            }
-
-        }
-        return  instancesWithTasks;
-         
+    
+    private ProcessInstances getProcInstancesForTaskList(List<Task> tasks) {
+    	ProcessInstances processInstances = new ProcessInstances();
+    	for (Task task : tasks) {
+    		long pid = convertProcessInstanceKeyToId(task.getProcessInstanceId());
+    		ProcessInstance procInstance = processInstanceService.getProcessInstance(pid);
+    		if (procInstance == null) {
+    			log.error("Task: " + task.getId() + "has no associated process instance");
+    		}
+    		removeCompletedTasks(procInstance);
+    		processInstances.getProcessInstances().add(procInstance);   		
+    	}
+    	return processInstances;
+    }
+    
+    
+    // !!! This removes completed tasks for the sole purpose of not knowing how to change the  webapp
+    private void removeCompletedTasks(ProcessInstance procInstance) {
+    	Iterator<Task> tasks = procInstance.getTasks().iterator();
+    	while (tasks.hasNext()) {
+    		Task task = tasks.next();    		
+    		if (task.getState().equals(org.jbpm.task.Status.Completed.name())) {
+    			tasks.remove();
+    		}
+    	}
     }
 }
