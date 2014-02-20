@@ -26,6 +26,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -370,6 +371,9 @@ public class ProcessInstancesController extends CowServerController{
     
     /**
      * Same as above, but retrieve only unassigned tasks. 
+     * 
+     *  !!! This removes completed tasks for the sole purpose of not knowing how to change the 
+     *      webapp
      * @return 
      * @see #getProcessInstancesWithTasks() 
      * @see TasksController#getUnassignedTaskssByCandidate(String candidate)
@@ -378,8 +382,27 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(
     		@RequestParam("candidate") String candidate) {
-        return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
+    	
+    	ProcessInstances processInstances = new ProcessInstances();
+    	for (Task t : taskService.findGroupTasks(candidate)) {
+    		long pid = convertProcessInstanceKeyToId(t.getProcessInstanceId());
+    		ProcessInstance procInstance = processInstanceService.getProcessInstance(pid);
+    		removeCompletedTasks(procInstance);
+    		processInstances.getProcessInstances().add(procInstance);   		
+    	}
+    	return processInstances;
     }  
+    
+    // !!! This removes completed tasks for the sole purpose of not knowing how to change the  webapp
+    private void removeCompletedTasks(ProcessInstance procInstance) {
+    	Iterator<Task> tasks = procInstance.getTasks().iterator();
+    	while (tasks.hasNext()) {
+    		Task task = tasks.next();    		
+    		if (task.getState().equals(org.jbpm.task.Status.Completed.name())) {
+    			tasks.remove();
+    		}
+    	}
+    }
     
     private List<ProcessInstance> mergeTasks(List<Task> tasks) {
         List<ProcessInstance> instances = processInstanceService.findAllProcessInstances();
@@ -400,6 +423,5 @@ public class ProcessInstancesController extends CowServerController{
 
         }
         return  instancesWithTasks;
-         
     }
 }

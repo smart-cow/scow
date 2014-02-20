@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from scow import *
+from sys import argv
 import json
 
 
@@ -31,23 +32,26 @@ def getInstancesIds(instancesDict):
 def deleteProcInstances(ids):
     for id in ids:
         name, ext = id.split('.')
-        sendScowCommand('ProcessInstancesController', 'deleteProcessInstance', 
+        sendScowCommand('ProcessInstancesController', 'deleteProcessInstance',
                         id = name, ext = ext)
-        break
 
 
 def main():
     global controllers
     global client
     controllers = loadControllers('scowMethods.pickle')
-    client = ScowClient('http://scout2:8080/cow-server/')
-    #client = ScowClient('http://localhost:8080/cow-server/')
+    client = None
+    if len(argv) > 1 and argv[1] == 'local':
+        client = ScowClient('http://localhost:8080/cow-server/')
+    else:
+        client = ScowClient('http://scout2:8080/cow-server/')
+
 
     processInstances = sendScowCommand('ProcessInstancesController', 'getAllProcessInstances')
     procInstanceIds = getInstancesIds(processInstances)
     deleteProcInstances(procInstanceIds)
 
-    
+
 
 
 if __name__ == "__main__":
