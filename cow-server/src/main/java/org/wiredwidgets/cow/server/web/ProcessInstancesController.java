@@ -401,7 +401,7 @@ public class ProcessInstancesController extends CowServerController{
     	return processInstances;
     }
     
-    
+
     // !!! This removes completed tasks for the sole purpose of not knowing how to change the  webapp
     private void removeCompletedTasks(ProcessInstance procInstance) {
     	Iterator<Task> tasks = procInstance.getTasks().iterator();
@@ -411,5 +411,7 @@ public class ProcessInstancesController extends CowServerController{
     			tasks.remove();
     		}
     	}
+
     }
+    
 }
