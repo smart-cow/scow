@@ -137,7 +137,8 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Override
     public void deleteProcessInstancesByKey(String key) {
-        List<ProcessInstanceLog> procList = processInstanceLogRepo.findByProcessIdAndStatus(key, STATE_ACTIVE);
+        List<ProcessInstanceLog> procList = 
+        		JPAProcessInstanceDbLog.findActiveProcessInstances(key);
         for (ProcessInstanceLog pil : procList) {
             try {
                 kSession.abortProcessInstance(pil.getProcessInstanceId());
@@ -150,7 +151,8 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Transactional(readOnly = true)
     @Override
     public List<ProcessInstance> findProcessInstancesByKey(String key) {
-        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(key);
+        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog
+        		.findActiveProcessInstances(key);
         return this.convertProcessInstanceLogs(processInstances);
     }
 

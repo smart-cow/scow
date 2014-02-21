@@ -14,14 +14,9 @@
  */
 package org.wiredwidgets.cow.server.web;
 
-import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +37,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.HistoryTasks;
-import org.wiredwidgets.cow.server.api.service.Participations;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Tasks;
 import org.wiredwidgets.cow.server.service.TaskService;
@@ -201,7 +195,9 @@ public class TasksController extends CowServerController {
      * @param id the task ID
      * @param task
      * @param response
+     * @deprecated use {@link #updateTask(long, Task, UriComponentsBuilder)}
      */
+    @Deprecated
     @RequestMapping(value = "/active/{id}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Task> updateTaskPost(
@@ -249,6 +245,7 @@ public class TasksController extends CowServerController {
      * @param assignee and format=rss specified as query parameters
      * @return response contains a string with rss feed
      */
+    @Deprecated
     @RequestMapping(value = "/active", params = {"format=rss", "assignee"})
     @ResponseBody
     public ResponseEntity<?> getTasksForRSS(@RequestParam("assignee") String assignee) {
@@ -266,15 +263,17 @@ public class TasksController extends CowServerController {
      * Retrieve all active unassigned tasks
      *
      * @return a Tasks object as XML
+     * @deprecated use {@link #getUnassignedTasks()}
      */
+    @Deprecated
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
     public Tasks getUnassignedTasksActive() {
     	return getUnassignedTasks();
     }
     
+    
     @RequestMapping(value = "/unassigned")
-    @ResponseBody
     public Tasks getUnassignedTasks() {
     	Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
@@ -315,6 +314,8 @@ public class TasksController extends CowServerController {
         tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(id));
         return tasks;
     }
+    
+   
 
     /**
      * Retrieve all active tasks for the specified process key
@@ -322,6 +323,7 @@ public class TasksController extends CowServerController {
      * @param processKey the process key
      * @return a Tasks object as XML
      */
+    @Deprecated
     @RequestMapping(value = "/active", params = "processKey")
     @ResponseBody
     public ResponseEntity<?> getTasksByProcessKey(@RequestParam("processKey") String processKey) {
@@ -416,6 +418,7 @@ public class TasksController extends CowServerController {
      * questionable. For example, adding a user as 'owner' or 'candidate' for a
      * task does NOT cause that task to appear on the person's task list.
      */
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}")
     @ResponseBody
     public ResponseEntity<?> getParticipations(@PathVariable("taskId") String id) {
@@ -428,8 +431,10 @@ public class TasksController extends CowServerController {
     	return notImplemented();
     }
 
+
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
-    		params = "group")
+    			params = "group")
     public ResponseEntity<?> addGroupParticipation(
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("group") String group, 
@@ -440,6 +445,8 @@ public class TasksController extends CowServerController {
     	return notImplemented();
     }
 
+    
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
     		params = "group")
     public ResponseEntity<?> deleteGroupParticipation(
@@ -452,6 +459,8 @@ public class TasksController extends CowServerController {
     	return notImplemented();
     }
 
+    
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
     		params = "user")
     public ResponseEntity<?> addUserParticipation(
@@ -464,6 +473,8 @@ public class TasksController extends CowServerController {
     	return notImplemented();
     }
 
+    
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
     		params = "user")
     public ResponseEntity<?> deleteUserParticipation(
@@ -475,7 +486,9 @@ public class TasksController extends CowServerController {
         //response.setStatus(SC_NO_CONTENT); // 204
     	return notImplemented();
     }
-
+    
+    
+    @Deprecated
     @RequestMapping(value = "/orphaned")
     @ResponseBody
     public ResponseEntity<?> findOrphanedTasks() {

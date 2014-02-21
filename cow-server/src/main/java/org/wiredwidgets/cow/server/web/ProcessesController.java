@@ -53,86 +53,110 @@ public class ProcessesController extends CowServerController {
     ProcessInstanceService processInstanceService;
     
     private static Logger log = Logger.getLogger(ProcessesController.class);
-
+    
+    /**
+     *  The terminology for key, id, ext was inconsistent so I extracted then to constants.
+     */
+    private static final String WFLOW_NAME = "workflowName";
+    private static final String WFLOW_NAME_URL = "/{" + WFLOW_NAME + "}";
+    
+    
     /**
      * Retrieve the process (workflow) XML in native (JPDL) format
-     * @param key the process key
+     * @param wflowName the process key
      * @return 
      */
-    @RequestMapping(value = "/{key}", params = "format=native")
+    @RequestMapping(value = WFLOW_NAME_URL, params = "format=native")
     @ResponseBody
-    public Definitions getNativeProcess(@PathVariable("key") String key) {
+    public Definitions getNativeProcess(@PathVariable(WFLOW_NAME) String wflowName) {
         // return new StreamSource(processService.getNativeProcessAsStream(key));
-    	return getBpmn20Process(key);
+    	return getBpmn20Process(wflowName);
     }
 
     /**
      * Retrieves a workflow process in BPMN 2.0 format. This method only works for workflow processes
      * that were originally created in COW format.  
-     * @param key the process key
+     * @param wflowName the process key
      * @return the process in BPMN2.0 format
      */
-    @RequestMapping(value = "/{key}", params = "format=bpmn20")
+    @RequestMapping(value = WFLOW_NAME_URL, params = "format=bpmn20")
     @ResponseBody
-    public Definitions getBpmn20Process(@PathVariable("key") String key) {
-    	return service.getBpmn20Process(key);
+    public Definitions getBpmn20Process(@PathVariable(WFLOW_NAME) String wflowName) {
+    	return service.getBpmn20Process(wflowName);
     }    
     
     /**
      * Retrieves a workflow process in COW format.  This method only works for workflow
      * processes that were originally created in COW format.
-     * @param key the process key.  Note: any "/" characters must be doubly encoded to "%252F"
+     * @param wflowName the process key.  Note: any "/" characters must be doubly encoded to "%252F"
      * @return the XML process document
      */
-    @RequestMapping(value = "/{key}", params = "format=cow", produces="application/xml")
+    @RequestMapping(value = WFLOW_NAME_URL, params = "format=cow", produces="application/xml")
     @ResponseBody
-    public org.wiredwidgets.cow.server.api.model.v2.Process getCowProcess(@PathVariable("key") String key) {
-        return getV2Process(key);
+    public org.wiredwidgets.cow.server.api.model.v2.Process getCowProcess(
+    			@PathVariable(WFLOW_NAME) String wflowName) {
+        return getV2Process(wflowName);
     }  
     
     
-    @RequestMapping(value = "/{id}")
+    @RequestMapping(value = WFLOW_NAME_URL)
     @ResponseBody
-    public Process getProcess(@PathVariable("id") String id) {
-    	return getCowProcess(id);
+    public Process getProcess(@PathVariable(WFLOW_NAME) String wflowName) {
+    	return getCowProcess(wflowName);
     }
     
 
     /**
      * For backward compatibility.  'cow' is preferred over 'v2'.
      * Calls getCowProcess
-     * @param key
+     * @param workFlowName
      * @return 
      * @see #getCowProcess(java.lang.String) 
      */
-    @RequestMapping(value = "/{key}", params = "format=v2", produces="application/xml")
+    @RequestMapping(value = WFLOW_NAME_URL, params = "format=v2", produces="application/xml")
     @ResponseBody
-    public org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(@PathVariable("key") String key) {  
-        return service.getV2Process(key);
+    public org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(
+    			@PathVariable(WFLOW_NAME) String workFlowName) {  
+        return service.getV2Process(workFlowName);
     }
     
     
     
-    @RequestMapping(value = "/{key}", params = "format=graph", produces="application/json")
+    @RequestMapping(value = WFLOW_NAME_URL, params = "format=graph", produces="application/json")
     @ResponseBody
-    public Map<String, Object> getCowProcessGraph(@PathVariable("key") String key) {
-        return service.getProcessGraph(key);
+    public Map<String, Object> getCowProcessGraph(@PathVariable(WFLOW_NAME) String wflowName) {
+        return service.getProcessGraph(wflowName);
     }
     
     
     /**
      * Retrieves the list of running instances for a given process
-     * @param id
+     * @param wflowName
      * @return
      */
-    @RequestMapping(value = "/{id}/processInstances")
+    @RequestMapping(value = WFLOW_NAME_URL + "/processInstances")
     @ResponseBody
-    public ProcessInstances getProcessInstances(@PathVariable("id") String id) {
+    public ProcessInstances getProcessInstances(
+    			@PathVariable(WFLOW_NAME) String wflowName) {
         ProcessInstances pi = new ProcessInstances();
-        pi.getProcessInstances().addAll(processInstanceService.findProcessInstancesByKey(id));
+        pi.getProcessInstances().addAll(processInstanceService
+        		.findProcessInstancesByKey(wflowName));
         return pi;
     }
     
+    
+    
+    @RequestMapping(value = WFLOW_NAME_URL + "/processInstances", method = DELETE)
+    @ResponseBody
+    public ResponseEntity<Void> deleteProcessInstances(
+    			@PathVariable(WFLOW_NAME) String workFlowName) {
+    	
+    	if (getCowProcess(workFlowName) == null) {
+    		return notFound();
+    	}
+    	processInstanceService.deleteProcessInstancesByKey(workFlowName);
+    	return noContent();
+    }
     
     /**
      * Create a new process. Attempts to use process.getKey() as the id. If the id is taken the
@@ -166,34 +190,34 @@ public class ProcessesController extends CowServerController {
      * of the process running the response will have status code 409, and the body will contain
      * the running instances of the process.
      * 
-     * @param id
+     * @param wflowName
      * @param process
      * @param uriBuilder
      * @return
      */
-    @RequestMapping(value = "/{id}", method = PUT)
+    @RequestMapping(value = WFLOW_NAME_URL, method = PUT)
     @ResponseBody
     public ResponseEntity<?> updateProcess(
-    		@PathVariable("id") String id, 
+    		@PathVariable(WFLOW_NAME) String wflowName, 
     		@RequestBody Process process, 
     		UriComponentsBuilder uriBuilder) {
     	
-    	process.setKey(id);
-    	Process existingProcess = service.getV2Process(id);
+    	process.setKey(wflowName);
+    	Process existingProcess = service.getV2Process(wflowName);
     	
     	if (existingProcess == null) {
     		//201 created
     		service.save(process);
-    		return getCreatedResponse("/processes/{id}", id, uriBuilder, process);
+    		return getCreatedResponse("/processes/{id}", wflowName, uriBuilder, process);
     	}
     	
     	
-    	ProcessInstances runningInstances = getProcessInstances(id);
+    	ProcessInstances runningInstances = getProcessInstances(wflowName);
     	
     	if (runningInstances.getProcessInstances().isEmpty()) {
     		//200 OK
     		service.save(process);
-    		return ok(getV2Process(id));
+    		return ok(getV2Process(wflowName));
     	}
     	else {
     		//409 need to delete process instances
@@ -206,20 +230,20 @@ public class ProcessesController extends CowServerController {
      * A process cannot be modified when there are instances of it running. If there are instances
      * of the process running the response will have status code 409, and the body will contain
      * the running instances of the process.
-     * @param id
+     * @param wflowName
      * @return 204 if successful, 404 if not found, 409 if running instances
      */
-    @RequestMapping(value = "/{id}", method = DELETE)
+    @RequestMapping(value = WFLOW_NAME_URL, method = DELETE)
     @ResponseBody
-    public ResponseEntity<?> deleteProcess(@PathVariable("id") String id) {
-    	Process process = service.getV2Process(id);
+    public ResponseEntity<?> deleteProcess(@PathVariable(WFLOW_NAME) String wflowName) {
+    	Process process = service.getV2Process(wflowName);
     	if (process == null) {
     		return notFound();
     	}
     	
-    	ProcessInstances runningInstances = getProcessInstances(id);
+    	ProcessInstances runningInstances = getProcessInstances(wflowName);
     	if (runningInstances.getProcessInstances().isEmpty()) {
-    		service.deleteProcess(id);
+    		service.deleteProcess(wflowName);
     		return noContent();
     	}
     	else {
