@@ -206,6 +206,7 @@ public class TasksController extends CowServerController {
     		@PathVariable("id") long id, 
     		@RequestBody Task task, 
     		UriComponentsBuilder uriBuilder) {
+    	log.warn("Deprecated method called: updateTaskPost(long, Task, UriComponentsBuilder)");
     	return updateTask(id, task, uriBuilder);
     }
     
@@ -251,6 +252,7 @@ public class TasksController extends CowServerController {
     @RequestMapping(value = "/active", params = {"format=rss", "assignee"})
     @ResponseBody
     public ResponseEntity<?> getTasksForRSS(@RequestParam("assignee") String assignee) {
+    	log.warn("Deprecated method called: getTasksForRSS(String)");
         /*
          * FeedFromTaskList fList = new FeedFromTaskList(); String feed =
          * fList.buildFeedByAssignee(assignee,
@@ -271,11 +273,13 @@ public class TasksController extends CowServerController {
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
     public Tasks getUnassignedTasksActive() {
+    	log.warn("Deprecated method called: getUnassignedTasksActive()");
     	return getUnassignedTasks();
     }
     
     
-    @RequestMapping(value = "/unassigned")
+    @RequestMapping(value = "/unassigned", method = RequestMethod.GET)
+    @ResponseBody
     public Tasks getUnassignedTasks() {
     	Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
@@ -329,6 +333,7 @@ public class TasksController extends CowServerController {
     @RequestMapping(value = "/active", params = "processKey")
     @ResponseBody
     public ResponseEntity<?> getTasksByProcessKey(@RequestParam("processKey") String processKey) {
+    	log.warn("Deprecated method called: getTasksByProcessKey(String)");
         /*
          Tasks tasks = new Tasks();
          //tasks.getTasks().addAll(taskService.findAllTasksByProcessKey(processKey));
@@ -424,6 +429,7 @@ public class TasksController extends CowServerController {
     @RequestMapping(value = "/participations/{taskId}")
     @ResponseBody
     public ResponseEntity<?> getParticipations(@PathVariable("taskId") String id) {
+    	log.warn("Deprecated method called: getParticipations(String)");
         /*
          * Participations p = new Participations();
          * p.getParticipations().addAll(this.taskService.getTaskParticipations(id));
@@ -441,6 +447,7 @@ public class TasksController extends CowServerController {
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("group") String group, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: addGroupParticipation(String, String, String)");
         /*
          * this.taskService.addTaskParticipatingGroup(taskId, group, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
@@ -455,6 +462,7 @@ public class TasksController extends CowServerController {
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("group") String group, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: deleteGroupParticipation(String, String, String)");
         /*
          * this.taskService.removeTaskParticipatingGroup(taskId, group, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
@@ -469,6 +477,7 @@ public class TasksController extends CowServerController {
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("user") String user, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: addUserParticipation(String, String, String)");
         /*
          * this.taskService.addTaskParticipatingUser(taskId, user, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
@@ -483,6 +492,7 @@ public class TasksController extends CowServerController {
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("user") String user, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: deleteUserParticipation(String, String, String)");
         /*
          * this.taskService.removeTaskParticipatingUser(taskId, user, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
@@ -494,6 +504,7 @@ public class TasksController extends CowServerController {
     @RequestMapping(value = "/orphaned")
     @ResponseBody
     public ResponseEntity<?> findOrphanedTasks() {
+    	log.warn("Deprecated method called: findOrphanedTasks()");
         /*
          * Tasks tasks = new Tasks();
          * tasks.getTasks().addAll(taskService.findOrphanedTasks()); return

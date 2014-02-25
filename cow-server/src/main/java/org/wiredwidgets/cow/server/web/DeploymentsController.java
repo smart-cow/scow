@@ -61,6 +61,7 @@ public class DeploymentsController {
     @ResponseBody
     @Deprecated
     public Deployment createDeployment(@RequestBody Definitions definitions, @RequestParam String name, @RequestParam(value = "bpmn2", required = false) boolean bpmn2) {
+    	log.warn("Deprecated method called: createDeployment");
         return processService.createDeployment(definitions);
     }
     
@@ -86,6 +87,7 @@ public class DeploymentsController {
     @ResponseBody
     @Deprecated
     public Deployments listDeployments() throws Exception {
+    	log.warn("Deprecated method called: listDeployments");
         Deployments deployments = new Deployments();
         deployments.getDeployments().addAll(processService.findAllDeployments());
         return deployments;

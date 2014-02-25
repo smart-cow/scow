@@ -174,7 +174,7 @@ public class ProcessInstancesController extends CowServerController{
     public ResponseEntity<?> getProcessInstance(
     		@PathVariable("id") String id, 
     		@PathVariable("ext") String ext) {
-    	
+    	log.warn("Deprecated method called: getProcessInstance(String, String)");
         if (ext.equals("*")) {
             ProcessInstances pi = new ProcessInstances();
             
@@ -202,8 +202,11 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping({"", "/active"})
     @ResponseBody
-    public ProcessInstances getAllProcessInstances() {
-        return createProcessInstances(processInstanceService.findAllProcessInstances());
+    public ResponseEntity<ProcessInstances> getAllProcessInstances() {
+    	ProcessInstances processInstances = 
+    			createProcessInstances(processInstanceService.findAllProcessInstances());
+    	return createGetResponse(processInstances);
+     
     }
     
     /**
@@ -224,7 +227,7 @@ public class ProcessInstancesController extends CowServerController{
     public ResponseEntity<?> deleteProcessInstance(
     		@PathVariable("id") String id, 
     		@PathVariable("ext") String ext) {
-    	
+    	log.warn("Deprecated method called: deleteProcessInstance(String, String");
     	id = decode(id);
         if (ext.equals("*")) {
             processInstanceService.deleteProcessInstancesByKey(id);
@@ -271,6 +274,7 @@ public class ProcessInstancesController extends CowServerController{
     public HistoryActivities getProcessInstanceActivities(
     		@PathVariable("id") String id,
     		@PathVariable("ext") Long ext) {
+    	log.warn("Deprecated method called: getProcessInstanceActivities(String, String)");
         return getProcessInstanceActivities(ext);
     }
     
@@ -278,6 +282,7 @@ public class ProcessInstancesController extends CowServerController{
     
     
     @RequestMapping(INSTANCE_ID_URL + "/activities")
+    @ResponseBody
     public HistoryActivities getProcessInstanceActivities(
     			@PathVariable(INSTANCE_ID) long procInstanceId) {
     	
@@ -304,14 +309,15 @@ public class ProcessInstancesController extends CowServerController{
     public ProcessInstance getProcessInstanceStatus(
     		@PathVariable("id") String id, 
     		@PathVariable("ext") Long ext) {
-        return getProcessInstanceStatus(ext);
+    	log.warn("Deprecated method called: getProcessInstance(String, String)");
+        return processInstanceService.getProcessInstanceStatus(ext);
     }
     
     
-    @RequestMapping(INSTANCE_ID_URL + "/status")
-    public ProcessInstance getProcessInstanceStatus(
+    @RequestMapping(value = INSTANCE_ID_URL + "/status", method = GET)
+    public ResponseEntity<ProcessInstance> getProcessInstanceStatus(
     			@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return processInstanceService.getProcessInstanceStatus(procInstanceId);
+    	return createGetResponse(processInstanceService.getProcessInstanceStatus(procInstanceId));
     }
     
     
@@ -349,6 +355,7 @@ public class ProcessInstancesController extends CowServerController{
     		@RequestBody ProcessInstance pi, 
     		@PathVariable("id") String id,
     		@PathVariable("ext") String ext) {
+    	log.warn("Deprecated method called: updateProcessInstance(String, String)");
         // use ID of the URL
         /*pi.setId(decode(id) + "." + ext);
         if (processInstanceService.updateProcessInstance(pi)) {
@@ -393,7 +400,8 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping("/tasks")
     @ResponseBody
     @Deprecated
-    public ResponseEntity<ProcessInstances> getProcessInstancesWithTasks() {     
+    public ResponseEntity<ProcessInstances> getProcessInstancesWithTasks() {    
+    	log.warn("Deprecated method called: getProcessInstancesWithTasks()");
         //return createProcessInstances(mergeTasks(taskService.findAllTasks()));
         //return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
     	return notImplemented();
@@ -423,6 +431,7 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = "/tasks", params = "unassigned=true")
     @ResponseBody
     public ResponseEntity<ProcessInstances> getProcessInstancesWithUnassignedTasks() {
+    	log.warn("Deprecated method called: getProcessInstancesWithUnassignedTasks");
         //return createProcessInstances(mergeTasks(taskService.findAllUnassignedTasks()));
         //return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
     	return notImplemented();
