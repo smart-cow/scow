@@ -21,9 +21,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -414,6 +416,7 @@ public class ProcessInstancesController extends CowServerController{
      * @see #getProcessInstancesWithTasks() 
      * @see TasksController#getTasksByAssignee(String assignee)
      */
+    //TODO deprecate??
     @RequestMapping(value = "/tasks", params = "assignee")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForAssignee(
@@ -446,6 +449,7 @@ public class ProcessInstancesController extends CowServerController{
      * @see #getProcessInstancesWithTasks() 
      * @see TasksController#getUnassignedTaskssByCandidate(String candidate)
      */
+    //TODO deprecate
     @RequestMapping(value = "/tasks", params = "candidate")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(
@@ -457,17 +461,20 @@ public class ProcessInstancesController extends CowServerController{
     
     private ProcessInstances getProcInstancesForTaskList(List<Task> tasks) {
     	ProcessInstances processInstances = new ProcessInstances();
+    	// Use the Set to make sure the same process doesn't get added more than once
+    	// when there are multiple tasks for a single process
+    	Set<String> pidsAdded = new HashSet<String>();
     	for (Task task : tasks) {
     		long pid = convertProcessInstanceKeyToId(task.getProcessInstanceId());
     		ProcessInstance procInstance = processInstanceService.getProcessInstance(pid);
     		
-    		if (procInstance != null) {
+    		if (procInstance == null) {
+    			log.error("Task: " + task.getId() + "has no associated process instance");    			
+    		}
+    		else if (pidsAdded.add(procInstance.getId())) {
     			removeCompletedTasks(procInstance);
         		processInstances.getProcessInstances().add(procInstance);  
-    		}
-    		else {
-    			log.error("Task: " + task.getId() + "has no associated process instance");
-    		}		 		
+    		}    			
     	}
     	return processInstances;
     }
