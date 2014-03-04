@@ -1,27 +1,24 @@
 /**
- * Approved for Public Release: 10-4800. Distribution Unlimited. Copyright 2011
- * The MITRE Corporation, Licensed under the Apache License, Version 2.0 (the
- * "License");
+ * Approved for Public Release: 10-4800. Distribution Unlimited.
+ * Copyright 2014 The MITRE Corporation,
+ * Licensed under the Apache License,
+ * Version 2.0 (the "License");
  *
- * You may not use this file except in compliance with the License. You may
- * obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.
  *
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * See the License for the specific language governing permissions and limitations under the License.
  */
-package org.wiredwidgets.cow.server.web;
 
-import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
+package org.wiredwidgets.cow.server.web;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +39,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.HistoryTasks;
-import org.wiredwidgets.cow.server.api.service.Participations;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Tasks;
 import org.wiredwidgets.cow.server.service.TaskService;
@@ -201,13 +197,16 @@ public class TasksController extends CowServerController {
      * @param id the task ID
      * @param task
      * @param response
+     * @deprecated use {@link #updateTask(long, Task, UriComponentsBuilder)}
      */
+    @Deprecated
     @RequestMapping(value = "/active/{id}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Task> updateTaskPost(
     		@PathVariable("id") long id, 
     		@RequestBody Task task, 
     		UriComponentsBuilder uriBuilder) {
+    	log.warn("Deprecated method called: updateTaskPost(long, Task, UriComponentsBuilder)");
     	return updateTask(id, task, uriBuilder);
     }
     
@@ -249,9 +248,11 @@ public class TasksController extends CowServerController {
      * @param assignee and format=rss specified as query parameters
      * @return response contains a string with rss feed
      */
+    @Deprecated
     @RequestMapping(value = "/active", params = {"format=rss", "assignee"})
     @ResponseBody
     public ResponseEntity<?> getTasksForRSS(@RequestParam("assignee") String assignee) {
+    	log.warn("Deprecated method called: getTasksForRSS(String)");
         /*
          * FeedFromTaskList fList = new FeedFromTaskList(); String feed =
          * fList.buildFeedByAssignee(assignee,
@@ -266,14 +267,18 @@ public class TasksController extends CowServerController {
      * Retrieve all active unassigned tasks
      *
      * @return a Tasks object as XML
+     * @deprecated use {@link #getUnassignedTasks()}
      */
+    @Deprecated
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
     public Tasks getUnassignedTasksActive() {
+    	log.warn("Deprecated method called: getUnassignedTasksActive()");
     	return getUnassignedTasks();
     }
     
-    @RequestMapping(value = "/unassigned")
+    
+    @RequestMapping(value = "/unassigned", method = RequestMethod.GET)
     @ResponseBody
     public Tasks getUnassignedTasks() {
     	Tasks tasks = new Tasks();
@@ -315,6 +320,8 @@ public class TasksController extends CowServerController {
         tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(id));
         return tasks;
     }
+    
+   
 
     /**
      * Retrieve all active tasks for the specified process key
@@ -322,9 +329,11 @@ public class TasksController extends CowServerController {
      * @param processKey the process key
      * @return a Tasks object as XML
      */
+    @Deprecated
     @RequestMapping(value = "/active", params = "processKey")
     @ResponseBody
     public ResponseEntity<?> getTasksByProcessKey(@RequestParam("processKey") String processKey) {
+    	log.warn("Deprecated method called: getTasksByProcessKey(String)");
         /*
          Tasks tasks = new Tasks();
          //tasks.getTasks().addAll(taskService.findAllTasksByProcessKey(processKey));
@@ -416,9 +425,11 @@ public class TasksController extends CowServerController {
      * questionable. For example, adding a user as 'owner' or 'candidate' for a
      * task does NOT cause that task to appear on the person's task list.
      */
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}")
     @ResponseBody
     public ResponseEntity<?> getParticipations(@PathVariable("taskId") String id) {
+    	log.warn("Deprecated method called: getParticipations(String)");
         /*
          * Participations p = new Participations();
          * p.getParticipations().addAll(this.taskService.getTaskParticipations(id));
@@ -428,57 +439,72 @@ public class TasksController extends CowServerController {
     	return notImplemented();
     }
 
+
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
-    		params = "group")
+    			params = "group")
     public ResponseEntity<?> addGroupParticipation(
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("group") String group, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: addGroupParticipation(String, String, String)");
         /*
          * this.taskService.addTaskParticipatingGroup(taskId, group, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
     	return notImplemented();
     }
 
+    
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
     		params = "group")
     public ResponseEntity<?> deleteGroupParticipation(
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("group") String group, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: deleteGroupParticipation(String, String, String)");
         /*
          * this.taskService.removeTaskParticipatingGroup(taskId, group, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
     	return notImplemented();
     }
 
+    
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
     		params = "user")
     public ResponseEntity<?> addUserParticipation(
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("user") String user, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: addUserParticipation(String, String, String)");
         /*
          * this.taskService.addTaskParticipatingUser(taskId, user, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
     	return notImplemented();
     }
 
+    
+    @Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
     		params = "user")
     public ResponseEntity<?> deleteUserParticipation(
     		@PathVariable("taskId") String taskId, 
     		@RequestParam("user") String user, 
     		@RequestParam("type") String type) {
+    	log.warn("Deprecated method called: deleteUserParticipation(String, String, String)");
         /*
          * this.taskService.removeTaskParticipatingUser(taskId, user, type);*/
         //response.setStatus(SC_NO_CONTENT); // 204
     	return notImplemented();
     }
-
+    
+    
+    @Deprecated
     @RequestMapping(value = "/orphaned")
     @ResponseBody
     public ResponseEntity<?> findOrphanedTasks() {
+    	log.warn("Deprecated method called: findOrphanedTasks()");
         /*
          * Tasks tasks = new Tasks();
          * tasks.getTasks().addAll(taskService.findOrphanedTasks()); return

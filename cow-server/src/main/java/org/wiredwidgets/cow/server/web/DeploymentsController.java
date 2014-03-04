@@ -1,3 +1,19 @@
+/**
+ * Approved for Public Release: 10-4800. Distribution Unlimited.
+ * Copyright 2014 The MITRE Corporation,
+ * Licensed under the Apache License,
+ * Version 2.0 (the "License");
+ *
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.
+ *
+ * See the License for the specific language governing permissions and limitations under the License.
+ */
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -45,6 +61,7 @@ public class DeploymentsController {
     @ResponseBody
     @Deprecated
     public Deployment createDeployment(@RequestBody Definitions definitions, @RequestParam String name, @RequestParam(value = "bpmn2", required = false) boolean bpmn2) {
+    	log.warn("Deprecated method called: createDeployment");
         return processService.createDeployment(definitions);
     }
     
@@ -70,6 +87,7 @@ public class DeploymentsController {
     @ResponseBody
     @Deprecated
     public Deployments listDeployments() throws Exception {
+    	log.warn("Deprecated method called: listDeployments");
         Deployments deployments = new Deployments();
         deployments.getDeployments().addAll(processService.findAllDeployments());
         return deployments;

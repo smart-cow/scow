@@ -22,9 +22,11 @@ class ScowClient:
             self.opener = build_opener()
 
         self.get = self.getstr
+        headers = [('Authorization', 'Basic YnJvc2VuYmVyZzpicmlhbg==')]
         if (accptJson):
-            self.opener.addheaders = [('Accept', 'application/json')]
+            headers.append(('Accept', 'application/json'))
             self.get = self.getJson
+        self.opener.addheaders = headers
 
     def getstr(self, path):
         return self.opener.open(self.serverLoc + path).read()

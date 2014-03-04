@@ -1,6 +1,6 @@
 /**
  * Approved for Public Release: 10-4800. Distribution Unlimited.
- * Copyright 2011 The MITRE Corporation,
+ * Copyright 2014 The MITRE Corporation,
  * Licensed under the Apache License,
  * Version 2.0 (the "License");
  *
@@ -13,6 +13,7 @@
  *
  * See the License for the specific language governing permissions and limitations under the License.
  */
+
 package org.wiredwidgets.cow.server.completion;
 
 import org.springframework.beans.BeansException;
