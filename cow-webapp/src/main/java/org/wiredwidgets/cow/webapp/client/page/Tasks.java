@@ -171,7 +171,7 @@ public class Tasks extends PageWidget {
 		sectionStack.addSection(sections[0]);
 		sectionStack.addSection(sections[1]);
 		sectionStack.addSection(sections[2]);
-		
+		//TODO Consider changing to /tasks/?assignee=
 		BpmServiceMain.sendGet("/processInstances/tasks?assignee=" + BpmServiceMain.getUser(), new AsyncCallback<String>() {
 			public void onFailure(Throwable arg0) {
 			}
@@ -187,6 +187,7 @@ public class Tasks extends PageWidget {
 				
 			}
 		});
+		//TODO Consider changing to /tasks/?candidate=
 		BpmServiceMain.sendGet("/processInstances/tasks?candidate=" + BpmServiceMain.getUser(), new AsyncCallback<String>() {
 			public void onFailure(Throwable arg0) {
 			}
@@ -346,7 +347,7 @@ public class Tasks extends PageWidget {
 		final String tempString = map.get("taskID") + outcomeString + varString;
 		if(assign) {
 			submitItem.disable();
-			BpmServiceMain.sendPostNoLocation("/tasks/active/" + map.get("taskID") + "?assignee=" + BpmServiceMain.getUser(), new AsyncCallback<Void>() {
+			BpmServiceMain.sendPostNoLocation("/tasks/" + map.get("taskID") + "/take?assignee=" + BpmServiceMain.getUser(), new AsyncCallback<Void>() {
 				public void onFailure(Throwable arg0) {
 					SC.say("Error. Please ensure that you are connected to the Internet, that the server is currently online, and that the task was not already assigned.");
 					submitItem.enable();

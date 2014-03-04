@@ -39,6 +39,8 @@ public interface BpmServiceAsync {
     public void postForObject(String url, String request, String[] args, AsyncCallback<String> asyncCallback);
 
     public void postForLocation(String url, String request, String[] args, AsyncCallback<String> asyncCallback);
+    
+    public void put(String url, String request, String[] args, AsyncCallback<String> asyncCallback);
 
     public void delete(String url, String[] args, AsyncCallback<Void> asyncCallback);
     

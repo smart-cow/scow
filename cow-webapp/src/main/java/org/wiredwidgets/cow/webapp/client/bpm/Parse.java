@@ -48,7 +48,7 @@ public class Parse {
 		}
 		else if (cname.endsWith(("processInstance"))){
 			ArrayList<Node> nodes = first.getChildNodes();
-			process = nodes.get(7);
+			process = nodes.get(8);
 			String processInstanceName = ((Node)nodes.get(5).getChildNodes().get(0)).getValue();
 			t.setName(processInstanceName);
 
@@ -76,7 +76,7 @@ public class Parse {
 		s = clean(s);		
 		Document doc = Document.xmlParse(s);
 		
-		Node process = (Node)((Document) doc.getChildren().get(0)).getChildren().get(7);
+		Node process = (Node)((Document) doc.getChildren().get(0)).getChildren().get(8);
 		Template t = new Template();
 		t.setMaxId(getAttributeValue(process, "maxId"));
 		t.setName(getAttributeValue(process, "name"));
@@ -107,7 +107,7 @@ public class Parse {
 		else if (cname.endsWith(("processInstance"))){
 			ArrayList<Node> nodes = first.getChildNodes();
 			//TODO make this not hard coded to a specific number
-			process = nodes.get(7);
+			process = nodes.get(8);
 		}
 		Map<String, String> map = new HashMap<String, String>();
 		parseNodeCompletion((Node)(process.getChildNodes().get(0)), map);

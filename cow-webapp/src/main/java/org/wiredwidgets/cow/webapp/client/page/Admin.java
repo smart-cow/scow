@@ -58,7 +58,7 @@ public class Admin extends PageWidget {
 		delete.setTitle("Delete all active workflows");
 		delete.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				BpmServiceMain.sendGet("/processInstances/active", new AsyncCallback<String>() {
+				BpmServiceMain.sendGet("/processInstances", new AsyncCallback<String>() {
 					public void onFailure(Throwable arg0) {
 						SC.say("Failed to retrieve workflow list");
 					}
@@ -69,13 +69,22 @@ public class Admin extends PageWidget {
 							String add = s.split("\\.")[0];
 							instancesToClear.add(add);
 						}
+						
 						for(String s : instancesToClear) {
-							BpmServiceMain.sendDelete("/processInstances/active/" + BpmServiceMain.urlEncode(s) + ".*", new AsyncCallback<Void>() {
-								public void onFailure(Throwable arg0) {}
-								public void onSuccess(Void arg0) {}
+							BpmServiceMain.sendDelete("/processes/" + BpmServiceMain.urlEncode(s)+ "/processInstances", new AsyncCallback<Void>() {
+								public void onFailure(Throwable arg0) {
+									SC.say("Could not delete ALL process instances");
+									
+								}
+								public void onSuccess(Void arg0) {									
+									
+								}
+								
+								
 							});
+							
 						}
-						SC.say("All Executing Workflows Have Ended");
+						SC.say("All Process Intances have ended");
 					}
 				});
 			}
@@ -93,11 +102,11 @@ public class Admin extends PageWidget {
 			public void onClick(ClickEvent event) {
 				
 					
-					SC.askforValue("Which workflow would you like to end?", new ValueCallback() {
+					SC.askforValue("Which workflow (ID number) would you like to end?", new ValueCallback() {
 						 
 		                public void execute(String s) {
 		                    if (s != null) {
-		                    	BpmServiceMain.sendDelete("/processInstances/active/" + s, new AsyncCallback<Void>() {
+		                    	BpmServiceMain.sendDelete("/processInstances/" + s, new AsyncCallback<Void>() {
 									public void onFailure(Throwable arg0) {
 										SC.say("Cannot find Worflow Instance: Please use the instance ID ");
 									}

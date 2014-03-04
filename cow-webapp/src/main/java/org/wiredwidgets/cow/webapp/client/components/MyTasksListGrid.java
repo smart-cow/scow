@@ -210,11 +210,11 @@ public class MyTasksListGrid extends ListGrid {
             	ListGridRecord[] recs = taskGrid.getRecords();
             	for (ListGridRecord rec: recs){
             		String var = rec.getAttribute("varname");
-            		//Current vars must start with $# 
-            		if (var.startsWith("$#") && var!=("$#id")){
-            			var = var.substring(2);
+            		//Current vars must start with $# //Do they? MH 
+            		//if (var.startsWith("$#") && var!=("$#id")){
+            			//var = var.substring(2);
             			varString += "&var=" + BpmServiceMain.urlEncode(var+ ":"+rec.getAttribute("value"));
-            		}
+            		//}
             	}
             	
             	

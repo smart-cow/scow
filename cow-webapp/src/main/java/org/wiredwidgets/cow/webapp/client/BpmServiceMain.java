@@ -258,6 +258,21 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 			bpmService.postForObject(server + url, request, new String[]{}, call);
 	}
 	
+	
+	/**
+	 * Sends a PUT
+	 * @param url The PUT url
+	 * @param request The PUT data
+	 * @param call The AsyncCallback of what to do on success/failure
+	 */
+	public static void sendPut(String url, String request, AsyncCallback<String> call) {
+		if(gadget)
+			makeRequest(server + url, request, "PUT", call);
+		else
+			bpmService.put(server + url, request, new String[]{}, call);
+	}
+	
+	
 	/**
 	 * Sends a DELETE
 	 * @param url The DELETE url
@@ -370,6 +385,7 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
 	 * @param type
 	 * @param callback
 	 */
+	//TODO Does POST_DATA work for PUT?
 	protected static native void makeRequest(String url, String postdata, String type, AsyncCallback<String> callback) /*-{
 		var params = {};
 		params[$wnd.gadgets.io.RequestParameters.REFRESH_INTERVAL] = 1;
@@ -383,6 +399,13 @@ public class BpmServiceMain /*extends Gadget<UserPreferences>*/ implements Entry
             params[$wnd.gadgets.io.RequestParameters.METHOD] = $wnd.gadgets.io.MethodType.GET; //(1)
         else if(type == "DELETE")
 			params[$wnd.gadgets.io.RequestParameters.METHOD] = $wnd.gadgets.io.MethodType.DELETE; //(1)
+		else if(type == "PUT"){
+			params[$wnd.gadgets.io.RequestParameters.METHOD] = $wnd.gadgets.io.MethodType.PUT; //(1)
+            var headers = {};
+            headers['Content-Type'] = 'application/xml';
+            params[$wnd.gadgets.io.RequestParameters.HEADERS]= headers;
+            params[$wnd.gadgets.io.RequestParameters.POST_DATA]= postdata; //(2)
+		}
         $wnd.gadgets.io.makeRequest(url, response, params); //(3)
 	
     	function response(obj) {

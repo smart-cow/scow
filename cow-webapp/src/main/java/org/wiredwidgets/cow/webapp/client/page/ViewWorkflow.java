@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 
+
+
+
+
 import org.wiredwidgets.cow.webapp.client.BpmServiceMain;
 import org.wiredwidgets.cow.webapp.client.PageManager;
 import org.wiredwidgets.cow.webapp.client.PageManager.Pages;
@@ -41,8 +45,14 @@ import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
 
 
+
+
+
+
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.Criteria;
+import com.smartgwt.client.data.Hilite;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Overflow;
 import com.smartgwt.client.types.SelectionStyle;
@@ -64,6 +74,7 @@ import com.smartgwt.client.widgets.form.fields.TextAreaItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.KeyPressEvent;
 import com.smartgwt.client.widgets.form.fields.events.KeyPressHandler;
+import com.smartgwt.client.widgets.grid.CellFormatter;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
@@ -105,7 +116,7 @@ public class ViewWorkflow extends PageWidget {
 				public void onSuccess(String result) {
 					generateBody(result, false);
 					
-					BpmServiceMain.sendGet("/processInstances/active/" + BpmServiceMain.urlEncode(name) + ".*", new AsyncCallback<String>() {
+					BpmServiceMain.sendGet("/processes/" + BpmServiceMain.urlEncode(name) + "/processInstances", new AsyncCallback<String>() {
 						public void onFailure(Throwable arg0) {
 						}
 						public void onSuccess(String arg0) {
@@ -139,7 +150,11 @@ public class ViewWorkflow extends PageWidget {
 	public ViewWorkflow(final String name, final boolean instance) {
 		super();
 		processInstanceId = name;
-		BpmServiceMain.sendGet("/processInstances/active/" + BpmServiceMain.urlEncode(name) + "/status", new AsyncCallback<String>() {
+		//TODO come back to status 
+		String id = BpmServiceMain.urlEncode(name);
+		id = id.substring(id.indexOf(".") + 1);
+		final String finID = id;
+		BpmServiceMain.sendGet("/processInstances/" + id + "/status", new AsyncCallback<String>() {
 			public void onFailure(Throwable caught) {
 				SC.say("Error. Please ensure that you are connected to the Internet, and that the server is currently online.");
 			}
@@ -147,7 +162,8 @@ public class ViewWorkflow extends PageWidget {
 				generateBody(result, instance);
 				timer = new Timer() {
 					public void run() {
-						BpmServiceMain.sendGet("/processInstances/active/" + BpmServiceMain.urlEncode(name) + "/status", new AsyncCallback<String>() {
+
+						BpmServiceMain.sendGet("/processInstances/" + finID + "/status", new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
 								updateTree(false);
 								timer.cancel();
@@ -189,17 +205,19 @@ public class ViewWorkflow extends PageWidget {
 		// TREEGRID
 		grid = new TreeGrid() {
             protected String getBaseStyle(ListGridRecord record, int rowNum, int colNum) {
-				TreeNode node = (TreeNode)record;
+			TreeNode node = (TreeNode)record;
+				if (colNum > 0){				
 				if(node.getAttribute("completion") != null && !node.getAttribute("completion").equals("")) {
 					return node.getAttribute("completion");
+				}
 				}
                 return super.getBaseStyle(record, rowNum, colNum);
             }
 		};
-		grid.setOverflow(Overflow.AUTO);
+		grid.setOverflow(Overflow.CLIP_V);
 		grid.setCanDragResize(true);
-		grid.setResizeFrom("L", "R");
-		grid.setWidth("50%");
+		grid.setResizeFrom("R");
+		grid.setWidth("35%");
 		grid.setHeight100();
 		grid.setSelectionType(SelectionStyle.SINGLE);
 		grid.setData(template.getTree(false));
@@ -208,8 +226,23 @@ public class ViewWorkflow extends PageWidget {
 		grid.setCanAutoFitFields(false);
 		grid.getTree().openAll();
 		ListGridField field = new ListGridField("name", "Name");
-		grid.setFields(field);
-		
+		///* TODO Part of a work in progress to have a separate column for completion status
+		if(instance) {
+			ListGridField completion = new ListGridField("completion", " ");
+			completion.setWidth(40);
+			//Remove the actual text from the cell, but keep the data to choose proper css
+			completion.setCellFormatter(new CellFormatter() {
+	        	public String format(Object value, ListGridRecord record, int rowNum, int colNum) {					
+					return "";
+				}		
+			});
+			grid.setFields(field,completion);
+		}
+		else {
+		//*/
+			grid.setFields(field);
+			
+		}
 		// UPDATE FORM
 		grid.addSelectionChangedHandler(new SelectionChangedHandler() {
 			public void onSelectionChanged(SelectionEvent event) {
@@ -581,7 +614,7 @@ public class ViewWorkflow extends PageWidget {
 		
 		popup.destroy();
 		
-		BpmServiceMain.sendPostLocation("/processInstances/active", out, new AsyncCallback<String>() {
+		BpmServiceMain.sendPostLocation("/processInstances", out, new AsyncCallback<String>() {
 			public void onFailure(Throwable caught) {
 				SC.say("Error. Please ensure that you are connected to the Internet, and that the server is currently online.");
 			}
@@ -598,13 +631,15 @@ public class ViewWorkflow extends PageWidget {
 		    while (it.hasNext()) {
 		        Map.Entry<String, String> pairs = (Map.Entry<String, String>)it.next();
 		        TreeNode node = grid.getTree().find("name", pairs.getKey());
-		        node.setAttribute("completion", pairs.getValue());
+		        node.setAttribute("completion",pairs.getValue());
+
+
 		    }
 		} else {
-			//TODO Doesn't this improperly mark all nodes as completed if any error occurs? MH
+			//If the tree can not be updated all nodes are marked as error
 			TreeNode[] nodes = grid.getTree().getAllNodes();
 			for(int i = 0; i < nodes.length; i++) {
-				nodes[i].setAttribute("completion", "completed");
+				nodes[i].setAttribute("completion", "error");
 			}
 		}
 	    grid.redraw();

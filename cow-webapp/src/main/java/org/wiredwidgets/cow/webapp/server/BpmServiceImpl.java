@@ -24,12 +24,19 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.http.HttpHost;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.wiredwidgets.cow.webapp.client.BpmService;
+import org.wiredwidgets.cow.webapp.client.HttpConflictException;
 
 import com.kytkemo.preemptiveauthenticationresttemplate.web.client.PreemptiveAuthenticationRestTemplate;
 import com.kytkemo.preemptiveauthenticationresttemplate.web.client.PreemptiveAuthenticationScheme;
@@ -97,6 +104,35 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
         }
         return getRestTemplate().postForLocation(baseURL + url, source, (Object[]) args).toString();
 
+    }
+    
+    public String put(String url, String request, String[] args) throws HttpConflictException{
+        // Casting the request object as as Source causes Spring to use the
+        // SourceHttpMessageConverter, which will cause the request body
+        // to be marked as application/xml, as required by the REST service.
+        //StreamSource source = new StreamSource(new StringReader(request));
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);
+        HttpEntity<String> ent = new HttpEntity<String>(request, headers);
+        //Object ex = getRestTemplate().exchange(baseURL + url, source, String.class, (Object[])args);
+        try {
+        	return getRestTemplate().exchange(baseURL + url,HttpMethod.PUT,ent,String.class).getBody();
+        }
+        catch (HttpClientErrorException e){
+        	HttpStatus code = e.getStatusCode();
+        	if (code == HttpStatus.CONFLICT){
+        		HttpConflictException ex = new HttpConflictException();
+        		ex.setBody(e.getResponseBodyAsString());
+        		throw ex;
+        	}
+        	else {
+        		throw e;
+        	}
+        }
+                
+        
+        
     }
 
     public void delete(String url, String[] args) {

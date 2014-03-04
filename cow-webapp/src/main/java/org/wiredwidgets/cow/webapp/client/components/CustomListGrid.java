@@ -146,7 +146,7 @@ public class CustomListGrid extends ListGrid {
 			button.setTitle("Assign To Me");
 			button.addClickHandler(new ClickHandler() {
 				public void onClick(ClickEvent event) {
-					BpmServiceMain.sendPostNoLocation("/tasks/active/" + ((Task)record.getAttributeAsObject("task")).get("id") + "?assignee=" + BpmServiceMain.getUser(), new AsyncCallback<Void>() {
+					BpmServiceMain.sendPostNoLocation("/tasks/" + ((Task)record.getAttributeAsObject("task")).get("id") + "/take?assignee=" + BpmServiceMain.getUser(), new AsyncCallback<Void>() {
 						public void onFailure(Throwable caught) {
 							SC.say("Error. Please ensure that you are connected to the Internet, that the server is currently online, and that the task was not already taken or completed.");
 						}

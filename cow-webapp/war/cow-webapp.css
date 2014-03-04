@@ -374,3 +374,20 @@
     border-bottom: 1px solid #000000; 	
     background-color:#000000;
 }
+
+.error,
+.errorDark,
+.errorOver,
+.errorOverDark,
+.errorSelected,
+.errorSelectedDark,
+.errorSelectedOver,
+.errorSelectedOverDark {
+    font-family:Verdana,Bitstream Vera Sans,sans-serif; font-size:13px; text-overflow:ellipsis;
+    color:gray; 
+    -webkit-text-stroke:0.25px gray;
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid #000000; 	
+    background-color:#FF0000;
+}
+

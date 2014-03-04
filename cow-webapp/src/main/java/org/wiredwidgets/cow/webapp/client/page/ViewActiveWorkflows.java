@@ -20,7 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.wiredwidgets.cow.webapp.client.BpmServiceMain;
 import org.wiredwidgets.cow.webapp.client.PageManager;
@@ -34,10 +37,13 @@ import org.wiredwidgets.cow.webapp.client.bpm.Parse;
 import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
 
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
+import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.SortDirection;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
@@ -57,12 +63,15 @@ import com.smartgwt.client.widgets.grid.events.CellDoubleClickEvent;
 import com.smartgwt.client.widgets.grid.events.CellDoubleClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
+import com.smartgwt.client.widgets.tree.TreeGrid;
+import com.smartgwt.client.widgets.tree.TreeNode;
 
 public class ViewActiveWorkflows extends PageWidget {
 	HashMap<String, String> map;
+	private ArrayList<TreeGrid> trees = new ArrayList<TreeGrid>();
 
 	public ViewActiveWorkflows() {
-			BpmServiceMain.sendGet("/processInstances/active", new AsyncCallback<String>() {
+			BpmServiceMain.sendGet("/processInstances", new AsyncCallback<String>() {
 			public void onFailure(Throwable arg0) {
 				createPage(new Label("Couldn't access list of active workflows"), PageWidget.PAGE_VIEWACTIVEWORKFLOWS);
 			}
@@ -75,6 +84,13 @@ public class ViewActiveWorkflows extends PageWidget {
 	}
 	
 	protected void generateBody(ArrayList<String> names) {
+		//TODO decide on V or H and figure out what the % bug is
+		final VLayout layout = new VLayout();
+		//final HLayout layout = new HLayout();
+		
+		layout.setWidth("100%");
+		layout.setHeight("100%");
+		
 		if(names.size() == 0) {
 			createPage(new Label("No active workflows"), PageWidget.PAGE_VIEWACTIVEWORKFLOWS);
 		} else {
@@ -151,7 +167,7 @@ public class ViewActiveWorkflows extends PageWidget {
 	        
 			
 			
-			BpmServiceMain.sendGet("/processInstances/active", new AsyncCallback<String>() {
+			BpmServiceMain.sendGet("/processInstances", new AsyncCallback<String>() {
 				public void onFailure(Throwable arg0) {
 				}
 				public void onSuccess(String arg0) {
@@ -170,13 +186,23 @@ public class ViewActiveWorkflows extends PageWidget {
 					for(int i = 0; i < names.size(); i++) {
 						rs[i].setAttribute("activeWorkflow", names.get(i));
 						rs[i].setAttribute("id", ids.get(i));
-						BpmServiceMain.sendGet("/processInstances/active/" + BpmServiceMain.urlEncode(ids.get(i)) + "/status", new AsyncCallback<String>() {
+						String id = ids.get(i);
+						id = id.substring(id.indexOf(".") + 1);
+						BpmServiceMain.sendGet("/processInstances/" + id + "/status", new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
 								SC.say("Error. Please ensure that you are connected to the Internet, and that the server is currently online.");
 							}
 							public void onSuccess(String result) {
+								
 								Template template = (result == null || result.equals("") ? new Template() : Parse.parseTemplate(result));
-
+								/*
+								Map<String, String> completionStates = Parse.parseTemplateCompletion(result);
+								TreeGrid tree = generateTree(template, true);
+								trees.add(tree);
+								updateTree(tree, completionStates, true);
+								layout.addMember(tree);
+								layout.redraw();
+								*/
 								
 								RecordList rs = grid.getDataAsRecordList();
 								//For every Record
@@ -281,12 +307,7 @@ public class ViewActiveWorkflows extends PageWidget {
 					
 				}
 			});
-			//TODO decide on V or H and figure out what the % bug is
-			final VLayout layout = new VLayout();
-			//final HLayout layout = new HLayout();
-			
-			layout.setWidth("100%");
-			layout.setHeight("100%");
+		
 			final HLayout labels = new HLayout();
 			//final VLayout labels = new VLayout();
 			labels.setWidth("60%");
@@ -333,15 +354,91 @@ public class ViewActiveWorkflows extends PageWidget {
 			precluded.setValign(VerticalAlignment.CENTER); 		
 			labels.addMember(precluded);
 			
+			
+			//TODO ADD SEVERAL MODIFIED VERSIONS OF VIEW WF INSTANCE
+			//Each wf can have multiple instances each with their own column 
+
+			
 			layout.addMember(grid);
 			layout.addMember(labels);
+			
+			
 			
 			
 			
 			createPage(layout, PageWidget.PAGE_VIEWACTIVEWORKFLOWS);}
 		}
 
+	protected TreeGrid generateTree(Template template, boolean instance){
+			// TREEGRID
+				
+				TreeGrid grid = new TreeGrid() {
+		            protected String getBaseStyle(ListGridRecord record, int rowNum, int colNum) {
+					TreeNode node = (TreeNode)record;
+						if (colNum > 0){				
+						if(node.getAttribute("completion") != null && !node.getAttribute("completion").equals("")) {
+							return node.getAttribute("completion");
+						}
+						}
+		                return super.getBaseStyle(record, rowNum, colNum);
+		            }
+				};
+				grid.setOverflow(Overflow.CLIP_V);
+				grid.setCanDragResize(true);
+				grid.setResizeFrom("R");
+				grid.setWidth("35%");
+				grid.setHeight100();
+				grid.setSelectionType(SelectionStyle.SINGLE);
+				grid.setData(template.getTree(false));
+				grid.setShowConnectors(true);
+				grid.setCanSort(false);
+				grid.setCanAutoFitFields(false);
+				grid.getTree().openAll();
+				ListGridField field = new ListGridField("name", template.getName());
+				///* TODO Part of a work in progress to have a separate column for completion status
+				if(instance) {
+					ListGridField completion = new ListGridField("completion", " ");
+					completion.setWidth(40);
+					//Remove the actual text from the cell, but keep the data to choose proper css
+					completion.setCellFormatter(new CellFormatter() {
+			        	public String format(Object value, ListGridRecord record, int rowNum, int colNum) {					
+							return "";
+						}		
+					});
+					grid.setFields(field,completion);
+				}
+				else {
+				//*/
+					grid.setFields(field);
+					
+				}
+				
+				return grid;
+		
+		
+	}
+	
+	protected void updateTree(TreeGrid tree, Map<String, String> completionStates, boolean success) {
+		
+		if(success) {
+			Iterator<Entry<String, String>> it = completionStates.entrySet().iterator();
+		    while (it.hasNext()) {
+		        Map.Entry<String, String> pairs = (Map.Entry<String, String>)it.next();
+		        TreeNode node = tree.getTree().find("name", pairs.getKey());
+		        node.setAttribute("completion",pairs.getValue());
 
+
+		    }
+		} else {
+			//If the tree can not be updated all nodes are marked as error
+			TreeNode[] nodes = tree.getTree().getAllNodes();
+			for(int i = 0; i < nodes.length; i++) {
+				nodes[i].setAttribute("completion", "error");
+			}
+		}
+	    tree.redraw();
+	}
+	
 	public void refresh() {
 		PageManager.getInstance().setPageHistory(Pages.VIEWACTIVEWORKFLOWS,null);
 	}

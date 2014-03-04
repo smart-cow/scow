@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.wiredwidgets.cow.webapp.client.BpmServiceMain;
+import org.wiredwidgets.cow.webapp.client.HttpConflictException;
 import org.wiredwidgets.cow.webapp.client.PageManager;
 import org.wiredwidgets.cow.webapp.client.PageManager.Pages;
 import org.wiredwidgets.cow.webapp.client.bpm.Activities;
@@ -40,7 +41,10 @@ import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
 
 
+
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.smartgwt.client.types.Cursor;
 import com.smartgwt.client.types.DragAppearance;
 import com.smartgwt.client.types.ImageStyle;
@@ -1180,10 +1184,27 @@ public class EditWorkflow extends PageWidget {
 				template.setName(nameForm.getValueAsString("templateName").replace(" ", "_"));
 				template.getBase().setSequential(nameForm.getValueAsString("order").equals("One at a time, in order") ? true : false);
 				if(!template.hasErrors()) {
-					BpmServiceMain.sendPost("/deployments/v2?name=" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() {
+					//TODO change to use new items (needed for warning about changing running process
+					//sendPost("/processes", template.toString(), new AsyncCallback<String>() if New
+					//sendPut("/processes/" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() { if existing
+					//BpmServiceMain.sendPost("/deployments/v2?name=" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() {
+					BpmServiceMain.sendPut("/processes/" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() {
 						public void onFailure(Throwable caught) {
-							String xml = BpmServiceMain.xmlEncode(template.toString());
-							SC.say("Failed to save template:<br />" + xml);
+							if (caught instanceof HttpConflictException){
+								HttpConflictException ex = (HttpConflictException) caught;														
+									
+								String exBody = ex.getBody();
+								//TODO Make an xpath to show the workflows currently blocking.
+								SC.ask("Failed to save Template due to active Intances. Would you like to :<br />" + exBody, exBody, null);
+								
+						
+							}
+							else {
+								
+								String xml = BpmServiceMain.xmlEncode(template.toString());
+								SC.say("Failed to save template:<br />" + xml);
+								
+							}
 						}
 	
 						public void onSuccess(String result) {

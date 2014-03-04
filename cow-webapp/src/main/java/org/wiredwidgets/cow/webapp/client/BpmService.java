@@ -66,6 +66,18 @@ public interface BpmService extends RemoteService {
      * @return the XML representation returned by the REST service
      */
     public String postForObject(String url, String request, String[] args);
+    
+    
+    /**
+     * Calls a REST service that PUTs an XML object representation and receives an
+     * XML object representation in the response
+     * @param url the URL of the REST service
+     * @param request the XML object representation being posted
+     * @param args arguments to be used to fill in any URL placeholders
+     * @return the XML representation returned by the REST service
+     * @throws HttpConflictException 
+     */
+    public String put(String url, String request, String[] args) throws HttpConflictException;
 
     /**
      * Calls a REST service that DELETEs an object.  Expects no content in the response
