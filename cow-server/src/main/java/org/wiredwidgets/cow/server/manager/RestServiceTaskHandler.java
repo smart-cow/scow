@@ -59,7 +59,7 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 	
 	@Override
 	public void abortWorkItem(WorkItem arg0, WorkItemManager arg1) {	
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 	}
 
 	@SuppressWarnings("unchecked")
