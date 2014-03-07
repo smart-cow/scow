@@ -160,6 +160,17 @@ public abstract class CowServerController {
     protected static <T> ResponseEntity<T> forbidden() {
     	return new ResponseEntity<T>(HttpStatus.FORBIDDEN);
     }
+    
+    
+    /**
+     * Construct a 500 internal server response
+     * @return
+     */
+    protected static <T> ResponseEntity<T> internalError() {
+    	return new ResponseEntity<T>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    
 
     protected static Long convertProcessInstanceKeyToId(String processInstanceKey) {
         int dotPos = processInstanceKey.indexOf('.');

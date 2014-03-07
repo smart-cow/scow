@@ -27,11 +27,10 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.rem2.schema.Node;
 import org.wiredwidgets.rem2.schema.Property;
@@ -53,7 +52,7 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
     protected Jaxb2Marshaller marshaller;
     
     
-	public URI save(org.wiredwidgets.cow.server.api.model.v2.Process process) {
+	public URI save(Process process) {
         Node node = new Node();
         node.setType("rem:marketplace");
         node.setName(process.getKey());
@@ -77,11 +76,12 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
         //RestTemplate restTemplate = new RestTemplate();
         //URI location = restTemplate.postForLocation("http://scout.mitre.org:8080/rem2/cms/workflows", node);
         
-        log.info("\nrem2.url = " + this.getRem2WorkflowLocation());
-        URI location = restTemplate.postForLocation(getRem2WorkflowLocation(), node);
+        log.info("\nrem2.url = " + getWorkflowsUrl());
+        URI location = restTemplate.postForLocation(getWorkflowsUrl(), node);
         return location;
     } 
-    
+	
+	
 	public List<ProcessDefinition> getAll() {
     	List<ProcessDefinition> defs = new ArrayList<ProcessDefinition>();
     	
@@ -102,20 +102,19 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
     		pd.setKey(item.getTitle());
     		defs.add(pd);
     	}
-    	return defs;
-    	
+    	return defs;    	
 	}
+	
+	
 
 	
 	@Override
-	public org.wiredwidgets.cow.server.api.model.v2.Process get(String key) {
-    	String url = getRem2WorkflowLocation() + '/' + key;
+	public Process get(String key) {
     	try {
-    		return restTemplate.getForObject(url, 
-    				org.wiredwidgets.cow.server.api.model.v2.Process.class);
+    		return restTemplate.getForObject(getWorkflowUrl(key), Process.class);
     	}
     	catch (HttpClientErrorException e) {
-    		e.printStackTrace();
+    		log.error("Process: " + key + " was requested from REM server", e);
     		return null;
     	}
 	}
@@ -124,16 +123,14 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
 	
 	@Override
 	public boolean delete(String key) {
-    	String url = getRem2WorkflowLocation() + '/' + key;
     	try {
-    		ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+    		restTemplate.delete(getWorkflowUrl(key));
+    		return true;
     	}
     	catch (HttpClientErrorException e) {
-    		// REM2 returns 404 if the object is not found, which
-    		// triggers this exception in RestTemplate
+    		log.error("Process: " + key + " was requested from REM server", e);
     		return false;
     	}
-    	return true; 
 	}
 	
 	
@@ -146,8 +143,12 @@ public class Rem2WorkflowStorage implements IWorkflowStorage {
 	
 	
     
-    private String getRem2WorkflowLocation(){
-        return this.REM2_URL +"/cms/workflows";        
+    private String getWorkflowsUrl() {
+        return REM2_URL + "/cms/workflows";        
+    }
+    
+    private String getWorkflowUrl(String key) {
+    	return getWorkflowsUrl() + "/" + key;
     }
 
 
