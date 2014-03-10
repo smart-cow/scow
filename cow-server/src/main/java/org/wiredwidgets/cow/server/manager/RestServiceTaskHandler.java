@@ -41,8 +41,9 @@ import org.drools.runtime.process.WorkItem;
 import org.drools.runtime.process.WorkItemHandler;
 import org.drools.runtime.process.WorkItemManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -62,7 +63,6 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 		// Auto-generated method stub
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void executeWorkItem(WorkItem item, WorkItemManager manager) {
 		log.info("Work item: " + item.getName());
@@ -72,46 +72,44 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 			log.info(entry.getKey() + ":" + entry.getValue());
 		}
 
+		// load variables
 		String contentPattern = (String) item.getParameter("content");
+		String contentType = (String) item.getParameter("contentType");
 		String var = (String) item.getParameter("var");
 		String urlPattern = (String) item.getParameter("url");
 		String method = (String) item.getParameter("method"); 
 		String xpath = (String) item.getParameter("resultSelectorXPath");
-		
-		Object variableObj = item.getParameter("Variables");
-		Map<String, Object> variables;
-		if (variableObj instanceof Map) {
-			variables = (Map<String, Object>) variableObj;
-		}
-		else {
-			variables = new HashMap<String, Object>();
-		}
 
-		String result = "";
-		String url = replaceVariables(urlPattern, variables);
+		Map<String, Object> variables = convertVarMap(item.getParameter("Variables"));
 		
-		if (method.equalsIgnoreCase(HttpMethod.GET.name())) {                  
+		
+		
+		//do request
+		String result = null;
+		String url = replaceVariables(urlPattern, variables);	
+		if (method.equalsIgnoreCase(HttpMethod.GET.name())) {     
 			result = restTemplate.getForObject(url, String.class);
 			log.info("GET result: " + result);
 		} 
 		else if (method.equalsIgnoreCase(HttpMethod.POST.name())) {            
-			try {
-				// this method expects XML content in the response.  if none if found an exception is thrown
-				String content = replaceVariables(contentPattern, variables);
-				result = restTemplate.postForObject(url, content, String.class);
-				log.info("POST result: " + result);
-			}
-			catch (RestClientException e) {
-				log.error(e);
-			}
-		}  
+			String body = replaceVariables(contentPattern, variables);
+			HttpEntity<?> httpEntity = getHttpEntity(contentType, body);
+			result = restTemplate.postForObject(url, httpEntity, String.class);
+			log.info("POST result: " + result);
+		}
+
 		
-		try {
-			result = evalXpath(xpath, result);
-		} catch (Exception e) {
-			log.info("xpath evaluation failed, returning entire response");
+		//Eval xpath
+		if (xpath != null && !xpath.isEmpty()) {
+			try {
+				result = evalXpath(xpath, result);
+			} catch (Exception e) {
+				log.info("xpath evaluation failed, returning entire response");
+			}
 		}
 		
+		
+		// Copy variables
 		Map<String, Object> outputMap = new HashMap<String, Object>();
 		outputMap.put("Variables", variables);
 		// update the result variable, if specified
@@ -120,10 +118,34 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 			variables.put(var, result);
 		}   
 	
+		
 		manager.completeWorkItem(item.getId(), outputMap);		
 	}
 
+	
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> convertVarMap(Object varsObj) {
+		Map<String, Object> variables;
+		if (varsObj instanceof Map) {
+			variables = (Map<String, Object>) varsObj;
+		}
+		else {
+			variables = new HashMap<String, Object>();
+		}
+		
+		return variables;
+	}
 
+	private static HttpEntity<?> getHttpEntity(String contentType, Object body) {
+		if (contentType == null || contentType.isEmpty()) {
+			return new HttpEntity<Object>(body);
+		}
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", contentType);
+		return new HttpEntity<Object>(body, headers);	 
+	}
+	
 	
 	private static Pattern regexPattern = Pattern.compile("\\$\\{(.*?)\\}");
 	
