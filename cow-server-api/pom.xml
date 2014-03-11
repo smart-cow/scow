@@ -11,6 +11,15 @@
 	<!--groupId>org.wiredwidgets</groupId-->
 	<artifactId>cow-server-api</artifactId>
 	<url>http://maven.apache.org</url>
+    <dependencies>
+
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics-runtime</artifactId>
+            <version>0.6.5.1</version>
+        </dependency>
+
+    </dependencies>
 	<build>
 		<resources>
 			<resource>
@@ -18,77 +27,92 @@
 			</resource>
 		</resources>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxb2-maven-plugin</artifactId>
-				<version>1.3</version>
-				<!-- Use multiple executions so we can provide different configuration 
-					settings for each one In particular, we need to customize the package names 
-					rather than use the JAXB default -->
-				<executions>
-					<execution>
-						<id>1</id>
-						<configuration>
-							<schemaFiles>cow-service.xsd</schemaFiles>
-							<staleFile>${project.build.directory}/generated-sources/jaxb/.staleFlag1</staleFile>
-							<clearOutputDir>false</clearOutputDir>
-							<!-- Use the binding.xjb binding file to customize the package names 
-								Since we are generating classes for multiple packages in the same pass, we 
-								can't use the packageName property -->
-							<bindingDirectory>src/main/xsd</bindingDirectory>
-						</configuration>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-					<!-- NOTE: the cow-service.xsd now imports the cow-model.xsd -->
-					<!-- so we do not need a separate source generation for cow-model -->
-					<!-- <execution> -->
-					<!-- <id>2</id> -->
-					<!-- <configuration> -->
-					<!-- <schemaFiles>cow-model.xsd</schemaFiles> -->
-					<!-- <packageName>org.wiredwidgets.cow.server.api.model.v2</packageName> -->
-					<!-- <staleFile>${project.build.directory}/generated-sources/jaxb/.staleFlag2</staleFile> -->
-					<!-- <clearOutputDir>false</clearOutputDir> -->
-					<!-- </configuration> -->
-					<!-- <goals> -->
-					<!-- <goal>xjc</goal> -->
-					<!-- </goals> -->
-					<!-- </execution> -->
-					<execution>
-						<id>3</id>
-						<configuration>
-							<schemaFiles>BPMN20.xsd,BPMNDI.xsd,DC.xsd,DI.xsd</schemaFiles>
-							<staleFile>${project.build.directory}/generated-sources/jaxb/.staleFlag3</staleFile>
-							<clearOutputDir>false</clearOutputDir>
-						</configuration>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<!--Need to use a more recent JAXB implementation to support XML namespace 
-							prefix customization See http://hwellmann.blogspot.com/2011/03/jaxb-marshalling-with-custom-namespace.html 
-							JDK 1.6 default version is 2.1.10 -->
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-impl</artifactId>
-						<version>2.2.6</version>
-					</dependency>
-					<dependency>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-xjc</artifactId>
-						<version>2.2.6</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-                                    <!-- change location to the relative to parent project ${basedir}/-->
-					<arguments>-extension ${basedir}/src/main/xsd/simpleBinding.xsd</arguments>
-					<extension>true</extension>
-				</configuration>
-			</plugin>
-			<!--  
+
+
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.8.3</version>
+                <executions>
+
+                    <execution>
+                        <id>cow model</id>
+                        <configuration>
+                            <forceRegenerate>true</forceRegenerate>
+                            <extension>true</extension>
+                            <cleanPackageDirectories>false</cleanPackageDirectories>
+                            <schemaDirectory>src/main/xsd</schemaDirectory>
+                            <schemaExcludes>
+                                <exclude>BPMN20.xsd</exclude>
+                                <exclude>BPMNDI.xsd</exclude>
+                                <exclude>DC.xsd</exclude>
+                                <exclude>DI.xsd</exclude>
+
+                            </schemaExcludes>
+                            <schemaIncludes>
+                                <include>cow-service.xsd</include>
+                                <include>simpleBinding.xsd</include>
+                            </schemaIncludes>
+
+                            <generateDirectory>target/generated-sources/jaxb</generateDirectory>
+                            <args>
+                                <!--<arg>-XtoString</arg>-->
+                                <arg>-Xequals</arg>
+                                <arg>-XhashCode</arg>
+                            </args>
+                            <plugins>
+                                <plugin>
+                                    <groupId>org.jvnet.jaxb2_commons</groupId>
+                                    <artifactId>jaxb2-basics</artifactId>
+                                    <version>0.6.5</version>
+                                </plugin>
+                            </plugins>
+                        </configuration>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+
+                    <execution>
+                        <id>bpmn stuff</id>
+                        <configuration>
+                            <forceRegenerate>true</forceRegenerate>
+                            <extension>true</extension>
+                            <cleanPackageDirectories>false</cleanPackageDirectories>
+                            <schemaDirectory>src/main/xsd</schemaDirectory>
+                            <schemaIncludes>
+                                <include>BPMN20.xsd</include>
+                                <include>BPMNDI.xsd</include>
+                                <include>DC.xsd</include>
+                                <include>DI.xsd</include>
+                                <include>simpleBinding.xsd</include>
+                            </schemaIncludes>
+                                <bindingExcludes>
+                                    <exclude>*.xjb</exclude>
+                                 </bindingExcludes>
+
+                            <generateDirectory>target/generated-sources/jaxb</generateDirectory>
+                            <plugins>
+                                <plugin>
+                                    <groupId>org.jvnet.jaxb2_commons</groupId>
+                                    <artifactId>jaxb2-basics</artifactId>
+                                    <version>0.6.5</version>
+                                </plugin>
+                            </plugins>
+                        </configuration>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+
+                </executions>
+
+            </plugin>
+
+
+
+
+                        <!--
 			<plugin>
 				<groupId>com.mycila.maven-license-plugin</groupId>
 				<artifactId>maven-license-plugin</artifactId>
@@ -132,6 +156,7 @@
 				</executions>
 			</plugin>
 			-->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
