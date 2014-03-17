@@ -12,12 +12,8 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<org.jbpm.version>5.4.0.Final</org.jbpm.version>
-		<org.hibernate.version>4.0.1.Final</org.hibernate.version>
-		<!--<copyright.basedir>${basedir}../../..</copyright.basedir> -->
 		<org.springframework.version>3.2.4.RELEASE</org.springframework.version>
 		<org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
-		<org.drools.version>5.5.0.Final</org.drools.version>
 		<org.jackson.version>2.2.3</org.jackson.version>
 	</properties>
 
@@ -178,93 +174,37 @@
 			<artifactId>jaxb-xjc</artifactId>
 			<version>2.2.6</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.jbpm</groupId> <artifactId>jbpm-flow</artifactId> 
-			<version>${org.jbpm.version}</version> </dependency> <dependency> <groupId>org.jbpm</groupId> 
-			<artifactId>jbpm-flow-builder</artifactId> <version>${org.jbpm.version}</version> 
-			</dependency> -->
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-persistence-jpa</artifactId>
-			<version>${org.jbpm.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-bpmn2</artifactId>
-			<version>${org.jbpm.version}</version>
-		</dependency>
+		
+		<!-- JBPM and Drools -->
+		
 		<dependency>
 			<groupId>org.jbpm</groupId>
 			<artifactId>jbpm-human-task-core</artifactId>
-			<version>${org.jbpm.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.cxf</groupId>
-					<artifactId>cxf-rt-frontend-jaxws</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.cxf</groupId>
-					<artifactId>cxf-rt-databinding-jaxb</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.jbpm</groupId>
-			<artifactId>jbpm-bam</artifactId>
-			<version>${org.jbpm.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+			<artifactId>jbpm-runtime-manager</artifactId>
+		</dependency>		
+
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-core</artifactId>
-			<version>${org.drools.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-spring</artifactId>
-			<version>${org.drools.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
-			<version>${org.drools.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>knowledge-api</artifactId>
-			<version>${org.drools.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-persistence-jpa</artifactId>
-			<version>${org.drools.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		
 		<dependency>
@@ -278,6 +218,7 @@
 			<artifactId>unboundid-ldapsdk</artifactId>
 			<version>2.3.1</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jms_1.1_spec</artifactId>
@@ -313,14 +254,6 @@
 			<version>1.4.3</version>
 		</dependency>
 		
-        <!-- trick to avoid putting exclusions everywhere -->
-        <dependency>
-        	<groupId>commons-logging</groupId>
-        	<artifactId>commons-logging</artifactId>
-        	<version>1.1.1</version>
-        	<scope>provided</scope>
-        </dependency>		
-
 	</dependencies>
 
 	<build>

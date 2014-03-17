@@ -15,6 +15,9 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<reportOutputDirectory>site</reportOutputDirectory>
+		<org.jbpm.version>6.0.1.Final</org.jbpm.version>
+		<org.hibernate.version>4.0.1.Final</org.hibernate.version>
+		<org.drools.version>6.0.1.Final</org.drools.version>		
 	</properties>
 
 	<modules>
@@ -23,6 +26,8 @@
 		<module>cow-server</module>
 		<module>cow-webapp</module>
 	</modules>
+	
+
 
 	<build>
 		<plugins>
@@ -113,4 +118,61 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	<dependencyManagement>
+
+		<dependencies>
+
+			<!-- define drools BOM -->
+
+			<dependency>
+				<groupId>org.drools</groupId>
+				<artifactId>drools-bom</artifactId>
+				<type>pom</type>
+				<version>${org.drools.version}</version>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- define drools BOM -->
+			<dependency>
+				<groupId>org.jbpm</groupId>
+				<artifactId>jbpm-bom</artifactId>
+				<type>pom</type>
+				<version>${org.jbpm.version}</version>
+				<scope>import</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${org.hibernate.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${org.hibernate.version}</version>
+				<scope>provided</scope>
+			</dependency>			
+			
+	        <!-- trick to avoid putting exclusions everywhere -->
+	        <dependency>
+	        	<groupId>commons-logging</groupId>
+	        	<artifactId>commons-logging</artifactId>
+	        	<version>1.1.1</version>
+	        	<scope>provided</scope>
+	        </dependency>			
+
+			<dependency>
+				<groupId>dom4j</groupId>
+				<artifactId>dom4j</artifactId>
+				<version>1.6.1</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
+
+	</dependencyManagement>		
+	
+	
 </project>

@@ -36,19 +36,22 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.drools.runtime.process.WorkflowProcessInstance;
-import org.jbpm.task.Content;
-import org.jbpm.task.Deadline;
-import org.jbpm.task.Deadlines;
-import org.jbpm.task.I18NText;
-import org.jbpm.task.OrganizationalEntity;
-import org.jbpm.task.PeopleAssignments;
-import org.jbpm.task.Status;
-import org.jbpm.task.TaskData;
-import org.jbpm.task.User;
-import org.jbpm.task.query.TaskSummary;
-import org.jbpm.task.service.ContentData;
-//import org.jbpm.task.service.local.LocalTaskService;
-import org.jbpm.task.utils.ContentMarshallerHelper;
+import org.jbpm.services.task.impl.model.TaskImpl;
+import org.jbpm.services.task.utils.ContentMarshallerHelper;
+import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.manager.RuntimeEngine;
+import org.kie.api.runtime.manager.RuntimeManager;
+import org.kie.api.task.model.Content;
+import org.kie.api.task.model.I18NText;
+import org.kie.api.task.model.OrganizationalEntity;
+import org.kie.api.task.model.PeopleAssignments;
+import org.kie.api.task.model.Status;
+import org.kie.api.task.model.TaskData;
+import org.kie.api.task.model.TaskSummary;
+import org.kie.internal.runtime.manager.context.EmptyContext;
+import org.kie.internal.task.api.model.ContentData;
+import org.kie.internal.task.api.model.Deadline;
+import org.kie.internal.task.api.model.Deadlines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -59,6 +62,9 @@ import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.repo.TaskRepository;
+
+import com.sun.tools.xjc.reader.xmlschema.bindinfo.BIConversion.User;
+//import org.jbpm.task.service.local.LocalTaskService;
 
 /**
  *
@@ -75,14 +81,14 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 	UsersService usersService;
 	
 	@Autowired
-	org.jbpm.task.TaskService taskClient;
+	RuntimeManager runtimeManager;
 	
 	private static Logger log = Logger.getLogger(TaskServiceImpl.class);
 
     //private static TypeDescriptor JBPM_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.task.Participation.class));
     private static TypeDescriptor COW_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Participation.class));
-    private static TypeDescriptor JBPM_TASK_SUMMARY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.query.TaskSummary.class));
-    private static TypeDescriptor JBPM_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.Task.class));
+    private static TypeDescriptor JBPM_TASK_SUMMARY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.kie.api.task.model.TaskSummary.class));
+    private static TypeDescriptor JBPM_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.kie.api.task.model.Task.class));
     private static TypeDescriptor COW_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Task.class));
     //private static TypeDescriptor JBPM_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryTask.class));
     private static TypeDescriptor COW_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(HistoryTask.class));
@@ -101,6 +107,10 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	// not a user in the system, so cannot have any tasks!
         	return new ArrayList<Task>();
         }
+        
+		RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
+		KieSession ksession = engine.getKieSession();
+		org.kie.api.task.TaskService taskClient = engine.getTaskService();
 
         //tempTasks.addAll(jbpmTaskService.getTasksAssignedAsPotentialOwner(assignee, "en-UK"));
         tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwner(assignee, "en-UK"));
@@ -116,23 +126,25 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Override
     public String createAdHocTask(Task task) {
-        org.jbpm.task.Task newTask = this.createOrUpdateTask(task);
+        org.kie.api.task.model.Task newTask = this.createOrUpdateTask(task);
         return Long.toString(newTask.getId());
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasks() {
-    	//List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>) jbpmTaskService.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
-        List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>) taskClient.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
-        return this.convertTasks(tasks);
+    	//List<org.kie.api.task.model.Task> tasks = (List<org.kie.api.task.model.Task>) jbpmTaskService.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
+        
+    	// TODO: does this really produce the same results?
+        List<org.kie.api.task.model.TaskSummary> tasks = getTaskService().getTasksByVariousFields(null, true);
+        return this.convertTaskSummarys(tasks);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Task getTask(Long id) {
     	try {
-    		org.jbpm.task.Task task = taskClient.getTask(id);
+    		org.kie.api.task.model.Task task = getTaskService().getTaskById(id);
     		return converter.convert(task, Task.class);
     	}
     	catch (EntityNotFoundException e) {
@@ -144,7 +156,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Override
 	@Transactional(readOnly = true)
     public HistoryTask getHistoryTask(Long id) {
-    	org.jbpm.task.Task task = taskRepo.findOne(id);
+    	// org.kie.api.task.model.Task task = taskRepo.findOne(id);
+    	TaskImpl task = taskRepo.findOne(id);
     	return converter.convert(task, HistoryTask.class);
     }
 
@@ -154,8 +167,11 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     	assert(assignee != null);
     	
         log.debug(assignee + " starting task with ID: " + id);
-        //org.jbpm.task.Task task = jbpmTaskService.getTask(id);
-        org.jbpm.task.Task task = taskClient.getTask(id);
+        //org.kie.api.task.model.Task task = jbpmTaskService.getTask(id);
+        
+        org.kie.api.task.TaskService taskClient = getTaskService();
+        
+        org.kie.api.task.model.Task task = taskClient.getTaskById(id);
         
         // convert to COW task so we can verify the decision
         Task cowTask = converter.convert(task,  Task.class);
@@ -171,7 +187,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         }
         
         //Content inputContent = jbpmTaskService.getContent(task.getTaskData().getDocumentContentId());
-        Content inputContent = taskClient.getContent(task.getTaskData().getDocumentContentId());
+        Content inputContent = taskClient.getContentById(task.getTaskData().getDocumentContentId());
         
         Map<String, Object> inputMap = (Map<String, Object>) ContentMarshallerHelper.unmarshall(inputContent.getContent(), null);
         
@@ -242,7 +258,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         }
        
         // start the task
-        if (task.getTaskData().getStatus().equals(org.jbpm.task.Status.Reserved)) {
+        if (task.getTaskData().getStatus().equals(Status.Reserved)) {
             // change status to InProgress
             log.debug("Starting task...");
             //jbpmTaskService.start(id, assignee); 
@@ -250,10 +266,10 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         }        
         
         // TODO: since we're passing the variables map further down, maybe we don't need to pass it here?  Test this.
-        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);
+        // ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);
         log.debug("Completing task...");
         //jbpmTaskService.complete(id, assignee, contentData);
-        taskClient.complete(id, assignee, contentData);
+        taskClient.complete(id, assignee, outputMap);
         
         // note that we have to pass the variables again.        
         kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), outputMap);
@@ -267,7 +283,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
         //tempTasks = jbpmTaskService.getTasksAssignedAsPotentialOwner("Administrator", "en-UK");
-        tempTasks = taskClient.getTasksAssignedAsPotentialOwner("Administrator", "en-UK");
+        tempTasks = getTaskService().getTasksAssignedAsPotentialOwner("Administrator", "en-UK");
         
         for (TaskSummary task : tempTasks){
             if (task.getStatus() == Status.Ready){
@@ -293,7 +309,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
         //tempTasks.addAll(jbpmTaskService.getTasksAssignedAsPotentialOwner(user, "en-UK"));
-        tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwner(user, "en-UK"));
+        tempTasks.addAll(getTaskService().getTasksAssignedAsPotentialOwner(user, "en-UK"));
         
         for (TaskSummary task : tempTasks){
             if (task.getStatus() == Status.Ready){
@@ -307,7 +323,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Override
     public void takeTask(Long taskId, String userId) {
     	//jbpmTaskService.claim(taskId, userId);
-        taskClient.claim(taskId, userId);
+        getTaskService().claim(taskId, userId);
     }
     
     @Override
@@ -321,7 +337,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         //List<Status> status = Arrays.asList(Status.Completed, Status.Created, Status.Error, Status.Exited, Status.Failed, Status.InProgress, Status.Obsolete, Status.Ready, Status.Reserved, Status.Suspended);
     	List<Status> status = Arrays.asList(Status.Ready);
         //return this.convertTaskSummarys(jbpmTaskService.getTasksByStatusByProcessId(id, status, "en-UK"));
-        return this.convertTaskSummarys(taskClient.getTasksByStatusByProcessId(id, status, "en-UK"));
+        return this.convertTaskSummarys(getTaskService().getTasksByStatusByProcessInstanceId(id, status, "en-UK"));
     }
 
     @Transactional(readOnly = true)
@@ -405,34 +421,34 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
      * JBPM_PARTICIPATION_LIST, COW_PARTICIPATION_LIST); }
      */
     @SuppressWarnings("unchecked")
-	private List<Task> convertTaskSummarys(List<org.jbpm.task.query.TaskSummary> source) {
+	private List<Task> convertTaskSummarys(List<org.kie.api.task.model.TaskSummary> source) {
         return (List<Task>) converter.convert(source, JBPM_TASK_SUMMARY_LIST, COW_TASK_LIST);
     }
     
     @SuppressWarnings("unchecked")
-    private List<Task> convertTasks(List<org.jbpm.task.Task> source) {
+    private List<Task> convertTasks(List<org.kie.api.task.model.Task> source) {
         return (List<Task>) converter.convert(source, JBPM_TASK_LIST, COW_TASK_LIST);
     }
   
     @SuppressWarnings("unchecked")
-	private List<HistoryTask> convertHistoryTasks(List<org.jbpm.task.Task> source) {
+	private List<HistoryTask> convertHistoryTasks(List<org.kie.api.task.model.Task> source) {
 		return (List<HistoryTask>) converter.convert(source, JBPM_TASK_LIST, COW_HISTORY_TASK_LIST);
 	}
 
     @SuppressWarnings("unchecked")
-    private List<HistoryActivity> convertHistoryActivities(List<org.jbpm.task.Task> source) { 
+    private List<HistoryActivity> convertHistoryActivities(List<org.kie.api.task.model.Task> source) { 
     	return (List<HistoryActivity>) converter.convert(source, JBPM_TASK_LIST, COW_HISTORY_ACTIVITY_LIST);
     }
      
     
     //TODO: Check if you can update a task. Can you update task by just adding a task with the same ID?
-    private org.jbpm.task.Task createOrUpdateTask(Task source) {
+    private org.kie.api.task.model.Task createOrUpdateTask(Task source) {
 
-        org.jbpm.task.Task target;
+    	org.kie.api.task.model.Task target;
         boolean newTask = false;
         if (source.getId() == null) {
             newTask = true;
-            target = new org.jbpm.task.Task();
+            target = new org.kie.api.task.model.Task();
         } else {
         	//target = jbpmTaskService.getTask(Long.valueOf(source.getId()));
                 target = taskClient.getTask(Long.valueOf(source.getId()));
@@ -499,5 +515,15 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         }
 
         return target;
+    }
+    
+    private org.kie.api.task.TaskService getTaskService() {
+		RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
+		return engine.getTaskService();
+    }
+    
+    private KieSession getKieSession() {
+		RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
+		return engine.getKieSession();
     }
 }

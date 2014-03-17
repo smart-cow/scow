@@ -92,11 +92,11 @@
 
 	<jee:jndi-lookup id="emf" jndi-name="persistence/myEmf" />
 
-	<bean id="sel" class="org.drools.SystemEventListenerFactory"
-		factory-method="getSystemEventListener" />
+<!-- 	<bean id="sel" class="org.drools.SystemEventListenerFactory" -->
+<!-- 		factory-method="getSystemEventListener" /> -->
 
-	<bean id="jbpmTaskService" class="org.jbpm.task.service.TaskService"
-		c:emf-ref="emf" c:systemEventListener-ref="sel" />
+<!-- 	<bean id="jbpmTaskService" class="org.jbpm.task.service.TaskService" -->
+<!-- 		c:emf-ref="emf" c:systemEventListener-ref="sel" /> -->
 
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
 
@@ -107,19 +107,19 @@
 	<tx:annotation-driven transaction-manager="txManager" />
 
 	<!-- Expose the StatefulKnowledgeSession as a Spring bean -->
-	<jbpm:grid-node id="node1" />
-	<jbpm:kbase id="kBase" node="node1" />
+<!-- 	<jbpm:grid-node id="node1" /> -->
+<!-- 	<jbpm:kbase id="kBase" node="node1" /> -->
 
-	<bean id="knowledgeSessionFactory"
-		class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" />
+<!-- 	<bean id="knowledgeSessionFactory" -->
+<!-- 		class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" /> -->
 
-	<bean id="kSession" factory-bean="knowledgeSessionFactory"
-		factory-method="createInstance" destroy-method="dispose" />
+<!-- 	<bean id="kSession" factory-bean="knowledgeSessionFactory" -->
+<!-- 		factory-method="createInstance" destroy-method="dispose" /> -->
 
 	<!-- Persists the ProcessInstanceLog, NodeInstanceLog and VariableInstanceLog 
 		tables -->
-	<bean id="logger" class="org.jbpm.process.audit.JPAWorkingMemoryDbLogger"
-		c:session-ref="kSession" destroy-method="dispose" />
+<!-- 	<bean id="logger" class="org.jbpm.process.audit.JPAWorkingMemoryDbLogger" -->
+<!-- 		c:session-ref="kSession" destroy-method="dispose" /> -->
 
 	<bean id="restServiceTaskHandler"
 		class="org.wiredwidgets.cow.server.manager.RestServiceTaskHandler" />
@@ -135,8 +135,8 @@
 		<constructor-arg ref="taskService" />
 	</bean>
 
-	<bean id="taskService"
-		class="org.wiredwidgets.cow.server.manager.ThreadLocalLocalTaskService" />
+<!-- 	<bean id="taskService" -->
+<!-- 		class="org.wiredwidgets.cow.server.manager.ThreadLocalLocalTaskService" /> -->
 
 	<!-- Specify packages containing JAXB generated classes for marshalling/unmarshalling -->
 	<oxm:jaxb2-marshaller id="jaxb-marshaller"

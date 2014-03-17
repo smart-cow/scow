@@ -19,17 +19,17 @@ package org.wiredwidgets.cow.server.repo;
 import java.util.Date;
 import java.util.List;
 
-import org.jbpm.task.Task;
-import org.jbpm.task.User;
+import org.jbpm.services.task.impl.model.TaskImpl;
+import org.kie.api.task.model.User;
 import org.springframework.data.repository.CrudRepository;
 
-public interface TaskRepository extends CrudRepository<Task, Long> {
+public interface TaskRepository extends CrudRepository<TaskImpl, Long> {
 	
-	public List<Task> findByTaskDataProcessId(String id);
+	public List<TaskImpl> findByTaskDataProcessId(String id);
 	
-	public List<Task> findByTaskDataProcessInstanceId(Long id);
+	public List<TaskImpl> findByTaskDataProcessInstanceId(Long id);
 	
-	public List<Task> findByTaskDataActualOwnerAndTaskDataCompletedOnBetween(User owner, Date start, Date end);
+	// public List<TaskImpl> findByTaskDataActualOwnerAndTaskDataCompletedOnBetween(User owner, Date start, Date end);
 	
-        public Task findById(Long id);
+    public TaskImpl findById(Long id);
 }
