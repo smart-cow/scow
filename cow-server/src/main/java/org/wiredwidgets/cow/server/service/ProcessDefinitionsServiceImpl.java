@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.cow.server.service.workflow.storage.IWorkflowStorage;
-import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20NewProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 
 /**
  *
@@ -45,7 +45,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
 	KnowledgeBase kbase;
 	
     @Autowired
-    Bpmn20NewProcessBuilder bpmn20ProcessBuilder;	
+    Bpmn20ProcessBuilder bpmn20ProcessBuilder;	
    
     @Autowired
     ProcessService processService;

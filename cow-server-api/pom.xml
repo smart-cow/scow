@@ -11,6 +11,9 @@
 	<!--groupId>org.wiredwidgets</groupId-->
 	<artifactId>cow-server-api</artifactId>
 	<url>http://maven.apache.org</url>
+	<properties>
+		<license.dir>${project.basedir}/..</license.dir>
+	</properties>
 	<build>
 		<resources>
 			<resource>

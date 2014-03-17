@@ -24,7 +24,6 @@ import org.omg.spec.bpmn._20100524.model.TIntermediateCatchEvent;
 import org.omg.spec.bpmn._20100524.model.TSignalEventDefinition;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Signal;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 
 @Component
 public class SignalNodeBuilder extends AbstractFlowNodeBuilder<Signal, TIntermediateCatchEvent> {
@@ -75,6 +74,4 @@ public class SignalNodeBuilder extends AbstractFlowNodeBuilder<Signal, TIntermed
     	return ("signal_" + signal.getSignalId());
     }	
 	
-	
-
 }

@@ -16,15 +16,33 @@
 
 package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 
 @Component
 public class UserTaskNodeBuilder extends AbstractUserTaskNodeBuilder<Task> {
 	
+	public static String TASK_INPUT_VARIABLES_NAME = "Variables";
+	public static String TASK_OUTPUT_VARIABLES_NAME = "Variables";	
+	
 	@Override
 	public Class<Task> getType() {
 		return Task.class;
 	}
+	
+    public static Set<String> getSystemVariableNames() {
+    	Set<String> varNames = new HashSet<String>();
+    	varNames.add(TASK_INPUT_VARIABLES_NAME);
+    	varNames.add("ProcessInstanceName");
+    	varNames.add("Options");
+    	varNames.add("Comment");
+    	varNames.add("TaskName");    	
+    	varNames.add("ActorId");   
+    	varNames.add("GroupId"); 
+    	return varNames;
+    }	
 
 }

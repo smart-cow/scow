@@ -20,7 +20,7 @@ package org.wiredwidgets.cow.server.completion;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Signal;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20SignalEventNodeBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.SignalNodeBuilder;
 
 @Component
 @Scope("prototype")
@@ -29,7 +29,7 @@ public class SignalEvaluator extends AbstractEvaluator<Signal> {
     @Override
     protected void evaluateInternal() {
     	
-    	String signalVar = info.getVariables().get(Bpmn20SignalEventNodeBuilder.getVarName(activity));
+    	String signalVar = info.getVariables().get(SignalNodeBuilder.getVarName(activity));
     	if (signalVar != null) {	
     		this.completionState = CompletionState.COMPLETED;
     	}

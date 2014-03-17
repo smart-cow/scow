@@ -41,7 +41,7 @@ import org.omg.spec.dd._20100524.dc.Point;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
-import org.wiredwidgets.cow.server.transform.v2.AbstractProcessContext;
+import org.wiredwidgets.cow.server.transform.AbstractProcessContext;
 
 
 /**
