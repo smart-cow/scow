@@ -69,15 +69,17 @@ public class FileSystemWorkflowStorage implements IWorkflowStorage {
 		List<ProcessDefinition> procDefs = new ArrayList<ProcessDefinition>();
 		
 		File wFlowDir = new File(WORKFLOW_DIR);
-		for (String filePath : wFlowDir.list()) {
-			
-			String fileName = wFlowDir.getName();		
-			//remove extension from filename
+		for (File file : wFlowDir.listFiles()) {
+			String fileName = file.getName();
+			//remove extension
+			String workflowKey;
 			int lastDot = fileName.lastIndexOf(".xml");
 			if (lastDot == -1) {
-				lastDot = filePath.length();
+				workflowKey = fileName;
 			}
-			String workflowKey = fileName.substring(0, lastDot);
+			else {
+				workflowKey = fileName.substring(0, lastDot);
+			}
 			
 			ProcessDefinition pd = new ProcessDefinition();
 			pd.setName(workflowKey);
