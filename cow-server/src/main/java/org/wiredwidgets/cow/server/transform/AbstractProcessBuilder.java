@@ -15,24 +15,31 @@
  */
 
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Abstract base class for ProcessBuilder subclasses
  */
 
-package org.wiredwidgets.cow.server.transform.v2.bpmn20;
+package org.wiredwidgets.cow.server.transform;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
-import org.wiredwidgets.cow.server.transform.v2.AbstractNodeBuilderFactory;
-import org.wiredwidgets.cow.server.transform.v2.NodeType;
 
 /**
  *
  * @author JKRANES
  */
-public abstract class Bpmn20NodeBuilderFactory<T extends Bpmn20FlowNodeBuilder, S extends Activity> extends AbstractNodeBuilderFactory<T, S>  {
+public abstract class AbstractProcessBuilder<T extends Object> implements ProcessBuilder<T> {
 
-    public Bpmn20NodeBuilderFactory(NodeType nodeType) {
-        super(nodeType, Bpmn20ProcessContext.class);
-    }
-
+//    @Autowired
+//    private ActivityBuilderFactoryFactory activityBuilderFactoryFactory;
+//
+//    /**
+//     * Create an ActivityBuilder instance based on the ProcessContext and Activity
+//     * @param context
+//     * @param activity
+//     * @return 
+//     */
+//    protected ActivityBuilder createActivityBuilder(ProcessContext context, Activity activity) {
+//        return activityBuilderFactoryFactory.createActivityBuilder(context, activity);
+//    }
+   
 }

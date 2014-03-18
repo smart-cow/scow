@@ -37,10 +37,10 @@ import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.model.v2.Variable;
+import org.wiredwidgets.cow.server.transform.AbstractProcessBuilder;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.builder.GraphBuilder;
-import org.wiredwidgets.cow.server.transform.v2.AbstractProcessBuilder;
 
 
 /**
@@ -48,7 +48,7 @@ import org.wiredwidgets.cow.server.transform.v2.AbstractProcessBuilder;
  * @author JKRANES
  */
 @Component
-public class Bpmn20NewProcessBuilder extends AbstractProcessBuilder<Definitions> {
+public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
 	
 	public static final String VARIABLES_PROPERTY = "variables";
 	public static final String PROCESS_INSTANCE_NAME_PROPERTY = "processInstanceName";

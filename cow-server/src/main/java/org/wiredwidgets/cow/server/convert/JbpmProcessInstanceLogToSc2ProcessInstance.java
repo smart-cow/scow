@@ -25,11 +25,9 @@ import static org.drools.runtime.process.ProcessInstance.STATE_ACTIVE;
 import static org.drools.runtime.process.ProcessInstance.STATE_COMPLETED;
 import static org.drools.runtime.process.ProcessInstance.STATE_PENDING;
 import static org.drools.runtime.process.ProcessInstance.STATE_SUSPENDED;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY;
+import static org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

@@ -20,8 +20,7 @@
  */
 package org.wiredwidgets.cow.server.service;
 
-import static org.drools.runtime.process.ProcessInstance.STATE_ACTIVE;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
+import static org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,7 +44,7 @@ import org.wiredwidgets.cow.server.completion.Evaluator;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
 import org.wiredwidgets.cow.server.completion.ProcessInstanceInfo;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 
 
 /**

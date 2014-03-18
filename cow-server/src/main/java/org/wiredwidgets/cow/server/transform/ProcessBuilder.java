@@ -19,27 +19,16 @@
  * and open the template in the editor.
  */
 
-package org.wiredwidgets.cow.server.transform.v2.bpmn20;
+package org.wiredwidgets.cow.server.transform;
 
-import org.springframework.stereotype.Component;
-import org.wiredwidgets.cow.server.api.model.v2.Task;
-import org.wiredwidgets.cow.server.transform.v2.NodeType;
-import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 
 /**
  *
  * @author JKRANES
  */
-@Component
-public class Bpmn20UserTaskNodeBuilderFactory extends Bpmn20NodeBuilderFactory<Bpmn20UserTaskNodeBuilder, Task> {
+public interface ProcessBuilder<T extends Object> {
 
-    public Bpmn20UserTaskNodeBuilderFactory() {
-        super(NodeType.TASK);
-    }
-    
-    @Override
-    public Bpmn20UserTaskNodeBuilder createNodeBuilder(ProcessContext context, Task task) {
-        return new Bpmn20UserTaskNodeBuilder(context, task);
-    }
+    public T build(Process process);
 
 }

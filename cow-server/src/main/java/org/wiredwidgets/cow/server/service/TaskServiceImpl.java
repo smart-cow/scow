@@ -20,9 +20,9 @@
  */
 package org.wiredwidgets.cow.server.service;
 
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilder.DECISION_VAR_NAME;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.VARIABLES_PROPERTY;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME;
+import static org.wiredwidgets.cow.server.transform.graph.bpmn20.DecisionTaskNodeBuilder.DECISION_VAR_NAME;
+import static org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder.VARIABLES_PROPERTY;
+import static org.wiredwidgets.cow.server.transform.graph.bpmn20.UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;
