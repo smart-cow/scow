@@ -19,13 +19,10 @@ package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 import javax.xml.bind.JAXBElement;
 
 import org.omg.spec.bpmn._20100524.model.ResourceAssignmentExpression;
-import org.omg.spec.bpmn._20100524.model.TFlowNode;
 import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.omg.spec.bpmn._20100524.model.TPotentialOwner;
 import org.omg.spec.bpmn._20100524.model.TUserTask;
-import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 
 public abstract class AbstractUserTaskNodeBuilder<T extends Task> extends AbstractFlowNodeBuilder<T, TUserTask> {
 	

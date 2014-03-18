@@ -19,16 +19,39 @@
  * and open the template in the editor.
  */
 
-package org.wiredwidgets.cow.server.transform.v2;
+package org.wiredwidgets.cow.server.transform;
 
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 
 /**
- *
+ * Type T represents the base object type for process nodes
  * @author JKRANES
  */
-public interface ProcessBuilder<T extends Object> {
+public interface ProcessContext<T extends Object> {
 
-    public T build(Process process);
+    /**
+     * Generates id values by appending a sequence number to the specified key.
+     * This provides the option of generating all ids using a single sequence scheme, or generating
+     * separate sequences per node type (e.g. task1, task2, gateway1, gateway2, etc).
+     * @param key
+     * @return
+     */
+    public String generateId(String key);
+
+    /**
+     * Add a new node to the process
+     * @param node
+     */
+    public void addNode(T node);
+
+    Process getSource();
+
+	public abstract void setStartId(String key, int count);
+
+	public abstract int getId(String key);
+
+	public abstract void setRevised(boolean revised);
+
+	public abstract boolean isRevised();
 
 }

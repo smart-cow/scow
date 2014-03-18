@@ -22,8 +22,6 @@ import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TScriptTask;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Script;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 @Component
 public class ScriptNodeBuilder extends AbstractFlowNodeBuilder<Script, TScriptTask> {

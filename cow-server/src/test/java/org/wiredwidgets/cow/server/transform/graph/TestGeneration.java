@@ -37,7 +37,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
-import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20NewProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 import org.wiredwidgets.cow.server.transform.graph.builder.GraphBuilder;
 
 
@@ -49,7 +49,7 @@ public class TestGeneration {
 	Jaxb2Marshaller marshaller;
 	
 	@Autowired
-	Bpmn20NewProcessBuilder builder;
+	Bpmn20ProcessBuilder builder;
 	
 	@Autowired
 	GraphBuilder graphBuilder;

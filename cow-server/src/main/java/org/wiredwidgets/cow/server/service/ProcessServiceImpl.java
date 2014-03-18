@@ -52,7 +52,7 @@ import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.service.workflow.storage.IWorkflowStorage;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
-import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20NewProcessBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 import org.wiredwidgets.cow.server.transform.graph.builder.GraphBuilder;
 
 /**
@@ -66,7 +66,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     private static Logger log = Logger.getLogger(ProcessServiceImpl.class);
     
     @Autowired
-    Bpmn20NewProcessBuilder bpmn20ProcessBuilder;
+    Bpmn20ProcessBuilder bpmn20ProcessBuilder;
     
     
     @Autowired

@@ -19,6 +19,7 @@
 		<org.springframework.security.version>3.1.4.RELEASE</org.springframework.security.version>
 		<org.drools.version>5.5.0.Final</org.drools.version>
 		<org.jackson.version>2.2.3</org.jackson.version>
+		<license.dir>${project.basedir}/..</license.dir>
 	</properties>
 
 	<dependencies>
