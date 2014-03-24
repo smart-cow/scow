@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -159,8 +161,14 @@ public class ProcessInstancesController extends CowServerController{
 
     @RequestMapping(value = INSTANCE_ID_URL, method = GET) 
     public ResponseEntity<ProcessInstance> getProcessInstance(
-    		@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return createGetResponse(processInstanceService.getProcessInstance(procInstanceId));
+    		@PathVariable(INSTANCE_ID)final long procInstanceId) {   	
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
+			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0) 
+						throws Exception {
+				return createGetResponse(processInstanceService
+    					.getProcessInstance(procInstanceId));
+			}
+		});
     }
 
     
@@ -212,8 +220,15 @@ public class ProcessInstancesController extends CowServerController{
     
     @RequestMapping(value = INSTANCE_ID_URL + "/status", method = GET)
     public ResponseEntity<ProcessInstance> getProcessInstanceStatus(
-    			@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return createGetResponse(processInstanceService.getProcessInstanceStatus(procInstanceId));
+    			@PathVariable(INSTANCE_ID) final long procInstanceId) {
+    	
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
+			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0)
+					throws Exception {
+				return createGetResponse(processInstanceService
+						.getProcessInstanceStatus(procInstanceId));
+			}    		
+		});    	
     }
     
     
