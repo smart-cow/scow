@@ -162,6 +162,7 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = INSTANCE_ID_URL, method = GET) 
     public ResponseEntity<ProcessInstance> getProcessInstance(
     		@PathVariable(INSTANCE_ID)final long procInstanceId) {   	
+    	//TODO: Remove do with retry
     	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
 			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0) 
 						throws Exception {
@@ -175,13 +176,20 @@ public class ProcessInstancesController extends CowServerController{
     
     /**
      * Retrieve all active process instances
-     * @return a ProcessInstances object as XML
+     * @return a ProcessInstances object 
      */
     @RequestMapping(value = "", method = GET)    
     public ResponseEntity<ProcessInstances> getAllProcessInstances() {
-    	ProcessInstances processInstances = 
-    			createProcessInstances(processInstanceService.findAllProcessInstances());
-    	return createGetResponse(processInstances);     
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstances>>() {
+			public ResponseEntity<ProcessInstances> doWithRetry(
+					RetryContext arg0) throws Exception {
+				ProcessInstances pis = new ProcessInstances();
+		    	pis.getProcessInstances().addAll(processInstanceService.findAllProcessInstances());
+		    	return ok(pis);     
+			}
+		});
+    	
     }
     
     
@@ -196,13 +204,6 @@ public class ProcessInstancesController extends CowServerController{
     		return notFound();
     	}
     }
-    
-    private ProcessInstances createProcessInstances(List<ProcessInstance> instances) {
-        ProcessInstances pi = new ProcessInstances();
-        pi.getProcessInstances().addAll(instances);
-        return pi;
-    }
-    
     
     
     @RequestMapping(INSTANCE_ID_URL + "/activities")
@@ -221,7 +222,7 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = INSTANCE_ID_URL + "/status", method = GET)
     public ResponseEntity<ProcessInstance> getProcessInstanceStatus(
     			@PathVariable(INSTANCE_ID) final long procInstanceId) {
-    	
+    	//TODO: Remove do with retry
     	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
 			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0)
 					throws Exception {
