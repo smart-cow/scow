@@ -27,6 +27,8 @@ import org.apache.log4j.Logger;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -289,10 +291,15 @@ public class ProcessesController extends CowServerController {
     
     
     
-    private ProcessInstances getProcInstances(String wflowName) {
-        ProcessInstances pis = new ProcessInstances();
-        pis.getProcessInstances().addAll(processInstanceService
-        		.findProcessInstancesByKey(wflowName));
-        return pis;
+    private ProcessInstances getProcInstances(final String wflowName) {
+    	return doWithRetry(new RetryCallback<ProcessInstances>() {
+			public ProcessInstances doWithRetry(RetryContext arg0)
+					throws Exception {
+		        ProcessInstances pis = new ProcessInstances();
+		        pis.getProcessInstances().addAll(processInstanceService
+		        		.findProcessInstancesByKey(wflowName));
+		        return pis;
+			}
+		});
     }
 }

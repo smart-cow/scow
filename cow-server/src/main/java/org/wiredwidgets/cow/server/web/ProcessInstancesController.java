@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -159,21 +161,35 @@ public class ProcessInstancesController extends CowServerController{
 
     @RequestMapping(value = INSTANCE_ID_URL, method = GET) 
     public ResponseEntity<ProcessInstance> getProcessInstance(
-    		@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return createGetResponse(processInstanceService.getProcessInstance(procInstanceId));
+    		@PathVariable(INSTANCE_ID)final long procInstanceId) {   	
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
+			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0) 
+						throws Exception {
+				return createGetResponse(processInstanceService
+    					.getProcessInstance(procInstanceId));
+			}
+		});
     }
 
     
     
     /**
      * Retrieve all active process instances
-     * @return a ProcessInstances object as XML
+     * @return a ProcessInstances object 
      */
     @RequestMapping(value = "", method = GET)    
     public ResponseEntity<ProcessInstances> getAllProcessInstances() {
-    	ProcessInstances processInstances = 
-    			createProcessInstances(processInstanceService.findAllProcessInstances());
-    	return createGetResponse(processInstances);     
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstances>>() {
+			public ResponseEntity<ProcessInstances> doWithRetry(
+					RetryContext arg0) throws Exception {
+				ProcessInstances pis = new ProcessInstances();
+		    	pis.getProcessInstances().addAll(processInstanceService.findAllProcessInstances());
+		    	return ok(pis);     
+			}
+		});
+    	
     }
     
     
@@ -188,13 +204,6 @@ public class ProcessInstancesController extends CowServerController{
     		return notFound();
     	}
     }
-    
-    private ProcessInstances createProcessInstances(List<ProcessInstance> instances) {
-        ProcessInstances pi = new ProcessInstances();
-        pi.getProcessInstances().addAll(instances);
-        return pi;
-    }
-    
     
     
     @RequestMapping(INSTANCE_ID_URL + "/activities")
@@ -212,8 +221,15 @@ public class ProcessInstancesController extends CowServerController{
     
     @RequestMapping(value = INSTANCE_ID_URL + "/status", method = GET)
     public ResponseEntity<ProcessInstance> getProcessInstanceStatus(
-    			@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return createGetResponse(processInstanceService.getProcessInstanceStatus(procInstanceId));
+    			@PathVariable(INSTANCE_ID) final long procInstanceId) {
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
+			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0)
+					throws Exception {
+				return createGetResponse(processInstanceService
+						.getProcessInstanceStatus(procInstanceId));
+			}    		
+		});    	
     }
     
     
