@@ -29,6 +29,8 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,7 +72,7 @@ public class TasksController extends CowServerController {
      */
     @RequestMapping(value = "", method = GET)
     @ResponseBody
-    public Tasks getAllTasks() {
+    public Tasks getAllTasks() {   
         Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllTasks());
         return tasks;      
