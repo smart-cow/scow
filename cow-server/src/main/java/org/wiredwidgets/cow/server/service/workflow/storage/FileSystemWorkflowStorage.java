@@ -29,6 +29,7 @@ import java.util.List;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -37,6 +38,8 @@ import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 
 public class FileSystemWorkflowStorage implements IWorkflowStorage {
 
+	private static Logger log = Logger.getLogger(FileSystemWorkflowStorage.class);
+	
     @Value("${workflow.fs.dir}")
     String WORKFLOW_DIR;
     
@@ -53,6 +56,7 @@ public class FileSystemWorkflowStorage implements IWorkflowStorage {
 			return process;
 		} 
 		catch (IOException e) {
+			log.error("Process: " + key + " was requested", e);
 			e.printStackTrace();
 			return null;
 		}
@@ -65,16 +69,17 @@ public class FileSystemWorkflowStorage implements IWorkflowStorage {
 		List<ProcessDefinition> procDefs = new ArrayList<ProcessDefinition>();
 		
 		File wFlowDir = new File(WORKFLOW_DIR);
-		for (String filePath : wFlowDir.list()) {
-			int lastSlash = filePath.lastIndexOf('/');
-			int lastBackslash = filePath.lastIndexOf("\\");
-			int fNameStart = lastSlash > lastBackslash ? lastSlash : lastBackslash;
-			
-			int lastDot = filePath.lastIndexOf(".xml");
+		for (File file : wFlowDir.listFiles()) {
+			String fileName = file.getName();
+			//remove extension
+			String workflowKey;
+			int lastDot = fileName.lastIndexOf(".xml");
 			if (lastDot == -1) {
-				lastDot = filePath.length();
+				workflowKey = fileName;
 			}
-			String workflowKey = filePath.substring(fNameStart + 1, lastDot);
+			else {
+				workflowKey = fileName.substring(0, lastDot);
+			}
 			
 			ProcessDefinition pd = new ProcessDefinition();
 			pd.setName(workflowKey);

@@ -20,11 +20,22 @@
  */
 package org.wiredwidgets.cow.server.web;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.wiredwidgets.cow.server.api.service.Group;
 import org.wiredwidgets.cow.server.api.service.Groups;
 import org.wiredwidgets.cow.server.api.service.User;
@@ -36,7 +47,7 @@ import org.wiredwidgets.cow.server.service.UsersService;
  * @author FITZPATRICK
  */
 @Controller
-public class UsersController {
+public class UsersController extends CowServerController {
     @Autowired
     UsersService usersService;
 
@@ -137,5 +148,31 @@ public class UsersController {
         String id = usersService.createGroup(name);
         response.setHeader("Location", request.getRequestURL() + "/" + id);
         response.setStatus(HttpServletResponse.SC_CREATED); // 201
+    }
+    
+    
+    
+    /**
+     * Gets the user logged in for the current session
+     * @return the logged in user
+     */
+    @RequestMapping(value = "/whoami")
+    @ResponseBody
+    public ResponseEntity<User> whoAmI() {
+    	String loggedInUsername = ((LdapUserDetailsImpl) 
+    			SecurityContextHolder
+    			.getContext()
+    			.getAuthentication()
+    			.getPrincipal())
+    			.getUsername();
+    	
+    	List<User> users = usersService.findAllUsers();
+    	for (User user : users) {
+    		if (user.getId().equals(loggedInUsername)) {
+    			return ok(user);
+    		}
+    	}
+    	
+    	return notFound();
     }
 }

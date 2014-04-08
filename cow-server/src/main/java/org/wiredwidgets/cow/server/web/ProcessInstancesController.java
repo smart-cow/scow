@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -90,7 +92,7 @@ public class ProcessInstancesController extends CowServerController{
      * @param response
      * @param req 
      */
-    @RequestMapping(value = {"", "/active"}, method = POST, params = "!execute")
+    @RequestMapping(value = "", method = POST, params = "!execute")
     public ResponseEntity<ProcessInstance> startExecution(
     		@RequestBody ProcessInstance pi, 
     		@RequestParam(value = "init-vars", required = false) boolean initVars, 
@@ -116,17 +118,18 @@ public class ProcessInstancesController extends CowServerController{
         return getCreatedResponse("/processInstances/{id}", id, uriBuilder, pi);
     }
     
+    
     /**
      * Simplified variation of startExecution to execute a process with no initial variables
-     * Requires no XML body content
+     * Requires no body content
      * @param execute the process definition key to execute
      * @param name a name to be used for this process instance.  Not strictly required to be
-     * unique, but as this is often used for display to users, it should at least be unique relative
-     * to other active processes.
-     * @param response
-     * @param req 
-     */ 
-    @RequestMapping(value = {"", "/active"}, method = POST, params = "execute")
+     * 		       unique, but as this is often used for display to users, it should at least 
+     * 			   be unique relative to other active processes.
+     * @param uriBuilder
+     * @return
+     */
+    @RequestMapping(value = "", method = POST, params = "execute")
     public ResponseEntity<ProcessInstance> startExecutionSimple(
     		@RequestParam("execute") String execute, 
     		@RequestParam(value = "name", required = false) String name,
@@ -141,6 +144,8 @@ public class ProcessInstancesController extends CowServerController{
         return startExecution(pi, false, uriBuilder);
     }
     
+    
+    
     private void addVariable(ProcessInstance pi, String name, String value) {
         if (pi.getVariables() == null) {
             pi.setVariables(new Variables());
@@ -151,94 +156,40 @@ public class ProcessInstancesController extends CowServerController{
         pi.getVariables().getVariables().add(v);
     }
     
-    /**
-     *  This method does two separate things and doesn't follow conventions 
-     *  (dot in the path variable). Use "/processInstance/{processInstanceIdNumber}" for
-     *  a single processInstance, or "/processes/{workflowName}/processInstances" for
-     *  all processesInstances of a process.
-     * 
-     * Retrieve a specific process instance by its ID
-     *
-     * Current JBPM implementation assigns processInstanceId using
-     * the format {processKey}.{uniqueNumber}
-     * @param id the process key. If the key includes "/" character(s), the key must be doubly URL encoded.  I.e. "/" becomes "%252F"
-     * @param ext the numeric extension of the process instance, or the wildcard "*" for all instances
-     * @param response
-     * @return a ProcessInstance object, if the extension specifies a single instance.  If the extension is the "*" wildcard,
-     * then the return value will be an ProcessInstances object.  If a single ProcessInstance is requested and it does not exist,
-     * a 404 response will be returned.
-     * @deprecated use {@link #getProcessInstance(long)} or 
-     * {@link ProcessesController#getProcessInstances()} instead.  
-     */
-    @Deprecated
-    @RequestMapping(value = "/active/{id}.{ext}", method = GET)
-    @ResponseBody
-    public ResponseEntity<?> getProcessInstance(
-    		@PathVariable("id") String id, 
-    		@PathVariable("ext") String ext) {
-    	log.warn("Deprecated method called: getProcessInstance(String, String)");
-        if (ext.equals("*")) {
-            ProcessInstances pi = new ProcessInstances();
-            
-            pi.getProcessInstances().addAll(processInstanceService
-            		.findProcessInstancesByKey(id));
-            return ok(pi);
-        } 
-        long pid = convertProcessInstanceKeyToId(ext);    
-        ProcessInstance instance = processInstanceService.getProcessInstance(pid);
-        return createGetResponse(instance);
-    }
+    
+    
 
-    
-    
     @RequestMapping(value = INSTANCE_ID_URL, method = GET) 
     public ResponseEntity<ProcessInstance> getProcessInstance(
-    		@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return createGetResponse(processInstanceService.getProcessInstance(procInstanceId));
+    		@PathVariable(INSTANCE_ID)final long procInstanceId) {   	
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
+			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0) 
+						throws Exception {
+				return createGetResponse(processInstanceService
+    					.getProcessInstance(procInstanceId));
+			}
+		});
     }
 
+    
     
     /**
      * Retrieve all active process instances
-     * @return a ProcessInstances object as XML
+     * @return a ProcessInstances object 
      */
-    @RequestMapping({"", "/active"})
-    @ResponseBody
+    @RequestMapping(value = "", method = GET)    
     public ResponseEntity<ProcessInstances> getAllProcessInstances() {
-    	ProcessInstances processInstances = 
-    			createProcessInstances(processInstanceService.findAllProcessInstances());
-    	return createGetResponse(processInstances);
-     
-    }
-    
-    /**
-     * This method does two separate things and doesn't follow conventions 
-     * (dot in the path variable). Use "/processInstance/{processInstanceIdNumber}" for
-     * a single processInstance, or "/processes/{workflowName}/processInstances" for
-     * all processesInstances of a process.
-     * 
-     * Delete a process instance, or all instances for a key
-     * @param id the process key. Doubly URL encode if it contains "/"
-     * @param ext the process instance number, or "*" to delete all for the key
-     * @param response
-     * @deprecated use {@link #deleteProcessInstance(long)} or 
-     * {@link ProcessesController#deleteProcessInstances(String)} instead.  
-     */
-    @Deprecated
-    @RequestMapping(value = "/active/{id}.{ext}", method = DELETE)
-    public ResponseEntity<?> deleteProcessInstance(
-    		@PathVariable("id") String id, 
-    		@PathVariable("ext") String ext) {
-    	log.warn("Deprecated method called: deleteProcessInstance(String, String");
-    	id = decode(id);
-        if (ext.equals("*")) {
-            processInstanceService.deleteProcessInstancesByKey(id);
-            return noContent();
-        }
-        if (processInstanceService.deleteProcessInstance(Long.decode(ext))) {
-        	return noContent();
-        }
-        return notFound();
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstances>>() {
+			public ResponseEntity<ProcessInstances> doWithRetry(
+					RetryContext arg0) throws Exception {
+				ProcessInstances pis = new ProcessInstances();
+		    	pis.getProcessInstances().addAll(processInstanceService.findAllProcessInstances());
+		    	return ok(pis);     
+			}
+		});
+    	
     }
     
     
@@ -254,34 +205,6 @@ public class ProcessInstancesController extends CowServerController{
     	}
     }
     
-    private ProcessInstances createProcessInstances(List<ProcessInstance> instances) {
-        ProcessInstances pi = new ProcessInstances();
-        pi.getProcessInstances().addAll(instances);
-        return pi;
-    }
-    
-    /**
-     * Retrieve HistoryActivities for the specified process igetprocenstance.  HistoryActivities include all
-     * completed and pending activities for the process.  This method may be used
-     * for both open and complete ProcessInstances.
-     * @param id the process key.  Doubly URL encode if it contains "/".  
-     * @param ext
-     * @param response
-     * @return a HistoryActivities object as XML
-     * @deprecated use {@link #getProcessInstanceActivities(long)}
-     */
-    @Deprecated
-    @RequestMapping("/active/{id}.{ext}/activities")
-    @ResponseBody
-    public HistoryActivities getProcessInstanceActivities(
-    		@PathVariable("id") String id,
-    		@PathVariable("ext") Long ext) {
-    	log.warn("Deprecated method called: getProcessInstanceActivities(String, String)");
-        return getProcessInstanceActivities(ext);
-    }
-    
-
-    
     
     @RequestMapping(INSTANCE_ID_URL + "/activities")
     @ResponseBody
@@ -295,31 +218,18 @@ public class ProcessInstancesController extends CowServerController{
     }
     
     
-    /**
-     * Returns a Process object with completion status attributes set, for a specified ProcessInstance ID. 
-     * The completion status attributes are computed for each activity within the process.
-     * @param id the process key.  Doubly URL encode if it contains "/".
-     * @param ext
-     * @param response
-     * @return
-     * @see org.wiredwidgets.cow.server.completion.CompletionState
-     * @deprecated use {@link #getProcessInstanceStatus(long)}
-     */
-    @Deprecated
-    @RequestMapping("/active/{id}.{ext}/status")
-    @ResponseBody
-    public ProcessInstance getProcessInstanceStatus(
-    		@PathVariable("id") String id, 
-    		@PathVariable("ext") Long ext) {
-    	log.warn("Deprecated method called: getProcessInstance(String, String)");
-        return processInstanceService.getProcessInstanceStatus(ext);
-    }
-    
     
     @RequestMapping(value = INSTANCE_ID_URL + "/status", method = GET)
     public ResponseEntity<ProcessInstance> getProcessInstanceStatus(
-    			@PathVariable(INSTANCE_ID) long procInstanceId) {
-    	return createGetResponse(processInstanceService.getProcessInstanceStatus(procInstanceId));
+    			@PathVariable(INSTANCE_ID) final long procInstanceId) {
+    	//TODO: Remove do with retry
+    	return doWithRetry(new RetryCallback<ResponseEntity<ProcessInstance>>() {
+			public ResponseEntity<ProcessInstance> doWithRetry(RetryContext arg0)
+					throws Exception {
+				return createGetResponse(processInstanceService
+						.getProcessInstanceStatus(procInstanceId));
+			}    		
+		});    	
     }
     
     
@@ -333,6 +243,7 @@ public class ProcessInstancesController extends CowServerController{
     }    
     
     
+    
     @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="signal")
     public ResponseEntity<?> signalProcessInstance(
 	    		@PathVariable String id, 
@@ -343,33 +254,6 @@ public class ProcessInstancesController extends CowServerController{
     	processInstanceService.signalProcessInstance(ext, signal, value);
     	return noContent();
     }
-    
-    /**
-     * Update an active process instance.  Only Priority and Variables will be updated.
-     * @param pi
-     * @param id the process key.  Doubly URL encode if it contains "/"
-     * @param ext
-     * @param response
-     */
-    @Deprecated
-    @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="!signal")
-    public ResponseEntity<?> updateProcessInstance(
-    		@RequestBody ProcessInstance pi, 
-    		@PathVariable("id") String id,
-    		@PathVariable("ext") String ext) {
-    	log.warn("Deprecated method called: updateProcessInstance(String, String)");
-        // use ID of the URL
-        /*pi.setId(decode(id) + "." + ext);
-        if (processInstanceService.updateProcessInstance(pi)) {
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }*/
-        //throw new UnsupportedOperationException("Not supported yet.");
-    	return notImplemented();
-    }
-    
-
     
     /**
      * Retrieve the history for a specified process key
@@ -393,6 +277,66 @@ public class ProcessInstancesController extends CowServerController{
     }
     
     /**
+	 * Update an active process instance.  Only Priority and Variables will be updated.
+	 * @param pi
+	 * @param id the process key.  Doubly URL encode if it contains "/"
+	 * @param ext
+	 * @param response
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}.{ext}", method = POST, params="!signal")
+	public ResponseEntity<?> updateProcessInstance(
+			@RequestBody ProcessInstance pi, 
+			@PathVariable("id") String id,
+			@PathVariable("ext") String ext) {
+		log.warn("Deprecated method called: updateProcessInstance(String, String)");
+	    // use ID of the URL
+	    /*pi.setId(decode(id) + "." + ext);
+	    if (processInstanceService.updateProcessInstance(pi)) {
+	        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+	    } else {
+	        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+	    }*/
+	    //throw new UnsupportedOperationException("Not supported yet.");
+		return notImplemented();
+	}
+
+	/**
+	 * 
+	 * @param pi
+	 * @param initVars
+	 * @param uriBuilder
+	 * @return
+	 * @deprecated use {@link #startExecution(ProcessInstance, boolean, UriComponentsBuilder)} 
+	 * 			   instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", method = POST, params = "!execute")
+	public ResponseEntity<ProcessInstance> startExecutionOld(
+			@RequestBody ProcessInstance pi, 
+			@RequestParam(value = "init-vars", required = false) boolean initVars, 
+			UriComponentsBuilder uriBuilder) {
+		
+		log.warn("Deprecated method called: updateProcessInstanceOld(String, String)");
+		return startExecution(pi, initVars, uriBuilder);
+	}
+
+
+	/**
+	 * 
+	 * @return
+	 * @deprecated use {@link #getAllProcessInstances()} instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", method = GET)
+	@ResponseBody    
+	public ResponseEntity<ProcessInstances> getAllProcessInstancesOld() {
+		log.warn("Deprecated method called: getAllProcessInstancesOld()");
+		return getAllProcessInstances();
+	}
+
+
+	/**
      * Retrieve all processInstances that have open tasks, and include the tasks with
      * the processInstance elements.  This provides an efficient method of 
      * retrieving the processInstance attributes along with the task information, 
@@ -410,21 +354,112 @@ public class ProcessInstancesController extends CowServerController{
     }
     
     /**
+	 * 
+	 * @param execute
+	 * @param name
+	 * @param uriBuilder
+	 * @return 
+	 * @deprecated use {@link #startExecution(ProcessInstance, boolean, UriComponentsBuilder)} 
+	 * 			   instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", method = POST, params = "execute")
+	public ResponseEntity<ProcessInstance> startExecutionSimpleOld(
+			@RequestParam("execute") String execute, 
+			@RequestParam(value = "name", required = false) String name,
+			UriComponentsBuilder uriBuilder) {
+		log.warn("Deprecated method called: startExecutionOld(ProcessInstance, boolean, UriComponentsBuilder)");
+		return startExecutionSimple(execute, name, uriBuilder);
+	}
+
+
+	/**
      * Same as above, but retrieve tasks only for the specified assignee.
      * @param assignee
      * @return 
      * @see #getProcessInstancesWithTasks() 
-     * @see TasksController#getTasksByAssignee(String assignee)
+     * @deprecated use @{link TasksController#getTasksByAssignee(String assignee)}
      */
-    //TODO deprecate??
+    @Deprecated
     @RequestMapping(value = "/tasks", params = "assignee")
-    @ResponseBody
+    @ResponseBody   
     public ProcessInstances getProcessInstancesWithTasksForAssignee(
     		@RequestParam("assignee") String assignee) {
+    	log.warn("Deprecated method called: getProcessInstancesWithTasksForAssignee(String)");
     	return getProcInstancesForTaskList(taskService.findPersonalTasks(assignee));
     }
     
     /**
+	 * Retrieve HistoryActivities for the specified process igetprocenstance.  HistoryActivities include all
+	 * completed and pending activities for the process.  This method may be used
+	 * for both open and complete ProcessInstances.
+	 * @param id the process key.  Doubly URL encode if it contains "/".  
+	 * @param ext
+	 * @param response
+	 * @return a HistoryActivities object as XML
+	 * @deprecated use {@link #getProcessInstanceActivities(long)}
+	 */
+	@Deprecated
+	@RequestMapping("/active/{id}.{ext}/activities")
+	@ResponseBody
+	public HistoryActivities getProcessInstanceActivities(
+			@PathVariable("id") String id,
+			@PathVariable("ext") Long ext) {
+		log.warn("Deprecated method called: getProcessInstanceActivities(String, String)");
+	    return getProcessInstanceActivities(ext);
+	}
+
+	/**
+	 * Returns a Process object with completion status attributes set, for a specified ProcessInstance ID. 
+	 * The completion status attributes are computed for each activity within the process.
+	 * @param id the process key.  Doubly URL encode if it contains "/".
+	 * @param ext
+	 * @param response
+	 * @return
+	 * @see org.wiredwidgets.cow.server.completion.CompletionState
+	 * @deprecated use {@link #getProcessInstanceStatus(long)}
+	 */
+	@Deprecated
+	@RequestMapping("/active/{id}.{ext}/status")
+	@ResponseBody
+	public ProcessInstance getProcessInstanceStatus(
+			@PathVariable("id") String id, 
+			@PathVariable("ext") Long ext) {
+		log.warn("Deprecated method called: getProcessInstance(String, String)");
+	    return processInstanceService.getProcessInstanceStatus(ext);
+	}
+
+	/**
+	 * This method does two separate things and doesn't follow conventions 
+	 * (dot in the path variable). Use "/processInstance/{processInstanceIdNumber}" for
+	 * a single processInstance, or "/processes/{workflowName}/processInstances" for
+	 * all processesInstances of a process.
+	 * 
+	 * Delete a process instance, or all instances for a key
+	 * @param id the process key. Doubly URL encode if it contains "/"
+	 * @param ext the process instance number, or "*" to delete all for the key
+	 * @param response
+	 * @deprecated use {@link #deleteProcessInstance(long)} or 
+	 * {@link ProcessesController#deleteProcessInstances(String)} instead.  
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}.{ext}", method = DELETE)
+	public ResponseEntity<?> deleteProcessInstance(
+			@PathVariable("id") String id, 
+			@PathVariable("ext") String ext) {
+		log.warn("Deprecated method called: deleteProcessInstance(String, String");
+		id = decode(id);
+	    if (ext.equals("*")) {
+	        processInstanceService.deleteProcessInstancesByKey(id);
+	        return noContent();
+	    }
+	    if (processInstanceService.deleteProcessInstance(Long.decode(ext))) {
+	    	return noContent();
+	    }
+	    return notFound();
+	}
+
+	/**
      * Same as above, but retrieve only unassigned tasks. 
      * @return 
      * @see #getProcessInstancesWithTasks() 
@@ -440,6 +475,8 @@ public class ProcessInstancesController extends CowServerController{
     	return notImplemented();
     }
     
+    
+    
     /**
      * Same as above, but retrieve only unassigned tasks. 
      * 
@@ -447,19 +484,57 @@ public class ProcessInstancesController extends CowServerController{
      *      webapp
      * @return 
      * @see #getProcessInstancesWithTasks() 
-     * @see TasksController#getUnassignedTaskssByCandidate(String candidate)
+     * @deprecated use {@link TasksController#getUnassignedTasksByCandidate(String)} instead
      */
-    //TODO deprecate
+    @Deprecated
     @RequestMapping(value = "/tasks", params = "candidate")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(
     		@RequestParam("candidate") String candidate) {
-    	
+    	log.warn("Deprecated method called: getProcessInstancesWithTasksForCandidate(String)");
     	return getProcInstancesForTaskList(taskService.findGroupTasks(candidate));
     }  
     
     
-    private ProcessInstances getProcInstancesForTaskList(List<Task> tasks) {
+    /**
+	 *  This method does two separate things and doesn't follow conventions 
+	 *  (dot in the path variable). Use "/processInstance/{processInstanceIdNumber}" for
+	 *  a single processInstance, or "/processes/{workflowName}/processInstances" for
+	 *  all processesInstances of a process.
+	 * 
+	 * Retrieve a specific process instance by its ID
+	 *
+	 * Current JBPM implementation assigns processInstanceId using
+	 * the format {processKey}.{uniqueNumber}
+	 * @param id the process key. If the key includes "/" character(s), the key must be doubly URL encoded.  I.e. "/" becomes "%252F"
+	 * @param ext the numeric extension of the process instance, or the wildcard "*" for all instances
+	 * @param response
+	 * @return a ProcessInstance object, if the extension specifies a single instance.  If the extension is the "*" wildcard,
+	 * then the return value will be an ProcessInstances object.  If a single ProcessInstance is requested and it does not exist,
+	 * a 404 response will be returned.
+	 * @deprecated use {@link #getProcessInstance(long)} or 
+	 * {@link ProcessesController#getProcessInstances()} instead.  
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}.{ext}", method = GET)
+	@ResponseBody
+	public ResponseEntity<?> getProcessInstance(
+			@PathVariable("id") String id, 
+			@PathVariable("ext") String ext) {
+		log.warn("Deprecated method called: getProcessInstance(String, String)");
+	    if (ext.equals("*")) {
+	        ProcessInstances pi = new ProcessInstances();
+	        
+	        pi.getProcessInstances().addAll(processInstanceService
+	        		.findProcessInstancesByKey(id));
+	        return ok(pi);
+	    } 
+	    long pid = convertProcessInstanceKeyToId(ext);    
+	    ProcessInstance instance = processInstanceService.getProcessInstance(pid);
+	    return createGetResponse(instance);
+	}
+
+	private ProcessInstances getProcInstancesForTaskList(List<Task> tasks) {
     	ProcessInstances processInstances = new ProcessInstances();
     	// Use the Set to make sure the same process doesn't get added more than once
     	// when there are multiple tasks for a single process

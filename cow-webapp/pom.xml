@@ -21,7 +21,7 @@
         <org.springframework.version>3.2.7.RELEASE</org.springframework.version>
         <org.springframework.security.version>3.2.0.RELEASE</org.springframework.security.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
-        <copyright.basedir>${basedir}</copyright.basedir>
+        <license.dir>${project.basedir}/..</license.dir>
     </properties>
 
     <dependencies>
@@ -220,46 +220,7 @@
                     <warSourceDirectory>war</warSourceDirectory>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
-                <version>1.6.1</version>
-                <configuration>
-                    <header>COPYRIGHT.txt</header>
-                    <quiet>false</quiet>
-                    <failIfMissing>false</failIfMissing>
-                    <aggregate>true</aggregate>
-                    <includes>
-                        <include>**/src/main/**</include>
-                        <include>**/war/**</include>
-                    </includes>
-                    <excludes>
-                        <exclude>COPYRIGHT.txt</exclude>
-                        <exclude>**/war/images/**</exclude>
-                    </excludes>
-                    <useDefaultExcludes>true</useDefaultExcludes>
-                    <mapping>
-                        <html>MY_HTML_STYLE</html>
-                        <htm>MY_HTML_STYLE</htm>
-                        <jwc>XML_STYLE</jwc>
-                        <application>XML_STYLE</application>
-                    </mapping>
-                    <useDefaultMapping>true</useDefaultMapping>
-                    <encoding>UTF-8</encoding>
-                    <headerDefinitions>
-                        <headerDefinition>MY_HTML_STYLE.xml</headerDefinition>
-                    </headerDefinitions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-headers</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
         </plugins>
     </build>
     <repositories>

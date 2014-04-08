@@ -33,7 +33,7 @@ import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.AbstractUserTaskNodeBuilder;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.UserTaskNodeBuilder;
 
 
 /**
@@ -134,7 +134,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         }
         
         // all other non system variables
-        Set<String> systemVarNames = Bpmn20UserTaskNodeBuilder.getSystemVariableNames();
+        Set<String> systemVarNames = UserTaskNodeBuilder.getSystemVariableNames();
         for (String key : map.keySet()) {
         	if (! systemVarNames.contains(key)) {
         		// log.info("Additional var: " + key);

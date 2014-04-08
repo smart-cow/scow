@@ -16,17 +16,19 @@
 
 package org.wiredwidgets.cow.server.web;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +49,7 @@ import org.wiredwidgets.cow.server.service.ProcessService;
 public class ProcessesController extends CowServerController {
 
     @Autowired
-    ProcessService service;
+    ProcessService procService;
     
     @Autowired
     ProcessInstanceService processInstanceService;
@@ -82,7 +84,7 @@ public class ProcessesController extends CowServerController {
     @RequestMapping(value = WFLOW_NAME_URL, params = "format=bpmn20")
     @ResponseBody
     public Definitions getBpmn20Process(@PathVariable(WFLOW_NAME) String wflowName) {
-    	return service.getBpmn20Process(wflowName);
+    	return procService.getBpmn20Process(wflowName);
     }    
     
     /**
@@ -99,11 +101,7 @@ public class ProcessesController extends CowServerController {
     }  
     
     
-    @RequestMapping(value = WFLOW_NAME_URL)
-    @ResponseBody
-    public Process getProcess(@PathVariable(WFLOW_NAME) String wflowName) {
-    	return getCowProcess(wflowName);
-    }
+
     
 
     /**
@@ -117,7 +115,7 @@ public class ProcessesController extends CowServerController {
     @ResponseBody
     public org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(
     			@PathVariable(WFLOW_NAME) String workFlowName) {  
-        return service.getV2Process(workFlowName);
+        return procService.getV2Process(workFlowName);
     }
     
     
@@ -125,7 +123,23 @@ public class ProcessesController extends CowServerController {
     @RequestMapping(value = WFLOW_NAME_URL, params = "format=graph", produces="application/json")
     @ResponseBody
     public Map<String, Object> getCowProcessGraph(@PathVariable(WFLOW_NAME) String wflowName) {
-        return service.getProcessGraph(wflowName);
+        return procService.getProcessGraph(wflowName);
+    }
+    
+    
+    
+    
+    
+    
+    /**
+     * Get a Process (workflow)
+     * @param wflowName The name of the Process
+     * @return
+     */
+    @RequestMapping(value = WFLOW_NAME_URL, method = GET)
+    @ResponseBody
+    public ResponseEntity<Process> getProcess(@PathVariable(WFLOW_NAME) String wflowName) {
+    	return createGetResponse(procService.getV2Process(wflowName));
     }
     
     
@@ -134,27 +148,33 @@ public class ProcessesController extends CowServerController {
      * @param wflowName
      * @return
      */
-    @RequestMapping(value = WFLOW_NAME_URL + "/processInstances")
+    @RequestMapping(value = WFLOW_NAME_URL + "/processInstances", method = GET)
     @ResponseBody
-    public ProcessInstances getProcessInstances(
+    public ResponseEntity<ProcessInstances> getProcessInstances(
     			@PathVariable(WFLOW_NAME) String wflowName) {
-        ProcessInstances pi = new ProcessInstances();
-        pi.getProcessInstances().addAll(processInstanceService
-        		.findProcessInstancesByKey(wflowName));
-        return pi;
+    	
+    	if (!processExists(wflowName)) {
+    		return notFound();
+    	}
+    	ProcessInstances pis = getProcInstances(wflowName);
+        return ok(pis);
     }
     
     
-    
+    /**
+     * Delete all running instances of process
+     * @param wflowName
+     * @return 204 on success, 404 if process doesn't exist
+     */
     @RequestMapping(value = WFLOW_NAME_URL + "/processInstances", method = DELETE)
     @ResponseBody
     public ResponseEntity<Void> deleteProcessInstances(
-    			@PathVariable(WFLOW_NAME) String workFlowName) {
+    			@PathVariable(WFLOW_NAME) String wflowName) {
     	
-    	if (getCowProcess(workFlowName) == null) {
+    	if (!processExists(wflowName)) {
     		return notFound();
     	}
-    	processInstanceService.deleteProcessInstancesByKey(workFlowName);
+    	processInstanceService.deleteProcessInstancesByKey(wflowName);
     	return noContent();
     }
     
@@ -173,10 +193,9 @@ public class ProcessesController extends CowServerController {
     public ResponseEntity<Process> createProcess(
     		@RequestBody Process process, UriComponentsBuilder uriBuilder) {
     	
-    	String id = process.getKey();
-    	id = getUniqueKey(id);
+    	String id = getUniqueKey(process.getKey());
     	process.setKey(id);
-    	service.save(process);
+    	procService.save(process);
 	
     	return getCreatedResponse("/processes/{id}", id, uriBuilder, getV2Process(id));
     }
@@ -203,20 +222,19 @@ public class ProcessesController extends CowServerController {
     		UriComponentsBuilder uriBuilder) {
     	
     	process.setKey(wflowName);
-    	Process existingProcess = service.getV2Process(wflowName);
     	
-    	if (existingProcess == null) {
+    	if (!processExists(wflowName)) {
     		//201 created
-    		service.save(process);
+    		procService.save(process);
     		return getCreatedResponse("/processes/{id}", wflowName, uriBuilder, process);
     	}
     	
     	
-    	ProcessInstances runningInstances = getProcessInstances(wflowName);
+    	ProcessInstances runningInstances = getProcInstances(wflowName);
     	
     	if (runningInstances.getProcessInstances().isEmpty()) {
     		//200 OK
-    		service.save(process);
+    		procService.save(process);
     		return ok(getV2Process(wflowName));
     	}
     	else {
@@ -234,31 +252,54 @@ public class ProcessesController extends CowServerController {
      * @return 204 if successful, 404 if not found, 409 if running instances
      */
     @RequestMapping(value = WFLOW_NAME_URL, method = DELETE)
-    @ResponseBody
+    @ResponseBody    
     public ResponseEntity<?> deleteProcess(@PathVariable(WFLOW_NAME) String wflowName) {
-    	Process process = service.getV2Process(wflowName);
-    	if (process == null) {
+    	
+    	if (!processExists(wflowName)) {
     		return notFound();
     	}
     	
-    	ProcessInstances runningInstances = getProcessInstances(wflowName);
-    	if (runningInstances.getProcessInstances().isEmpty()) {
-    		service.deleteProcess(wflowName);
-    		return noContent();
-    	}
-    	else {
-    		//409 need to delete process instances
+    	ProcessInstances runningInstances = getProcInstances(wflowName);
+    	if (!runningInstances.getProcessInstances().isEmpty()) {
     		return conflict(runningInstances);
     	}
+    	
+    	if (!procService.deleteProcess(wflowName)) {
+    		return internalError();
+    	}
+
+    	return noContent();
     }
+    
+    
     
     private String getUniqueKey(String key)  {
     	String orginalKey = key;
     	int i = 1;
-    	while (getCowProcess(key) != null) {
+    	while (processExists(key)) {
     		key = orginalKey + i;
     		i++;
     	}
     	return key;
+    }
+    
+    
+    
+    private boolean processExists(String wflowName) {
+    	return procService.getV2Process(wflowName) != null;
+    }
+    
+    
+    
+    private ProcessInstances getProcInstances(final String wflowName) {
+    	return doWithRetry(new RetryCallback<ProcessInstances>() {
+			public ProcessInstances doWithRetry(RetryContext arg0)
+					throws Exception {
+		        ProcessInstances pis = new ProcessInstances();
+		        pis.getProcessInstances().addAll(processInstanceService
+		        		.findProcessInstancesByKey(wflowName));
+		        return pis;
+			}
+		});
     }
 }

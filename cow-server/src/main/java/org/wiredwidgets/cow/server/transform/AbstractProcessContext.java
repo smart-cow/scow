@@ -19,11 +19,10 @@
  * Each BPMN notation system, e.g. BPMN20 and JPDL, will have its own ProcessContext implementation
  */
 
-package org.wiredwidgets.cow.server.transform.v2;
+package org.wiredwidgets.cow.server.transform;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 

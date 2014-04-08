@@ -207,7 +207,7 @@
 		class="org.springframework.http.converter.StringHttpMessageConverter">
 		<!--  brian change -->
 		<!-- <property name="supportedMediaTypes" value="application/xml" /> -->
-		<property name="supportedMediaTypes" value="text/xml" />
+		<!-- <property name="supportedMediaTypes" value="text/xml" /> -->
 	</bean>
 
 	<!-- Instance of RestTemplate, used by RestServiceInvoker -->

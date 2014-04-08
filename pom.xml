@@ -15,6 +15,7 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<reportOutputDirectory>site</reportOutputDirectory>
+		<license.dir>${project.basedir}</license.dir>
 	</properties>
 
 	<modules>
@@ -51,7 +52,7 @@
 				<artifactId>maven-license-plugin</artifactId>
 				<version>1.6.1</version>
 				<configuration>
-					<header>COPYRIGHT.txt</header>
+					<header>${license.dir}/COPYRIGHT.txt</header>
 					<quiet>false</quiet>
 					<failIfMissing>false</failIfMissing>
 					<aggregate>true</aggregate>
@@ -69,15 +70,15 @@
 					</excludes>
 					<useDefaultExcludes>true</useDefaultExcludes>
 					<mapping>
-						<html>MY_HTML_STYLE</html>
-						<htm>MY_HTML_STYLE</htm>
-						<jwc>XML_STYLE</jwc>
-						<application>XML_STYLE</application>
+						<html>${license.dir}/MY_HTML_STYLE</html>
+						<htm>${license.dir}/MY_HTML_STYLE</htm>
+						<xjb>XML_STYLE</xjb>
+						<application>${license.dir}/XML_STYLE</application>
 					</mapping>
 					<useDefaultMapping>true</useDefaultMapping>
 					<encoding>UTF-8</encoding>
 					<headerDefinitions>
-						<headerDefinition>MY_HTML_STYLE.xml</headerDefinition>
+						<headerDefinition>${license.dir}/MY_HTML_STYLE.xml</headerDefinition>
 					</headerDefinitions>
 				</configuration>
 				<executions>

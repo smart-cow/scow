@@ -28,6 +28,10 @@ import org.apache.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.AlwaysRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -55,6 +59,15 @@ public abstract class CowServerController {
     }    
     
     
+    /**
+     * Construct a 201 Created response with location header
+     * @param uriPattern for example /tasks/{id}
+     * @param id the value to substitute in the URI pattern
+     * @param uriBuilder If a UriComponentsBuilder is specified in the controller method's
+     * 					 parameters, Spring will automatically pass it in
+     * @param body The object to be included in the HTTP response's body
+     * @return 
+     */
     protected static <T> ResponseEntity<T> getCreatedResponse(
     		String uriPattern, Object id, UriComponentsBuilder uriBuilder, T body) {
 
@@ -63,6 +76,14 @@ public abstract class CowServerController {
     }
     
     
+    /**
+     * Construct an HttpHeaders object with the location header set
+     * @param uriPattern for example /tasks/{id}
+     * @param id the value to substitute in the URI pattern
+     * @param uriBuilder If a UriComponentsBuilder is specified in the controller method's
+     * 					 parameters, Spring will automatically pass it in
+     * @return
+     */
     protected static HttpHeaders getHeadersWithLocation(String uriPattern, Object id, 
     		UriComponentsBuilder uriBuilder) {
     	URI uri = uriBuilder
@@ -74,6 +95,13 @@ public abstract class CowServerController {
     	return headers;
     }
     
+    
+    /**
+     * Construct a default response to an HTTP GET request. If body is not null
+     * returns 200, else 404
+     * @param body The object to be included in the HTTP response's body
+     * @return 
+     */
     protected static <T> ResponseEntity<T> createGetResponse(T body) {
     	if (body == null) {
     		return notFound();
@@ -82,25 +110,71 @@ public abstract class CowServerController {
     }
     
     
+    /**
+     * Construct a 200 ok response
+     * @param body
+     * @return
+     */
     protected static <T> ResponseEntity<T> ok(T body) {
     	return new ResponseEntity<T>(body, HttpStatus.OK);
     }
     
+    
+    /**
+     * Construct a 404 not found response
+     * @return
+     */
     protected static <T> ResponseEntity<T> notFound() {
     	return new ResponseEntity<T>(HttpStatus.NOT_FOUND);
     }
     
+    
+    /**
+     * Construct a 201 no content response
+     * @return
+     */
     protected static <T> ResponseEntity<T> noContent() {
     	return new ResponseEntity<T>(HttpStatus.NO_CONTENT);
     }
     
+    
+    /**
+     * Construct a 409 conflict response
+     * @param body
+     * @return
+     */
     protected static <T> ResponseEntity<T> conflict(T body) {
     	return new ResponseEntity<T>(body, HttpStatus.CONFLICT);
     }
     
+    
+    /**
+     * Construct a 501 not implemented response
+     * @return
+     */
     protected static <T> ResponseEntity<T> notImplemented() {
     	return new ResponseEntity<T>(HttpStatus.NOT_IMPLEMENTED);
     }
+    
+    
+    /**
+     * Construct a 403 forbidden response
+     * @return
+     */
+    protected static <T> ResponseEntity<T> forbidden() {
+    	return new ResponseEntity<T>(HttpStatus.FORBIDDEN);
+    }
+    
+    
+    /**
+     * Construct a 500 internal server response
+     * @return
+     */
+    protected static <T> ResponseEntity<T> internalError() {
+    	return new ResponseEntity<T>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    
 
     protected static Long convertProcessInstanceKeyToId(String processInstanceKey) {
         int dotPos = processInstanceKey.indexOf('.');
@@ -109,5 +183,14 @@ public abstract class CowServerController {
     }
     
     
-    
+    protected static <T> T doWithRetry(RetryCallback<T> callback) {
+		RetryTemplate template = new RetryTemplate();
+		template.setRetryPolicy(new AlwaysRetryPolicy());
+		try {
+			return template.execute(callback);
+		} catch (Exception e) {
+			log.error(e);
+			throw new RuntimeException();
+		}		
+	}           
 }

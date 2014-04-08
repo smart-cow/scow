@@ -29,6 +29,8 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,8 +44,11 @@ import org.wiredwidgets.cow.server.api.service.HistoryTasks;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Tasks;
 import org.wiredwidgets.cow.server.service.TaskService;
-//import org.wiredwidgets.cow.server.rss.FeedFromTaskList;
-// import org.wiredwidgets.cow.server.test.TestHumanVars;
+
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 /**
  * Handles REST API methods for the /tasks resource
@@ -63,57 +68,38 @@ public class TasksController extends CowServerController {
     /**
      * Retrieve all active tasks
      *
-     * @return a Tasks object as XML
+     * @return a Tasks object
      */
-    @RequestMapping({"", "/active"})
+    @RequestMapping(value = "", method = GET)
     @ResponseBody
-    public Tasks getAllTasks() {
+    public Tasks getAllTasks() {   
         Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllTasks());
         return tasks;      
     }
     
-
-    /**
-     * Create a new ad-hoc task, i.e. one not associated with any process
-     * instance Note: ad-hoc tasks are considered experimental and may not
-     * function as expected in all cases. The HTTP response Location header
-     * provides the URL of the new task.
-     *
-     * @param task a task object in XML sent as the request body
-     * @param task
-     * @param uriBuilder
-     */
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<Task> createTask(@RequestBody Task task, 
-    		UriComponentsBuilder uriBuilder) {
-    	String id = taskService.createAdHocTask(task);
-    	return getCreatedResponse("/tasks/active/{id}", id, uriBuilder, 
-    			taskService.getTask(Long.valueOf(id)));
-    }
     
     /**
      * Retrieve a single task by its ID
      *
      * @param id the task ID
-     * @return the Task object as XML
+     * @return the Task object
      */    
-    @RequestMapping({"/{id}", "/active/{id}"})
+    @RequestMapping(value = "/{id}", method = GET)
     @ResponseBody
     public ResponseEntity<Task> getTask(@PathVariable("id") long id) {
     	Task task = taskService.getTask(id);
     	return createGetResponse(task);
     }
 
-
+    
     /**
      * Mark a task as complete The choice of DELETE here is based on the fact
      * that this action causes the resource (i.e. task) to be removed from its
      * location at the specified URL. Once completed, the task will then appear
      * under the /tasks/history URI. Response: http 204 if success, 404 if the
      * task was not found (i.e. an invalid task ID or a task that was already
-     * completed)
+     * completed), http 409 if task hasn't been assigned to a user yet
      *
      * @param id the task ID
      * @param outcome the outgoing transition for the completed task. Required
@@ -121,9 +107,8 @@ public class TasksController extends CowServerController {
      * @param variables variable assignments for the completed task, in
      * name:value format. More than one instance of this parameter can be
      * provided (e.g. ?variable=name1:value1&variable=name2:value2 etc)
-     * @param response
      */
-    @RequestMapping(value = {"/{id}", "/active/{id}"}, method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}", method = DELETE)
     @ResponseBody
     public ResponseEntity<?> completeTask(
     		@PathVariable("id") long id, 
@@ -147,6 +132,12 @@ public class TasksController extends CowServerController {
     	return noContent();
     }
     
+    
+    /**
+     * Convert variables passed in name1:value1&variable=name2:value format to a Map
+     * @param varPairs variable in name1:value1&variable=name2:value format
+     * @return Map containing the variables
+     */
     private static Map<String, String> getVarMap(String[] varPairs) {
     	Map<String, String> varMap = new HashMap<String, String>();
     	if (varPairs == null) {
@@ -161,21 +152,15 @@ public class TasksController extends CowServerController {
     	return varMap;
     }
     
+
+    
     /**
-     * Assign a task to a user, or return a task to unassigned status. A task
-     * can only be assigned if is currently in an unassigned state, otherwise an
-     * error will result. Note: the UI client should be prepared to gracefully
-     * handle a race condition, as two users may try to take the same task at
-     * nearly the same time: in this case, one will succeed and the other will
-     * receive an error response. Response: http 204 or an error code.
-     *
-     * @param id the ID of the task
-     * @param assignee the person taking the task. Use a blank value
-     * (?assignee=) to return the task to unassigned status
-     * @param response
+     * Assign a task to a user.
+     * @param id
+     * @param assignee
+     * @return 404 if no task with id, 403 if assignee is not allowed to take the task
      */
-    @RequestMapping(value = {"/{id}/take", "/active/{id}"}, method = RequestMethod.POST, 
-    		params = "assignee")
+    @RequestMapping(value = "/{id}/take", method = POST, params = "assignee")
     @ResponseBody
     public ResponseEntity<Task> takeTask(
     		@PathVariable("id") long id, 
@@ -184,34 +169,27 @@ public class TasksController extends CowServerController {
     	if (task == null) {
     		return notFound();
     	}
-    	taskService.takeTask(id, assignee);
-    	task = taskService.getTask(id);
-    	return ok(task);
+    	
+    	try {
+    		taskService.takeTask(id, assignee);
+        	task = taskService.getTask(id);
+        	return ok(task);
+    	}
+    	catch (org.jbpm.task.service.PermissionDeniedException e) {
+    		return forbidden();
+    	}
     }
-
+    
+    
+    
     /**
-     * Updates an existing task with new properties. Specified properties will
-     * be updated, others will be left with their previous values. This could be
-     * used to update priority, due date, etc.
-     *
-     * @param id the task ID
+     * Update an existing task
+     * @param id
      * @param task
-     * @param response
-     * @deprecated use {@link #updateTask(long, Task, UriComponentsBuilder)}
+     * @param uriBuilder
+     * @return 404 if doesn't exist
      */
-    @Deprecated
-    @RequestMapping(value = "/active/{id}", method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<Task> updateTaskPost(
-    		@PathVariable("id") long id, 
-    		@RequestBody Task task, 
-    		UriComponentsBuilder uriBuilder) {
-    	log.warn("Deprecated method called: updateTaskPost(long, Task, UriComponentsBuilder)");
-    	return updateTask(id, task, uriBuilder);
-    }
-    
-    
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = PUT)
     @ResponseBody
     public ResponseEntity<Task> updateTask(
     		@PathVariable("id") long id, 
@@ -220,8 +198,7 @@ public class TasksController extends CowServerController {
     	
     	task.setId(String.valueOf(id));
     	if (taskService.getTask(id) == null) {
-    		// Task doesn't exist, create ad-hoc test
-    		return createTask(task, uriBuilder);
+    		notFound();
     	}
     	taskService.updateTask(task);
     	return ok(taskService.getTask(id));
@@ -232,52 +209,21 @@ public class TasksController extends CowServerController {
      * Retrieve all assigned active tasks for a specified assignee
      *
      * @param assignee the user ID
-     * @return a Tasks object as XML
+     * @return a Tasks object
      */
-    @RequestMapping(value = {"", "/active"}, params = "assignee")
+    @RequestMapping(value = "",	params = "assignee", method = GET)
     @ResponseBody
     public Tasks getTasksByAssignee(@RequestParam("assignee") String assignee) {
     	Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findPersonalTasks(assignee));
         return tasks;   
     }
-
-    /**
-     * Retrieve all assigned active tasks for a specified assignee in rss format
-     *
-     * @param assignee and format=rss specified as query parameters
-     * @return response contains a string with rss feed
-     */
-    @Deprecated
-    @RequestMapping(value = "/active", params = {"format=rss", "assignee"})
-    @ResponseBody
-    public ResponseEntity<?> getTasksForRSS(@RequestParam("assignee") String assignee) {
-    	log.warn("Deprecated method called: getTasksForRSS(String)");
-        /*
-         * FeedFromTaskList fList = new FeedFromTaskList(); String feed =
-         * fList.buildFeedByAssignee(assignee,
-         * request.getRequestURL().toString(), request.getQueryString(),
-         * taskService); response.setContentType("application/xml;
-         * charset=UTF-8"); return feed;
-         */
-        return notImplemented();
-    }
-
-    /**
-     * Retrieve all active unassigned tasks
-     *
-     * @return a Tasks object as XML
-     * @deprecated use {@link #getUnassignedTasks()}
-     */
-    @Deprecated
-    @RequestMapping(value = "/active", params = "unassigned=true")
-    @ResponseBody
-    public Tasks getUnassignedTasksActive() {
-    	log.warn("Deprecated method called: getUnassignedTasksActive()");
-    	return getUnassignedTasks();
-    }
     
     
+    /**
+     * Get all tasks that haven't been assigned to a user yet.
+     * @return
+     */
     @RequestMapping(value = "/unassigned", method = RequestMethod.GET)
     @ResponseBody
     public Tasks getUnassignedTasks() {
@@ -294,54 +240,36 @@ public class TasksController extends CowServerController {
      * candidateGroup element.
      *
      * @param candidate the user ID
-     * @return a Tasks object as XML
+     * @return a Tasks object
      */
-    @RequestMapping(value = {"", "/active"}, params = "candidate")
+    @RequestMapping(value = "", params = "candidate", method = GET)
     @ResponseBody
     public Tasks getUnassignedTasksByCandidate(@RequestParam("candidate") String candidate) {
     	Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findGroupTasks(candidate));
         return tasks; 
     }
-
+    
+    
+    
     /**
      * Retrieve all active tasks for the specified process instance ID
      *
      * @param processInstance the processInstance ID
-     * @return a Tasks object as XML
+     * @return a Tasks object
      */
-    @RequestMapping(value = {"", "/active"}, params = "processInstance")
+    @RequestMapping(value = "", params = "processInstance", method = GET)
     @ResponseBody
     public Tasks getTasksByProcessInstance(
-    		@RequestParam("processInstance") String processInstance) {
+    		@RequestParam("processInstance") long processInstanceId) {
     	       
-        long id = convertProcessInstanceKeyToId(processInstance);
         Tasks tasks = new Tasks();
-        tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(id));
+        tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(processInstanceId));
         return tasks;
     }
     
-   
-
-    /**
-     * Retrieve all active tasks for the specified process key
-     *
-     * @param processKey the process key
-     * @return a Tasks object as XML
-     */
-    @Deprecated
-    @RequestMapping(value = "/active", params = "processKey")
-    @ResponseBody
-    public ResponseEntity<?> getTasksByProcessKey(@RequestParam("processKey") String processKey) {
-    	log.warn("Deprecated method called: getTasksByProcessKey(String)");
-        /*
-         Tasks tasks = new Tasks();
-         //tasks.getTasks().addAll(taskService.findAllTasksByProcessKey(processKey));
-         return tasks;
-         */
-    	return notImplemented();
-    }
-
+    
+    
     /**
      * Retrieve a single HistoryTask by its ID. Note that the intent use of this
      * method is to retrieve completed tasks, therefore the behavior in the case
@@ -419,7 +347,199 @@ public class TasksController extends CowServerController {
     	return tasks;
     }
 
-    /*
+    
+    
+    
+/**************************************************************************************
+	Methods below have been deprecated. They are either deprecated because their functionality
+	is now at a new end point, or the feature was removed when updating JBPM version.
+	If the method is now at new end point, the new method should be listed in the 
+	Javadoc comment.
+
+**************************************************************************************/
+    
+    
+    
+    /**
+	 * @deprecated use {@link #getAllTasks()} instead
+	 * @return
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", method = GET)
+	@ResponseBody
+	public Tasks getAllTasksOld() {
+		log.warn("Deprecated method called: getAllTasksOld()");
+		return getAllTasks();
+	}
+
+
+	/**
+	 * Create a new ad-hoc task, i.e. one not associated with any process
+	 * instance Note: ad-hoc tasks are considered experimental and may not
+	 * function as expected in all cases. The HTTP response Location header
+	 * provides the URL of the new task.
+	 *
+	 * @param task a task object in XML sent as the request body
+	 * @param task
+	 * @param uriBuilder
+	 * @deprecated AFAIK no one uses this
+	 */
+	@Deprecated
+	@RequestMapping(method = POST)
+	@ResponseBody
+	public ResponseEntity<Task> createTask(@RequestBody Task task, 
+			UriComponentsBuilder uriBuilder) {
+		log.warn("Deprecated method called: createTask(Task, UriComponentsBuilder");
+		String id = taskService.createAdHocTask(task);
+		return getCreatedResponse("/tasks/active/{id}", id, uriBuilder, 
+				taskService.getTask(Long.valueOf(id)));
+	}
+
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 * @deprecated use {@link #getTask(long)} instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}", method = GET)
+	@ResponseBody
+	public ResponseEntity<Task> getTaskOld(@PathVariable("id") long id) {
+		log.warn("Deprecated method called: getTaskOld(long)");
+		return getTask(id);
+	}
+
+
+	/**
+	 * 
+	 * @param id
+	 * @param outcome
+	 * @param variables
+	 * @return
+	 * @deprecated use {@link #completeTask(long, String, String[])} instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}", method = DELETE)
+	@ResponseBody
+	public ResponseEntity<?> completeTaskOld(
+			@PathVariable("id") long id, 
+			@RequestParam(value = "outcome", required = false) String outcome, 
+			@RequestParam(value = "var", required = false) String[] variables) {
+		
+		log.warn("Deprecated method called: completeTaskOld(long, String, String[])");
+		return completeTask(id, outcome, variables);
+	}
+
+
+	/**
+	 * 
+	 * @param candidate
+	 * @return
+	 * @deprecated use {@link #getUnassignedTasksByCandidate(String)} instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", params = "candidate", method = GET)
+	@ResponseBody
+	public Tasks getUnassignedTasksByCandidateOld(@RequestParam("candidate") String candidate) {
+		log.warn("Deprecated method called: getUnassignedTasksByCandidateOld(String)");
+		return getUnassignedTasksByCandidate(candidate);
+	}
+
+
+	/**
+	 * 
+	 * @param id
+	 * @param assignee
+	 * @return 
+	 * @deprecated use {@link #takeTask(long, String)}
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}", method = POST, params = "assignee")
+	@ResponseBody
+	public ResponseEntity<Task> takeTaskOld(
+			@PathVariable("id") long id, 
+			@RequestParam("assignee") String assignee) {
+		log.warn("Deprecated method called: takeTaskOld(long, String)");
+		return takeTask(id, assignee);
+	}
+
+
+	/**
+	 * Retrieve all active tasks for the specified process key
+	 *
+	 * @param processKey the process key
+	 * @return a Tasks object as XML
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", params = "processKey")
+	@ResponseBody
+	public ResponseEntity<?> getTasksByProcessKey(@RequestParam("processKey") String processKey) {
+		log.warn("Deprecated method called: getTasksByProcessKey(String)");
+	    /*
+	     Tasks tasks = new Tasks();
+	     //tasks.getTasks().addAll(taskService.findAllTasksByProcessKey(processKey));
+	     return tasks;
+	     */
+		return notImplemented();
+	}
+
+
+	/**
+	 * Updates an existing task with new properties. Specified properties will
+	 * be updated, others will be left with their previous values. This could be
+	 * used to update priority, due date, etc.
+	 *
+	 * @param id the task ID
+	 * @param task
+	 * @param response
+	 * @deprecated use {@link #updateTask(long, Task, UriComponentsBuilder)}
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active/{id}", method = POST)
+	@ResponseBody
+	public ResponseEntity<Task> updateTaskPost(
+			@PathVariable("id") long id, 
+			@RequestBody Task task, 
+			UriComponentsBuilder uriBuilder) {
+		log.warn("Deprecated method called: updateTaskPost(long, Task, UriComponentsBuilder)");
+		return updateTask(id, task, uriBuilder);
+	}
+
+
+	/**
+	 * 
+	 * @param processInstance
+	 * @return
+	 * @deprecated use {@link #getTasksByProcessInstance(long)} instead
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", params = "processInstance", method = GET)
+	@ResponseBody
+	public Tasks getTasksByProcessInstanceOld(
+			@RequestParam("processInstance") String processInstance) {
+		log.warn("Deprecated method called: getTasksByProcessInstanceOld(String)");      
+	    long id = convertProcessInstanceKeyToId(processInstance);
+	    return getTasksByProcessInstance(id);
+	}
+
+
+	/**
+	 * Retrieve all active unassigned tasks
+	 *
+	 * @return a Tasks object as XML
+	 * @deprecated use {@link #getUnassignedTasks()}
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", params = "unassigned=true")
+	@ResponseBody
+	public Tasks getUnassignedTasksActive() {
+		log.warn("Deprecated method called: getUnassignedTasksActive()");
+		return getUnassignedTasks();
+	}
+
+
+	/*
      * NOTE: The /participations methods expose underlying JBPM functionality
      * for Participations, but the usefulness of the underlying feature is
      * questionable. For example, adding a user as 'owner' or 'candidate' for a
@@ -440,7 +560,22 @@ public class TasksController extends CowServerController {
     }
 
 
-    @Deprecated
+    /**
+	 * 
+	 * @param assignee
+	 * @return
+	 * @deprecated use {@link #getTasksByAssignee(String)} instead
+	 */
+	@Deprecated
+	@RequestMapping(value =	"/active", params = "assignee", method = GET)
+	@ResponseBody
+	public Tasks getTasksByAssigneeOld(@RequestParam("assignee") String assignee) {
+		log.warn("Deprecated method called: getTasksByAssigneeOld(String)");
+		return getTasksByAssignee(assignee);
+	}
+
+
+	@Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, 
     			params = "group")
     public ResponseEntity<?> addGroupParticipation(
@@ -455,7 +590,29 @@ public class TasksController extends CowServerController {
     }
 
     
-    @Deprecated
+    /**
+	 * Retrieve all assigned active tasks for a specified assignee in rss format
+	 *
+	 * @param assignee and format=rss specified as query parameters
+	 * @return response contains a string with rss feed
+	 */
+	@Deprecated
+	@RequestMapping(value = "/active", params = {"format=rss", "assignee"})
+	@ResponseBody
+	public ResponseEntity<?> getTasksForRSS(@RequestParam("assignee") String assignee) {
+		log.warn("Deprecated method called: getTasksForRSS(String)");
+	    /*
+	     * FeedFromTaskList fList = new FeedFromTaskList(); String feed =
+	     * fList.buildFeedByAssignee(assignee,
+	     * request.getRequestURL().toString(), request.getQueryString(),
+	     * taskService); response.setContentType("application/xml;
+	     * charset=UTF-8"); return feed;
+	     */
+	    return notImplemented();
+	}
+
+
+	@Deprecated
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, 
     		params = "group")
     public ResponseEntity<?> deleteGroupParticipation(

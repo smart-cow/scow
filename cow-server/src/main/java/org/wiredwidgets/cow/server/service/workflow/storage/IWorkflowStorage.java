@@ -20,14 +20,34 @@ import java.net.URI;
 import java.util.List;
 
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 
 public interface IWorkflowStorage {
 
-	public org.wiredwidgets.cow.server.api.model.v2.Process get(String key);
+	/**
+	 * 
+	 * @param key the workflow name
+	 * @return process or null if not found
+	 */
+	public Process get(String key);
+	
 	
 	public List<ProcessDefinition> getAll();
 	
-	public URI save(org.wiredwidgets.cow.server.api.model.v2.Process process);
 	
+	/**
+	 * 
+	 * @param process
+	 * @return Location of saved process
+	 */
+	public URI save(Process process);
+	
+	
+	
+	/**
+	 * 
+	 * @param key the workflow name
+	 * @return true if deleted
+	 */
 	public boolean delete(String key);
 }

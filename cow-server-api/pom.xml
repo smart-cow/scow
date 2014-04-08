@@ -11,6 +11,9 @@
 	<!--groupId>org.wiredwidgets</groupId-->
 	<artifactId>cow-server-api</artifactId>
 	<url>http://maven.apache.org</url>
+	<properties>
+		<license.dir>${project.basedir}/..</license.dir>
+	</properties>
 	<build>
 		<resources>
 			<resource>
@@ -88,6 +91,7 @@
 					<extension>true</extension>
 				</configuration>
 			</plugin>
+			<!--  
 			<plugin>
 				<groupId>com.mycila.maven-license-plugin</groupId>
 				<artifactId>maven-license-plugin</artifactId>
@@ -130,6 +134,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>

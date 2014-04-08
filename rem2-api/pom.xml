@@ -13,6 +13,10 @@
 
     <name>rem2-api</name>
     <url>http://maven.apache.org</url>
+    
+    <properties>
+    	<license.dir>${project.basedir}/..</license.dir>
+    </properties>
 
     <build>
         <plugins>
