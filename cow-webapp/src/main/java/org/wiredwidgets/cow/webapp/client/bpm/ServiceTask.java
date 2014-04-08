@@ -29,6 +29,7 @@ public class ServiceTask extends Activity {
 	protected String serviceUrl;
 	protected String content;
 	protected String var;
+	protected String contentType;
 
 	public ServiceTask() {
 		this("", "");
@@ -40,6 +41,8 @@ public class ServiceTask extends Activity {
 		serviceUrl = "";
 		content = "";
 		var = "";
+		contentType = "";
+	
 	}
 	
 	public void setMethod(String m) {
@@ -72,6 +75,14 @@ public class ServiceTask extends Activity {
 	
 	public String getVar() {
 		return var;
+	}
+	
+	public void setContentType(String ct) {
+		contentType = ct;
+	}
+	
+	public String getContentType() {
+		return contentType;
 	}
 
 	public TreeNode getTreeNode(boolean edit) {

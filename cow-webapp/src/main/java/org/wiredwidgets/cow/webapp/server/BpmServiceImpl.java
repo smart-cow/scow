@@ -64,29 +64,29 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
         return "bpmService";
     }
 
-    public String getProcess(String key) {
+    public synchronized String getProcess(String key) {
         return getRestTemplate().getForObject(baseURL + "/processes/{key}?format=sc2", String.class, key);
     }
 
-    public String getNativeProcess(String key) {
+    public synchronized String getNativeProcess(String key) {
         return getRestTemplate().getForObject(baseURL + "/processes/{key}?format=native", String.class, key);
     }
 
-    public String createNativeDeployment(String processXml) {
+    public synchronized String createNativeDeployment(String processXml) {
         return getRestTemplate().postForObject(baseURL + "/deployments/native", processXml, String.class);
     }
 
-    public String createDeployment(String processXml) {
+    public synchronized String createDeployment(String processXml) {
         StreamSource source = new StreamSource();
         source.setReader(new StringReader(processXml));
         return getRestTemplate().postForObject(baseURL + "/deployments/sc2?name=test", source, String.class);
     }
 
-    public String getForObject(String url, String[] args ) {
+    public synchronized String getForObject(String url, String[] args ) {
     	return getRestTemplate().getForObject(baseURL + url, String.class, (Object[])args);
     }
 
-    public String postForObject(String url, String request, String[] args) {
+    public synchronized String postForObject(String url, String request, String[] args) {
         // Casting the request object as as Source causes Spring to use the
         // SourceHttpMessageConverter, which will cause the request body
         // to be marked as application/xml, as required by the REST service.
@@ -94,7 +94,7 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
         return getRestTemplate().postForObject(baseURL + url, source, String.class, (Object[])args);
     }
 
-    public String postForLocation(String url, String request, String[] args) {
+    public synchronized String postForLocation(String url, String request, String[] args) {
         // see comment above regarding Source
         /*StreamSource source = new StreamSource(new StringReader(request));
         return restTemplate.postForLocation(url, source, (Object[])args).toString();*/
@@ -106,7 +106,7 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
 
     }
     
-    public String put(String url, String request, String[] args) throws HttpConflictException{
+    public synchronized String put(String url, String request, String[] args) throws HttpConflictException{
         // Casting the request object as as Source causes Spring to use the
         // SourceHttpMessageConverter, which will cause the request body
         // to be marked as application/xml, as required by the REST service.
@@ -135,11 +135,11 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
         
     }
 
-    public void delete(String url, String[] args) {
+    public synchronized void delete(String url, String[] args) {
         getRestTemplate().delete(baseURL + url, (Object[])args);
     }
     
-    public void delete(String url) {
+    public synchronized void delete(String url) {
     	URI uri;
 		try {
 			uri = new URI(baseURL + url);
@@ -149,11 +149,13 @@ public class BpmServiceImpl extends AutoinjectingRemoteServiceServlet implements
 		}
     }
 
-    public void postForNoContent(String url, String[] args) {
+    public synchronized void postForNoContent(String url, String[] args) {
         getRestTemplate().execute(baseURL + url, HttpMethod.POST, null, null, (Object[])args);
     }
     
-    private RestTemplate getRestTemplate() {
+    //TODO Remove sync when server can handle it
+    //ADD timeout
+    private  RestTemplate getRestTemplate() {
     	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     	LdapUserDetails user = (LdapUserDetails)auth.getPrincipal();
     	

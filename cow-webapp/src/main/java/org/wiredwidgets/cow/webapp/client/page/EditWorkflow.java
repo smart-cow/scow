@@ -18,6 +18,7 @@ package org.wiredwidgets.cow.webapp.client.page;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,12 +44,21 @@ import org.wiredwidgets.cow.webapp.client.bpm.Template;
 
 
 
+
+
+
+import org.wiredwidgets.cow.webapp.client.components.TaskVariableGrid;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Cursor;
 import com.smartgwt.client.types.DragAppearance;
 import com.smartgwt.client.types.ImageStyle;
+import com.smartgwt.client.types.ListGridEditEvent;
+import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.types.RowEndEditAction;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.SelectionType;
 import com.smartgwt.client.types.TreeModelType;
@@ -83,6 +93,7 @@ import com.smartgwt.client.widgets.events.MouseOverHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
+import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.HeaderItem;
 import com.smartgwt.client.widgets.form.fields.PickerIcon;
 import com.smartgwt.client.widgets.form.fields.PickerIcon.Picker;
@@ -97,10 +108,14 @@ import com.smartgwt.client.widgets.form.fields.events.FocusEvent;
 import com.smartgwt.client.widgets.form.fields.events.FocusHandler;
 import com.smartgwt.client.widgets.form.fields.events.FormItemClickHandler;
 import com.smartgwt.client.widgets.form.fields.events.FormItemIconClickEvent;
+import com.smartgwt.client.widgets.grid.CellFormatter;
+import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
 import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.layout.HLayout;
+import com.smartgwt.client.widgets.layout.Layout;
 import com.smartgwt.client.widgets.layout.LayoutSpacer;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.menu.MenuItem;
@@ -486,10 +501,45 @@ public class EditWorkflow extends PageWidget {
 			public void onKeyPress(KeyPressEvent event) {
 				if(event.getKeyName().equals("Delete")) {
 					TreeNode node = (TreeNode)grid.getSelectedRecord();
-					DynamicForm form = (DynamicForm)formContainer.getMember(0);
-					saveRecord(node, form, grid);
-					formContainer.removeMember(form);
-					form.destroy();
+					Canvas[] formItems = formContainer.getChildren();
+					DynamicForm form = null;
+					ListGrid variableGrid = null;
+					HLayout variableGridLayout = null;
+					for (Canvas formItem: formItems){
+						if (formItem instanceof DynamicForm){
+							form = (DynamicForm)formItem;
+							formContainer.removeMember(form);
+							
+						}
+						else if (formItem instanceof HLayout){
+							variableGridLayout = (HLayout)formItem;
+							if (variableGridLayout != null){
+								for (Canvas layoutItem: variableGridLayout.getChildren()){
+									if (layoutItem != null){
+										for (Canvas item: layoutItem.getChildren()){
+									
+											if (item instanceof ListGrid){
+													variableGrid = (ListGrid)layoutItem;
+											}
+										}
+									}
+									
+									
+								}
+								
+								
+							}
+							
+							
+						}
+						
+					}
+					if (form != null && variableGrid != null){
+						saveRecord(node, form, grid, variableGrid);
+						form.destroy();
+						variableGridLayout.destroy();
+					}
+					
 					Object activity = node.getAttributeAsObject("activity");
 					grid.getTree().remove(node);
 					if(activity instanceof Activity) {
@@ -625,19 +675,58 @@ public class EditWorkflow extends PageWidget {
 			// the deselection event can be detected by checking if
 			// event.getSelectedRecord() == null
 			public void onSelectionChanged(SelectionEvent event) {
-				Canvas oldForm = formContainer.getMember(0);
-				Object activity = event.getRecord().getAttributeAsObject("activity");
-				if(event.getSelectedRecord() == null) {
-					saveRecord((TreeNode)event.getRecord(), (DynamicForm)oldForm, grid);
-				} else {
-					if(oldForm != null) {
-						formContainer.removeMember(oldForm);
-						oldForm.destroy();
+				Canvas oldForm = null;
+				ListGrid variableGrid = null;
+				HLayout variableGridLayout = null;
+					for (Canvas formItem: formContainer.getChildren()){
+						if (formItem instanceof DynamicForm){
+							oldForm = (DynamicForm)formItem;
+							if(oldForm != null) {
+								formContainer.removeMember(oldForm);
+							}
+						}
+						//Remove the Variable grid which is its own hlayout
+						else if (formItem != null && formItem instanceof HLayout){
+							variableGridLayout = (HLayout)formItem;	
+							for (Canvas layoutItem: variableGridLayout.getChildren()){
+								if (layoutItem != null && layoutItem instanceof VLayout){
+									for (Canvas item: layoutItem.getChildren()){								
+										if (item != null && item instanceof ListGrid){
+											variableGrid = (ListGrid)item;
+										}
+									}
+								}								
+							}	
+						}
+						else if (formItem instanceof Label){
+							Label label = (Label)formItem;
+							if (label != null){
+								formContainer.removeMember(label);
+								label.destroy();
+							}
+						}
+						else {
+							SC.say("Error Found" + formItem.getClass());
+							
+						}
+						
 					}
+				
+				
+				Object activity = event.getRecord().getAttributeAsObject("activity");
+				Layout varTable = null;
+				if(event.getSelectedRecord() == null) {
+					saveRecord((TreeNode)event.getRecord(), (DynamicForm)oldForm, grid, variableGrid);
+					if (oldForm != null){
+						oldForm.destroy();					
+					}
+					if (variableGridLayout != null){
+						variableGridLayout.destroy();					
+					}
+					
+				} else {
 					DynamicForm form = new DynamicForm();
 					form.setMargin(10);
-					form.setWidth100();
-					form.setHeight100();
 					
 					HeaderItem basic = new HeaderItem("Basic");
 					basic.setValue("Basic Options");
@@ -693,15 +782,6 @@ public class EditWorkflow extends PageWidget {
 						assigneeType.setValue(t.get("assigneeType") == null ? "User" : t.get("assigneeType"));
 						assigneeType.setRequired(true);
 						
-						TextItem addInfo1 = new TextItem("AddInfo1");
-						addInfo1.setWidth(300);
-						addInfo1.setValue(t.getVariable("Additional Info 1"));
-						addInfo1.setTitle("Additional Info 1");
-						
-						TextItem addInfo2 = new TextItem("AddInfo2");
-						addInfo2.setWidth(300);
-						addInfo2.setValue(t.getVariable("Additional Info 2"));
-						addInfo2.setTitle("Additional Info 2");
 						
 						assigneeType.addChangedHandler(new ChangedHandler() {
 							public void onChanged(ChangedEvent event) {
@@ -723,7 +803,26 @@ public class EditWorkflow extends PageWidget {
 						
 						description.setValue(getSavedStringValue(t.getDescription()));
 						
-						form.setFields(basic, name, assigneeType, assignee, description, advanced, addInfo1, addInfo2, bypass);
+											
+				        
+						
+						
+						
+						//Create Variables Table
+						ArrayList<FormItem> items = new ArrayList<FormItem>();
+						items.addAll(Arrays.asList(basic, name, assignee, description, advanced,  bypass));
+						
+											
+						varTable = generateVarTable(t.getRawWariables());
+						 
+						
+				        
+										
+						
+						
+						
+						
+						form.setFields(items.toArray(new FormItem[items.size()]));
 					} else if(activity instanceof Exit) {
 						Exit e = (Exit)activity;
 						name.setValue(e.getName());
@@ -801,23 +900,39 @@ public class EditWorkflow extends PageWidget {
 						method.setValue(getSavedStringValue(t.getMethod()));
 						method.setRequired(true);
 						
+						
+						
 						method.addChangedHandler(new ChangedHandler() {
 							public void onChanged(ChangedEvent event) {
 								TextItem method = (TextItem)event.getForm().getItem("Method");
 								TextItem content = (TextItem)event.getForm().getItem("Content");
+								ComboBoxItem contentType = (ComboBoxItem) event.getForm().getItem("ContentType");
 								if(method.getValue().equals("POST")) {
 									if(content.getDisabled()) {
 										content.setDisabled(false);
 										content.redraw();
+										contentType.setDisabled(false);
+										contentType.redraw();
 									}
 								} else {
 									if(!content.getDisabled()) {
 										content.setDisabled(true);
 										content.redraw();
+										contentType.setDisabled(true);
+										contentType.redraw();
 									}
 								}
 							}
 						});
+						
+						ComboBoxItem contentType = new ComboBoxItem("ContentType");
+						contentType.setTitle("<nobr>Content Type</nobr>");
+						contentType.setType("comboBox");
+						contentType.setValueMap("lorem", "ipsum"/*, "DELETE"*/);
+						contentType.setValue(getSavedStringValue(t.getContentType()));
+						contentType.setDisabled(!method.getValue().equals("POST"));
+						
+						
 						
 						TextItem serviceUrl = new TextItem("ServiceUrl");
 						serviceUrl.setTitle("<nobr>Service Url</nobr>");
@@ -839,7 +954,7 @@ public class EditWorkflow extends PageWidget {
 						
 						description.setValue(getSavedStringValue(t.getDescription()));
 						
-						form.setFields(basic, name, serviceUrl, method, content, var, description, advanced, bypass);
+						form.setFields(basic, name, serviceUrl, method, contentType, content, var, description, advanced, bypass);
 					} else if(activity instanceof Activities) {
 						Activities a = (Activities)activity;
 						name.setValue(getSavedStringValue(a.getName()));
@@ -895,15 +1010,6 @@ public class EditWorkflow extends PageWidget {
 						
 						description.setValue(getSavedStringValue(l.getDescription()));
 						
-						TextItem addInfo1 = new TextItem("AddInfo1");
-						addInfo1.setWidth(300);
-						addInfo1.setValue(l.getLoopTask().getVariable("Additional Info 1"));
-						addInfo1.setTitle("Additional Info 1");
-						
-						TextItem addInfo2 = new TextItem("AddInfo2");
-						addInfo2.setWidth(300);
-						addInfo2.setValue(l.getLoopTask().getVariable("Additional Info 2"));
-						addInfo2.setTitle("Additional Info 2");
 						
 						ComboBoxItem order = new ComboBoxItem("Order");
 						order.setTitle("<nobr>Actions Order</nobr>");
@@ -923,7 +1029,8 @@ public class EditWorkflow extends PageWidget {
 						repeatName.setValue(getSavedStringValue(l.getRepeatName()));
 						repeatName.setWidth(300);
 						
-						form.setFields(basic, name, loopTask, assigneeType, assignee, description, order, advanced, doneName, repeatName, addInfo1, addInfo2, bypass);
+						varTable = generateVarTable(t.getRawWariables());
+						form.setFields(basic, name, loopTask, assigneeType, assignee, description, order, advanced, doneName, repeatName, bypass);
 					} else if(activity instanceof Decision) {
 						Decision d = (Decision)activity;
 						Task t = d.getTask();
@@ -963,16 +1070,8 @@ public class EditWorkflow extends PageWidget {
 						assignee.setRequired(true);
 						
 						description.setValue(getSavedStringValue(d.getDescription()));
-						TextItem addInfo1 = new TextItem("AddInfo1");
-						addInfo1.setWidth(300);
-						addInfo1.setValue(d.getTask().getVariable("Additional Info 1"));
-						addInfo1.setTitle("Additional Info 1");
 						
-						TextItem addInfo2 = new TextItem("AddInfo2");
-						addInfo2.setWidth(300);
-						addInfo2.setValue(d.getTask().getVariable("Additional Info 2"));
-						addInfo2.setTitle("Additional Info 2");
-						
+						varTable = generateVarTable(t.getRawWariables());
 						form.setFields(basic, name, decisionTask, assigneeType, assignee, description, advanced, bypass);
 					} else if(activity instanceof Option) {
 						Option o = (Option)activity;
@@ -1005,7 +1104,12 @@ public class EditWorkflow extends PageWidget {
 						form.setFields(basic, name, workflow, description, advanced, bypass);
 					}
 					
+					
 					formContainer.addMember(form);
+					if (varTable != null){
+						varTable.setMargin(50);
+						formContainer.addMember(varTable);
+					}
 				}
 			}
 		});
@@ -1179,15 +1283,43 @@ public class EditWorkflow extends PageWidget {
 		save.setTitle("Save");
 		save.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				if(formContainer.getMember(0) instanceof DynamicForm)
-					saveRecord((TreeNode)grid.getSelectedRecord(), (DynamicForm)formContainer.getMember(0), grid);
+				DynamicForm form =null;
+				ListGrid variableGrid = null;
+				HLayout variableGridLayout = null;
+				//TODO remove this test message
+
+				for (Canvas formItem: formContainer.getChildren()){
+					if (formItem != null && formItem instanceof DynamicForm){
+						form = (DynamicForm)formItem;
+						//formContainer.removeMember(form);
+
+					}
+					else if (formItem != null && formItem instanceof HLayout){
+						variableGridLayout = (HLayout)formItem;	
+						for (Canvas layoutItem: variableGridLayout.getChildren()){
+							if (layoutItem != null && layoutItem instanceof VLayout){
+								for (Canvas item: layoutItem.getChildren()){								
+									if (item != null && item instanceof ListGrid){
+										variableGrid = (ListGrid)item;
+									}
+								}
+							}								
+						}	
+					}
+					
+					
+				}
+				
+				saveRecord((TreeNode)grid.getSelectedRecord(), form, grid, variableGrid);
+				if (form != null){
+					form.destroy();
+				}
+				if (variableGridLayout != null){
+					variableGridLayout.destroy();
+				}	
 				template.setName(nameForm.getValueAsString("templateName").replace(" ", "_"));
 				template.getBase().setSequential(nameForm.getValueAsString("order").equals("One at a time, in order") ? true : false);
 				if(!template.hasErrors()) {
-					//TODO change to use new items (needed for warning about changing running process
-					//sendPost("/processes", template.toString(), new AsyncCallback<String>() if New
-					//sendPut("/processes/" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() { if existing
-					//BpmServiceMain.sendPost("/deployments/v2?name=" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() {
 					BpmServiceMain.sendPut("/processes/" + BpmServiceMain.urlEncode(template.getName()), template.toString(), new AsyncCallback<String>() {
 						public void onFailure(Throwable caught) {
 							if (caught instanceof HttpConflictException){
@@ -1219,8 +1351,37 @@ public class EditWorkflow extends PageWidget {
 		tempSave.setTitle("Save Locally");
 		tempSave.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				if(formContainer.getMember(0) instanceof DynamicForm)
-					saveRecord((TreeNode)grid.getSelectedRecord(), (DynamicForm)formContainer.getMember(0), grid);
+				DynamicForm form =null;
+				ListGrid variableGrid = null;
+				HLayout variableGridLayout = null;
+				for (Canvas formItem: formContainer.getChildren()){
+					if (formItem != null && formItem instanceof DynamicForm){
+						form = (DynamicForm)formItem;
+						//formContainer.removeMember(form);
+
+					}
+					else if (formItem != null && formItem instanceof HLayout){
+						variableGridLayout = (HLayout)formItem;	
+						for (Canvas layoutItem: variableGridLayout.getChildren()){
+							if (layoutItem != null && layoutItem instanceof VLayout){
+								for (Canvas item: layoutItem.getChildren()){								
+									if (item != null && item instanceof ListGrid){
+										variableGrid = (ListGrid)item;
+									}
+								}
+							}								
+						}	
+					}
+					
+					
+				}
+				saveRecord((TreeNode)grid.getSelectedRecord(), form, grid, variableGrid);
+				if (form != null){
+					form.destroy();
+				}
+				if (variableGridLayout != null){
+					variableGridLayout.destroy();
+				}	
 				template.setName(nameForm.getValueAsString("templateName").replace(" ", "_"));
 				template.getBase().setSequential(nameForm.getValueAsString("order").equals("One at a time, in order") ? true : false);
 				String xml = template.toString();
@@ -1309,7 +1470,7 @@ public class EditWorkflow extends PageWidget {
 		grid.selectRecord(newNode);
 	}
 	
-	protected void saveRecord(TreeNode node, DynamicForm form, TreeGrid grid) {
+	protected void saveRecord(TreeNode node, DynamicForm form, TreeGrid grid, ListGrid variableGrid) {
 		if(node == null || form == null) return;
 		Object activity = node.getAttributeAsObject("activity");
 		node.setName(form.getValueAsString("Name"));
@@ -1321,8 +1482,19 @@ public class EditWorkflow extends PageWidget {
 			t.set("assignee", form.getValueAsString("Assignee"));
 			t.set("assigneeType", form.getValueAsString("AssigneeType"));
 			t.setDescription(form.getValueAsString("Description"));
-			t.setVariable(1, form.getValueAsString("AddInfo1"));
-			t.setVariable(2, form.getValueAsString("AddInfo2"));
+			String records = "";
+			if (variableGrid != null){
+				records += "Var grid not null";
+				variableGrid.saveAllEdits();
+				
+				for (ListGridRecord item: variableGrid.getRecords()){
+					t.setVariable(item.getAttribute("varname"), item.getAttribute("value"));
+					records += item.toString();
+				}
+				
+			}
+			//TODO remove this
+			//SC.say(records);
 		}if(activity instanceof Signal) {
 			Signal s = (Signal)activity;
 			s.setName(form.getValueAsString("Name"));
@@ -1338,10 +1510,15 @@ public class EditWorkflow extends PageWidget {
 			t.setName(form.getValueAsString("Name"));
 			t.setBypass(Boolean.parseBoolean(form.getValueAsString("Bypass")));
 			t.setMethod(form.getValueAsString("Method"));
-			if(t.getMethod().equals("POST"))
+			
+			if(t.getMethod().equals("POST")){
+				t.setContentType(form.getValueAsString("ContentType"));
 				t.setContent(form.getValueAsString("Content"));
-			else
+			}
+			else{
 				t.setContent("");
+				t.setContentType("");
+			}
 			t.setServiceUrl(form.getValueAsString("ServiceUrl"));
 			t.setVar(form.getValueAsString("Var"));
 			t.setDescription(form.getValueAsString("Description"));
@@ -1379,8 +1556,12 @@ public class EditWorkflow extends PageWidget {
 			l.setRepeatName(form.getValueAsString("Repeat Name"));
 			l.getLoopTask().set("description", form.getValueAsString("Loop Description"));
 			l.setDescription(form.getValueAsString("Description"));
-			l.getLoopTask().setVariable(1, form.getValueAsString("AddInfo1"));
-			l.getLoopTask().setVariable(2, form.getValueAsString("AddInfo2"));
+			if (variableGrid != null){
+				variableGrid.saveAllEdits();
+				for (ListGridRecord item: variableGrid.getRecords()){
+					l.getLoopTask().setVariable(item.getAttribute("varname"), item.getAttribute("value"));
+				}
+			}
 		} else if(activity instanceof Decision) {
 			Decision d = (Decision)activity;
 			d.setName(form.getValueAsString("Name"));
@@ -1389,8 +1570,12 @@ public class EditWorkflow extends PageWidget {
 			d.getTask().set("assigneeType", form.getValueAsString("Decision-Maker Type"));
 			d.setBypass(Boolean.parseBoolean(form.getValueAsString("Bypass")));
 			d.getTask().set("description", form.getValueAsString("Decision Description"));
-			d.getTask().setVariable(1, form.getValueAsString("AddInfo1"));
-			d.getTask().setVariable(2, form.getValueAsString("AddInfo2"));
+			if (variableGrid != null){
+				variableGrid.saveAllEdits();
+				for (ListGridRecord item: variableGrid.getRecords()){
+					d.getTask().setVariable(item.getAttribute("varname"), item.getAttribute("value"));
+				}
+			}
 			d.setDescription(form.getValueAsString("Description"));
 		} else if(activity instanceof Option) {
 			Option o = (Option)activity;
@@ -1431,6 +1616,109 @@ public class EditWorkflow extends PageWidget {
 	protected void toggleSidebar() {
 		sidebar.setVisible(!sidebar.isVisible());
 	}
+	
+	protected Layout generateVarTable(Map<String, String> variablesMap){
+		VLayout layout = new VLayout(5);  
+        layout.setPadding(5); 
+        HLayout hlayoutUpper = new HLayout();
+        
+
+        final ListGrid taskGrid = new ListGrid(){
+           //Doesn't allow the varible name or required flag to be changed unless a user has just added it
+        	@Override
+            protected boolean canEditCell (int rowNum, int colNum){
+            	ListGridRecord existingRecord = getRecord(rowNum);
+            	if (existingRecord != null && 
+            			existingRecord.getAttribute("varname") != null && 
+            			//Used to verify GWT hasn't added a non-breaking space for the table
+            			existingRecord.getAttribute("varname").replace("\u00a0","").replace("&nbsp;","").length() >= 0) {
+            		//Ensures this is the value
+            		return (colNum < 3) && super.canEditCell(rowNum, colNum) ;            	    	
+            	    	
+            	    }
+            	return true;
+            	    
+            	    
+        	
+        }; 
+  
+        };
+        taskGrid.setWidth(750);  
+        taskGrid.setHeight(130);  
+        taskGrid.setCellHeight(22);  
+         
+       
+        
+
+        taskGrid.setCanEdit(true);  
+        //taskGrid.setModalEditing(true);
+        taskGrid.setEditByCell(true);
+        taskGrid.setEditEvent(ListGridEditEvent.CLICK);  
+        taskGrid.setListEndEditAction(RowEndEditAction.NEXT);  
+        taskGrid.setAutoSaveEdits(false);  
+        ListGridField variable = new ListGridField("varname", "Variable Name");
+        //variable.setCanEdit(false);
+        CellFormatter formatter = new CellFormatter() {
+        	public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
+				if(value == null) return "";
+				String s = value.toString();
+				return s;
+			}
+
+	
+		};
+		
+		ListGridField required = new ListGridField("required", "Required");
+		required.setType(ListGridFieldType.BOOLEAN);
+        taskGrid.setFields(variable, new ListGridField("value", "Value"),required);
+        taskGrid.setCellFormatter(formatter);
+        
+        
+        ListGridRecord[] records = new ListGridRecord[variablesMap.keySet().size()];
+		int count = 0;
+		for (Map.Entry<String, String> entry : variablesMap.entrySet()) {
+			ListGridRecord lgr = new ListGridRecord();
+			lgr.setAttribute("varname", entry.getKey());
+			lgr.setAttribute("value", entry.getValue());
+			records[count++] = lgr;
+		}
+        taskGrid.setData(records);
+        
+        
+        layout.addMember(taskGrid);  
+
+        HLayout hLayout = new HLayout(10);  
+        hLayout.setAlign(Alignment.LEFT);  
+
+
+        IButton discardButton = new IButton("Discard");  
+        discardButton.addClickHandler(new ClickHandler() {  
+            public void onClick(ClickEvent event) {  
+            	taskGrid.discardAllEdits();  
+            }  
+        });  
+        hLayout.addMember(discardButton);  
+
+        
+        IButton addRowButton = new IButton("Add Variable");  
+        addRowButton.addClickHandler(new ClickHandler() {  
+            public void onClick(ClickEvent event) {  
+            	taskGrid.startEditingNew();
+                
+            }  
+        });  
+        hLayout.addMember(addRowButton);  
+        
+                                         
+        layout.addMember(hLayout);  
+        
+        hlayoutUpper.addMember(layout);
+		
+		return hlayoutUpper;
+		
+		
+	}
+
 	
 	public void refresh() {
 		String[] args= {template.getName()};

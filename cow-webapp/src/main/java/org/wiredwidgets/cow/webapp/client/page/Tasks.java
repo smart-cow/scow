@@ -353,7 +353,7 @@ public class Tasks extends PageWidget {
 					submitItem.enable();
 				}
 				public void onSuccess(Void arg0) {
-					BpmServiceMain.sendDelete("/tasks/active/" + tempString, true, new AsyncCallback<Void>() {
+					BpmServiceMain.sendDelete("/tasks/" + tempString, true, new AsyncCallback<Void>() {
 						public void onFailure(Throwable arg0) {
 							SC.say("Error. Please ensure that you are connected to the Internet, that the server is currently online, and that the task was not already completed.");
 							confirm.destroy();
@@ -367,7 +367,7 @@ public class Tasks extends PageWidget {
 				}
 			});
 		} else {
-			BpmServiceMain.sendDelete("/tasks/active/" + tempString, true, new AsyncCallback<Void>() {
+			BpmServiceMain.sendDelete("/tasks/" + tempString, true, new AsyncCallback<Void>() {
 				public void onFailure(Throwable arg0) {
 					SC.say("Error. Please ensure that you are connected to the Internet, that the server is currently online, and that the task was not already completed.");
 				}

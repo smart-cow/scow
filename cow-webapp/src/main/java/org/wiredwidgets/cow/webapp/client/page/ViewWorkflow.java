@@ -17,11 +17,16 @@
 package org.wiredwidgets.cow.webapp.client.page;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+
+
+
 
 
 
@@ -43,6 +48,10 @@ import org.wiredwidgets.cow.webapp.client.bpm.Signal;
 import org.wiredwidgets.cow.webapp.client.bpm.SubProcess;
 import org.wiredwidgets.cow.webapp.client.bpm.Task;
 import org.wiredwidgets.cow.webapp.client.bpm.Template;
+
+
+
+
 
 
 
@@ -150,7 +159,6 @@ public class ViewWorkflow extends PageWidget {
 	public ViewWorkflow(final String name, final boolean instance) {
 		super();
 		processInstanceId = name;
-		//TODO come back to status 
 		String id = BpmServiceMain.urlEncode(name);
 		id = id.substring(id.indexOf(".") + 1);
 		final String finID = id;
@@ -165,10 +173,12 @@ public class ViewWorkflow extends PageWidget {
 
 						BpmServiceMain.sendGet("/processInstances/" + finID + "/status", new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
+								SC.say("Failed Status");
 								updateTree(false);
 								timer.cancel();
 							}
 							public void onSuccess(String result) {
+								//template = (result == null || result.equals("") ? new Template() : Parse.parseTemplate(result));
 								completionStates = Parse.parseTemplateCompletion(result);
 								updateTree(true);
 							}
@@ -183,6 +193,7 @@ public class ViewWorkflow extends PageWidget {
 	protected void generateBody(String result, boolean instance) {
 		this.instance = instance;
 		template = (result == null || result.equals("") ? new Template() : Parse.parseTemplate(result));
+		
 		// TEMPLATE NAME TEXTFIELD
 		Label templateName = new Label();
 		templateName.addStyleName("bigLabel");
@@ -282,7 +293,7 @@ public class ViewWorkflow extends PageWidget {
 					assignee.setValue(t.get("assignee"));
 					
 					description.setValue(t.getHtmlDescription());
-					
+					/*
 					StaticTextItem addInfo1 = new StaticTextItem("AddInfo1");
 					addInfo1.setTitle("<nobr>Additional Info 1</nobr>");
 					addInfo1.setValue(BpmServiceMain.xmlEncode(t.getVariable("Additional Info 1")));
@@ -290,8 +301,29 @@ public class ViewWorkflow extends PageWidget {
 					StaticTextItem addInfo2 = new StaticTextItem("AddInfo2");
 					addInfo2.setTitle("<nobr>Additional Info 2</nobr>");
 					addInfo2.setValue(BpmServiceMain.xmlEncode(t.getVariable("Additional Info 2")));
+					*/
+					
+					
+					//Add all Variables to page (Not just ADD INFO)
+					ArrayList<FormItem> varFormItems = new ArrayList<FormItem>();
+					varFormItems.addAll(Arrays.asList(basic, name, assignee, description, advanced, bypass));
+					HashMap<String, String> variables = t.getRawWariables();
+					Iterator<Entry<String, String>> it = variables.entrySet().iterator();
+				    
+					while (it.hasNext()) {	
 
-					form.setFields(basic, name, assignee, description, advanced, addInfo1, addInfo2, bypass);
+				        Map.Entry<String, String> pairs = it.next();
+				        StaticTextItem addInfoN = new StaticTextItem(pairs.getKey());
+				        addInfoN.setTitle("<nobr>" + pairs.getKey() + "</nobr>");
+				        addInfoN.setValue(BpmServiceMain.xmlEncode(pairs.getValue()));
+				        
+				        
+				        varFormItems.add(addInfoN);						
+						
+				    }
+				    form.setFields(varFormItems.toArray(new FormItem[varFormItems.size()]));
+					
+					
 				} else if(activity instanceof Exit) {
 					Exit e = (Exit)activity;
 					name.setValue(e.getName());
@@ -328,9 +360,15 @@ public class ViewWorkflow extends PageWidget {
 					url.setTitle("<nobr>Url</nobr>");
 					url.setValue("<nobr><a href=\"" + s.getServiceUrl() + "\">" + s.getServiceUrl() + "</a></nobr>");
 					
+					StaticTextItem contentType = new StaticTextItem("ContentType");
+					contentType.setTitle("<nobr>Content Type</nobr>");
+					contentType.setValue("<nobr>" + BpmServiceMain.xmlEncode(s.getContentType()) + "</nobr>");
+					
 					StaticTextItem content = new StaticTextItem("Content");
 					content.setTitle("<nobr>Content</nobr>");
 					content.setValue("<nobr>" + BpmServiceMain.xmlEncode(s.getContent()) + "</nobr>");
+					
+					
 					
 					StaticTextItem variable = new StaticTextItem("Var");
 					variable.setTitle("<nobr>Variable</nobr>");
@@ -338,7 +376,7 @@ public class ViewWorkflow extends PageWidget {
 					
 					description.setValue(s.getHtmlDescription());
 					
-					form.setFields(basic, name, method, url, content, variable, description, advanced, bypass);
+					form.setFields(basic, name, method, url,contentType, content, variable, description, advanced, bypass);
 				} else if(activity instanceof Script) {
 					Script s = (Script)activity;
 					name.setValue(s.getName());
@@ -575,7 +613,8 @@ public class ViewWorkflow extends PageWidget {
 				}
 			});
 			header.addMenuItem(initiate);
-		} else {
+		}
+		else {
 			MenuItem back = new MenuItem("Back to Workflow");
 			back.addClickHandler(new com.smartgwt.client.widgets.menu.events.ClickHandler() {
 				public void onClick(MenuItemClickEvent event) {
@@ -629,11 +668,19 @@ public class ViewWorkflow extends PageWidget {
 		if(success) {
 	    Iterator<Entry<String, String>> it = completionStates.entrySet().iterator();
 		    while (it.hasNext()) {
-		        Map.Entry<String, String> pairs = (Map.Entry<String, String>)it.next();
-		        TreeNode node = grid.getTree().find("name", pairs.getKey());
-		        node.setAttribute("completion",pairs.getValue());
-
-
+		        
+		    	Map.Entry<String, String> pairs = (Map.Entry<String, String>)it.next();
+		    	String key = pairs.getKey();
+		    	if (!key.isEmpty()){
+		    		TreeNode node = grid.getTree().find("name", pairs.getKey());
+		        	node.setAttribute("completion",pairs.getValue());
+		    	}
+		        /*
+		        TreeNode[] nodes = grid.getTree().getAllNodes();
+				for(int i = 0; i < nodes.length; i++) {
+					nodes[i].setAttribute("completion", completionStates.get(nodes[i].getAttribute("name")));
+				}
+				*/
 		    }
 		} else {
 			//If the tree can not be updated all nodes are marked as error

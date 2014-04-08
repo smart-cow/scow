@@ -42,14 +42,24 @@ public class Parse {
 		Node process = null;
 		String cname = first.getName();
 		Template t = new Template();
+		
 		if (cname.endsWith(("process"))){
 			process = first;
 			t.setName(getAttributeValue(process, "name"));
 		}
 		else if (cname.endsWith(("processInstance"))){
 			ArrayList<Node> nodes = first.getChildNodes();
-			process = nodes.get(8);
-			String processInstanceName = ((Node)nodes.get(5).getChildNodes().get(0)).getValue();
+			String processInstanceName = "";
+			for (Node child: nodes){
+				if (child.getName().endsWith("process")){
+					process = child;
+				}
+				if (child.getName().endsWith("id")){
+					processInstanceName =  ((Node) child.getChildNodes().get(0)).getValue();
+				}
+			
+			}
+
 			t.setName(processInstanceName);
 
 		}
@@ -71,7 +81,35 @@ public class Parse {
 	}
 	
 	
+	public static Map<String, String> parseTemplateCompletion(String s) {
+		s = clean(s);		
+		Document doc = Document.xmlParse(s);
+		ArrayList<Node> children = doc.getChildren();
+		Node first = children.get(0);
+		Node process = null;
+		String cname = first.getName();
+		if (cname.endsWith(("process"))){
+			process = first;
+		}
+		else if (cname.endsWith(("processInstance"))){
+			ArrayList<Node> nodes = first.getChildNodes();
+			for (Node child: nodes){
+				if (child.getName().endsWith("process")){
+					process = child;
+				}
+				
+			}
+			
+		}
+		
+		
+		Map<String, String> map = new HashMap<String, String>();
+		parseNodeCompletion((Node)(process.getChildNodes().get(0)), map);
+		return map;
+	}
 	
+	
+	/*
 	public static Template parseTemplateNew(String s) {
 		s = clean(s);		
 		Document doc = Document.xmlParse(s);
@@ -91,28 +129,10 @@ public class Parse {
 		}
 		return t;
 	}
+	*/
 	
 	
 	
-	public static Map<String, String> parseTemplateCompletion(String s) {
-		s = clean(s);		
-		Document doc = Document.xmlParse(s);
-		ArrayList<Node> children = doc.getChildren();
-		Node first = children.get(0);
-		Node process = null;
-		String cname = first.getName();
-		if (cname.endsWith(("process"))){
-			process = first;
-		}
-		else if (cname.endsWith(("processInstance"))){
-			ArrayList<Node> nodes = first.getChildNodes();
-			//TODO make this not hard coded to a specific number
-			process = nodes.get(8);
-		}
-		Map<String, String> map = new HashMap<String, String>();
-		parseNodeCompletion((Node)(process.getChildNodes().get(0)), map);
-		return map;
-	}
 	
 	
 	
