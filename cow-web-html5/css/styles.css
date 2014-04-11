@@ -1,0 +1,26 @@
+﻿
+
+/** Chiclet chart colors **/
+#chiclet-chart td.completed {
+    background-color: green;
+    color: white
+}
+
+#chiclet-chart td.open {
+    background-color: yellow;
+}
+
+#chiclet-chart td.planned {
+    background-color: blue;
+    color: white
+}
+
+#chiclet-chart td.contingent {
+    background-color: grey;
+    color: white
+}
+
+#chiclet-chart td.precluded {
+    background-color: black;
+    color: white
+}

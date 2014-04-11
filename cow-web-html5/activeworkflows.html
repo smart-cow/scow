@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>COW</title>
+    
+    
+    <script src="js/libs/jquery-1.11.0.js"></script>
+    
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <script src="js/libs/bootstrap.js"></script>
+    
+    <script src="js/libs/knockout-3.0.0.debug.js"></script>
+    <script src="js/libs/knockout.mapping.js"></script>
+    
+    <script src="js/libs/stomp.js"></script>
+    <script src="js/libs/sockjs-0.3.min.js"></script>
+    
+    <link href="css/styles.css" rel="stylesheet" />
+    <script src="js/config.js"></script>
+    <script src="js/mylibs/cow-lib.js"></script>
+    <script src="js/mylibs/activeworkflows-scripts.js"></script>
+</head>
+
+<body>
+<h1>Active Workflows</h1>
+
+<table class="table table-striped" data-bind="if: workflows().length">
+    <thead>
+        <tr data-bind="foreach: tableHeadings">
+            <th data-bind="text: $data"></th>
+        </tr>
+    </thead>
+    <tbody id="chiclet-chart" data-bind="foreach: workflows">
+        <tr data-bind="foreach: columnValues">
+            <td data-bind="text: $data, css: $data"></td>
+        </tr>
+    </tbody>
+</table>
+
+
+</body>
+</html>

@@ -92,6 +92,9 @@ function Task(newTaskData) {
 }
 
 
+
+
+
 //Root object used by Knockout
 function TasksViewModel() {
     var self = this;

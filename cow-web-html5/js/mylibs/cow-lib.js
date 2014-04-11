@@ -33,6 +33,18 @@ var COW = (function ($) {
         return $.ajax(ajaxParams);
     };
 
+    my.activeWorkflowIds = function (callBack) {
+        my.cowRequest('processInstances').done(function (data) {
+            var ids = $.map(data.processInstance, function (procInstance) {
+                var nameId = procInstance.id;
+                var dotPosition = nameId.lastIndexOf('.');
+                return +nameId.substr(dotPosition + 1);
+            });
+            callBack(ids);
+        });
+    };
+
+
 
     // Configure Stomp to use SockJs to connect to AMQP
     var sock = new SockJS(cowConfig.amqpUrl);
@@ -95,8 +107,6 @@ var COW = (function ($) {
             amqpIsConnected = true;
             amqpFailedConnectionAttempts = 0;
         };
-
-
         var onError = function () {
             amqpIsConnected = false;
             amqpFailedConnectionAttempts++;
@@ -110,9 +120,11 @@ var COW = (function ($) {
                 }, 500);
             }
         };
-
         stomp.connect('guest', 'guest', onConnect, onError);
     };
+
+
+
 
     return my;
 }(jQuery));
