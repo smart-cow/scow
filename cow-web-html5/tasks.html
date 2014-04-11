@@ -1,105 +1,104 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
+﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>COW</title>
     
-	
-	<script src="js/libs/jquery-1.11.0.js"></script>
-	
-	<link href="css/bootstrap.css" rel="stylesheet">
-	<script src="js/libs/bootstrap.js"></script>
-	
-	<script src="js/libs/knockout-min.js"></script>
-	<script src="js/libs/knockout.mapping.js"></script>
+    
+    <script src="js/libs/jquery-1.11.0.js"></script>
+    
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <script src="js/libs/bootstrap.js"></script>
+    
+    <script src="js/libs/knockout-3.0.0.debug.js"></script>
+    <script src="js/libs/knockout.mapping.js"></script>
     
     <script src="js/libs/stomp.js"></script>
     <script src="js/libs/sockjs-0.3.min.js"></script>
     
-    <script src="js/config.json"></script>
+    <script src="js/config.js"></script>
     <script src="js/mylibs/cow-lib.js"></script>
-   	<script src="js/mylibs/task-scripts.js"></script>
+    <script src="js/mylibs/task-scripts.js"></script>
 </head>
 <body>
-	
+    
 
 <h1>Tasks</h1>
 
 <h3>Tasks Assigned to you</h3>
 <table class="table table-hover table-striped">
-	<thead>
-		<tr>
-    		<th> ID </th>
-    		<th> Name </th>
-    		<th> Workflow </th>
-    		<th> Description </th>   
-    		<th> State </th> 	
-    	</tr>
-	</thead>
-	<tbody data-bind="foreach: assignedTasks">
-		<!-- The modal opens when clicked because of the data-toggle="modal" and 
-			 data-target="#taskInfoModal"-->
-		<tr data-toggle="modal" data-target="#taskInfoModal" data-bind="click: $root.showTask">		
-			<td data-bind="text: id"></td>
-			<td data-bind="text: name"></td>
-			<td data-bind="text: processInstanceId"></td>
-			<td data-bind="text: description"></td>		
-			<td data-bind="text: state"></td>
-		</tr>	
-	</tbody>
+    <thead>
+        <tr>
+            <th> ID </th>
+            <th> Name </th>
+            <th> Workflow </th>
+            <th> Description </th>   
+            <th> State </th> 	
+        </tr>
+    </thead>
+    <tbody data-bind="foreach: assignedTasks">
+        <!-- The modal opens when clicked because of the data-toggle="modal" and 
+             data-target="#taskInfoModal"-->
+        <tr data-toggle="modal" data-target="#taskInfoModal" data-bind="click: $root.showTask">		
+            <td data-bind="text: id"></td>
+            <td data-bind="text: name"></td>
+            <td data-bind="text: processInstanceId"></td>
+            <td data-bind="text: description"></td>		
+            <td data-bind="text: state"></td>
+        </tr>	
+    </tbody>
 </table>
 
 <h3>Available Tasks</h3>
 <table class="table table-hover table-striped">
-	<thead>
-		<tr>
-    		<th> ID </th>
-    		<th> Name </th>
-    		<th> Workflow </th>
-    		<th> Description </th>   
-    		<th> State </th> 	
-    	</tr>
-	</thead>
-	<tbody data-bind="foreach: availableTasks">
-		<tr data-toggle="modal" data-target="#taskInfoModal" data-bind="click: $root.showTask">		
-			<td data-bind="text: id"></td>
-			<td data-bind="text: name"></td>
-			<td data-bind="text: processInstanceId"></td>
-			<td data-bind="text: description"></td>		
-			<td data-bind="text: state"></td>
-		</tr>	
-	</tbody>
+    <thead>
+        <tr>
+            <th> ID </th>
+            <th> Name </th>
+            <th> Workflow </th>
+            <th> Description </th>   
+            <th> State </th> 	
+        </tr>
+    </thead>
+    <tbody data-bind="foreach: availableTasks">
+        <tr data-toggle="modal" data-target="#taskInfoModal" data-bind="click: $root.showTask">		
+            <td data-bind="text: id"></td>
+            <td data-bind="text: name"></td>
+            <td data-bind="text: processInstanceId"></td>
+            <td data-bind="text: description"></td>		
+            <td data-bind="text: state"></td>
+        </tr>	
+    </tbody>
 </table>
 
 
 <br/>
 
 <!-- Explicitly reloads all task data from cow-server. Not actually necessary because of amqp, 
-	but might be helpful for debugging -->
+    but might be helpful for debugging -->
 <button class="btn btn-primary" data-bind="enable: username, click: refreshAllTasks">
-	Refresh task lists
+    Refresh task lists
 </button>
 
 
 <h3>History Tasks</h3>
 <table class="table table-striped">
-	<thead>
-		<tr>
-    		<th> ID </th>
-    		<th> Assignee </th>
-    		<th> Workflow </th>
-    		<th> State </th> 	
-    	</tr>
-	</thead>
-	<tbody data-bind="foreach: historyTasks">
-		<tr>		
-			<td data-bind="text: id"></td>
-			<td data-bind="text: assignee"></td>
-			<td data-bind="text: executionId"></td>
-			<td data-bind="text: state"></td>
-		</tr>	
-	</tbody>
+    <thead>
+        <tr>
+            <th> ID </th>
+            <th> Assignee </th>
+            <th> Workflow </th>
+            <th> State </th> 	
+        </tr>
+    </thead>
+    <tbody data-bind="foreach: historyTasks">
+        <tr>		
+            <td data-bind="text: id"></td>
+            <td data-bind="text: assignee"></td>
+            <td data-bind="text: executionId"></td>
+            <td data-bind="text: state"></td>
+        </tr>	
+    </tbody>
 </table>
 
 
@@ -107,7 +106,7 @@
 <!-- See http://getbootstrap.com/javascript/#modals, copy and pasted their modal example -->
 <div id="taskInfoModal" class="modal fade">
   <div class="modal-dialog">
-  	<!-- data-bind=with: sets the current context to the task that was last clicked -->
+    <!-- data-bind=with: sets the current context to the task that was last clicked -->
     <div class="modal-content" data-bind="with: selectedTask">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
@@ -115,81 +114,81 @@
         <h4 class="modal-title">Task Information</h4>
       </div>
       <div class="modal-body">
-      	<dl>
-      		<dt>Name</dt>
-      			<dd data-bind="text: name"></dd>
-      		<dt>Description</dt>
-      			<dd data-bind="text: description"></dd>
-      		<dt>Workflow</dt>
-      			<dd data-bind="text: processInstanceId"></dd>
-      		<dt>Task ID</dt>
-      			<dd data-bind="text: id"></dd>
-      		<dt>State</dt>
-      			<dd data-bind="text: state"></dd>
-      		<dt>Activity Name</dt>
-      			<dd data-bind="text: activityName"></dd>
-      		<dt>State</dt>
-      			<dd data-bind="text: state"></dd>
-      		<dt>Assignee</dt>
-      			<dd data-bind="text: assignee"></dd>	      		
-      	</dl>
-      	<!-- Form to select the task outcome, only shown when task has possible outcomes -->
-      	<form id="outcomes-form" class="form-inline" 
-      	      data-bind="visible: outcomes().length > 0">
-      	    <!-- help-block only shows up after the user tries to complete the task 
-      	    	without selecting an outcome -->  
-      		<p class="help-block hidden">Must select an outcome</p>
-      		
-      		<strong class="control-label">Outcomes</strong>
-      		<label data-bind="foreach: outcomes" class="radio">
-      			<input type="radio" name="selectedOutcome"
-      			       data-bind="checked: $parent.selectedOutcome, value: $data"/>
-      			<!-- Display the outcome name next to its radio button -->       
-      			<span data-bind="text: $data"></span>    
-      		</label>      		
-      	</form>
-      	<!-- Variable edit section -->
-      	<div>
-      		<strong>Variables</strong>
-      		<!-- Each variable's editors appear in a li -->
-	      	<ul class="form-inline" data-bind="foreach: variables">
-	      		<!-- Only add class 'has-error' when the view model says there is an error with 
-	      			the section's variable -->
-	      		<li class="form-group" 
-	      		    data-bind="css: {'has-error': $parent.variableHasConflict($data)}">
-	      		    <!-- Only show help when the view model says there is an error with 
-	      				 the section's variable -->
-	      			<label class="help-block" 
-	      			       data-bind="visible: $parent.variableHasConflict($data)">
-	      				Cannot have duplicate variable names
-	      			</label>	      
-	      			<!-- Disable variable editors if the selectedTask hasn't yet been assigned 
-	      				 to the user -->			
-	      			Name: <input class="form-control" 
-	      			             data-bind="value: name, enable: $parent.canCompleteTask"/>
-	      			Value: <input class="form-control" 
-	      			              data-bind="value: value, enable: $parent.canCompleteTask"/>
-	      			<button data-bind="visible: $parent.canCompleteTask, click: $parent.removeVariable">
-	      				Delete
-	      			</button>
-	      		</li>
-	      	</ul>
-	      	<button data-bind="visible: canCompleteTask, click: addVariable">Add Variable</button>
-      	</div>
+        <dl>
+            <dt>Name</dt>
+                <dd data-bind="text: name"></dd>
+            <dt>Description</dt>
+                <dd data-bind="text: description"></dd>
+            <dt>Workflow</dt>
+                <dd data-bind="text: processInstanceId"></dd>
+            <dt>Task ID</dt>
+                <dd data-bind="text: id"></dd>
+            <dt>State</dt>
+                <dd data-bind="text: state"></dd>
+            <dt>Activity Name</dt>
+                <dd data-bind="text: activityName"></dd>
+            <dt>State</dt>
+                <dd data-bind="text: state"></dd>
+            <dt>Assignee</dt>
+                <dd data-bind="text: assignee"></dd>	      		
+        </dl>
+        <!-- Form to select the task outcome, only shown when task has possible outcomes -->
+        <form id="outcomes-form" class="form-inline" 
+              data-bind="visible: outcomes().length > 0">
+            <!-- help-block only shows up after the user tries to complete the task 
+                without selecting an outcome -->  
+            <p class="help-block hidden">Must select an outcome</p>
+            
+            <strong class="control-label">Outcomes</strong>
+            <label data-bind="foreach: outcomes" class="radio">
+                <input type="radio" name="selectedOutcome"
+                       data-bind="checked: $parent.selectedOutcome, value: $data"/>
+                <!-- Display the outcome name next to its radio button -->       
+                <span data-bind="text: $data"></span>    
+            </label>      		
+        </form>
+        <!-- Variable edit section -->
+        <div>
+            <strong>Variables</strong>
+            <!-- Each variable's editors appear in a li -->
+            <ul class="form-inline" data-bind="foreach: variables">
+                <!-- Only add class 'has-error' when the view model says there is an error with 
+                    the section's variable -->
+                <li class="form-group" 
+                    data-bind="css: {'has-error': $parent.variableHasConflict($data)}">
+                    <!-- Only show help when the view model says there is an error with 
+                         the section's variable -->
+                    <label class="help-block" 
+                           data-bind="visible: $parent.variableHasConflict($data)">
+                        Cannot have duplicate variable names
+                    </label>	      
+                    <!-- Disable variable editors if the selectedTask hasn't yet been assigned 
+                         to the user -->			
+                    Name: <input class="form-control" 
+                                 data-bind="value: name, enable: $parent.canCompleteTask"/>
+                    Value: <input class="form-control" 
+                                  data-bind="value: value, enable: $parent.canCompleteTask"/>
+                    <button data-bind="visible: $parent.canCompleteTask, click: $parent.removeVariable">
+                        Delete
+                    </button>
+                </li>
+            </ul>
+            <button data-bind="visible: canCompleteTask, click: addVariable">Add Variable</button>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <!-- Display one of the two buttons based on the state of the selectedTask.
-        	 The button's click: function closes the modal after the ajax call completes, 
-        	 not when the button is clicked -->
+             The button's click: function closes the modal after the ajax call completes, 
+             not when the button is clicked -->
         <button data-bind="visible: canAssignTask, click: $root.takeSelectedTask" 
-        		type="button" class="btn btn-primary">
-        	Assign to me
+                type="button" class="btn btn-primary">
+            Assign to me
         </button>
         <button type="button" class="btn btn-primary"  
                 data-bind="visible: canCompleteTask, disable: hasVariableConflicts, click: $root.completeCurrentTask">
                 Complete Task
-     	</button>
+        </button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
