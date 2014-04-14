@@ -486,7 +486,7 @@ public class ProcessInstancesController extends CowServerController{
      *      webapp
      * @return 
      * @see #getProcessInstancesWithTasks() 
-     * @deprecated use @{link TasksController#getUnassignedTasksByCandidate(String)} instead
+     * @deprecated use {@link TasksController#getUnassignedTasksByCandidate(String)} instead
      */
     @Deprecated
     @RequestMapping(value = "/tasks", params = "candidate")

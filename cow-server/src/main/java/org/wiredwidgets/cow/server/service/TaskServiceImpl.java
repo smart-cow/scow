@@ -319,7 +319,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwner(user, "en-UK"));
         
         for (TaskSummary task : tempTasks){
-            if (task.getStatus() == Status.Ready){
+            if (task.getStatus() == Status.Ready || task.getStatus() == Status.Created){
                 tasks.add(task);
             }
         }
