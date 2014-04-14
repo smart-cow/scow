@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wiredwidgets</groupId>
 		<artifactId>scow-projects-parent</artifactId>
-		<version>1.01</version>
+		<version>1.02-SNAPSHOT</version>
     </parent>
 
     <artifactId>rem2-api</artifactId>
