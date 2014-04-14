@@ -18,6 +18,7 @@ package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,9 +30,17 @@ import org.omg.spec.bpmn._20100524.di.BPMNDiagram;
 import org.omg.spec.bpmn._20100524.di.BPMNEdge;
 import org.omg.spec.bpmn._20100524.di.BPMNPlane;
 import org.omg.spec.bpmn._20100524.di.BPMNShape;
+import org.omg.spec.bpmn._20100524.model.Assignment;
+import org.omg.spec.bpmn._20100524.model.DataInput;
+import org.omg.spec.bpmn._20100524.model.DataInputAssociation;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.omg.spec.bpmn._20100524.model.ExtensionElements;
+import org.omg.spec.bpmn._20100524.model.InputSet;
+import org.omg.spec.bpmn._20100524.model.IoSpecification;
 import org.omg.spec.bpmn._20100524.model.Property;
+import org.omg.spec.bpmn._20100524.model.TActivity;
+import org.omg.spec.bpmn._20100524.model.TFlowNode;
+import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.omg.spec.bpmn._20100524.model.TItemDefinition;
 import org.omg.spec.bpmn._20100524.model.TProcess;
 import org.omg.spec.bpmn._20100524.model.TProcessType;
@@ -197,6 +206,55 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<Bpmn20Node, TPr
         diagram.setBPMNPlane(plane);
         definitions.getBPMNDiagrams().add(diagram);        
 	}
+	
+/*	private IoSpecification getProcessIoSpec() {
+		if (getTarget().getIoSpecification() == null) {
+			getTarget().setIoSpecification(new IoSpecification());
+		}
+		return getTarget().getIoSpecification();
+	}
+	
+	private DataInput addProcessDataInput(String name) {
+	    DataInput dataInput = new DataInput();
+	    dataInput.setId(getProcessInputRefName(name));
+	    dataInput.setName(name); 
+	    getProcessIoSpec().getDataInputs().add(dataInput);
+	    getProcessInputSet().getDataInputRefs().add(modelFactory.createInputSetDataInputRefs(dataInput));  
+	    return dataInput;
+	}	
+	
+	private InputSet getProcessInputSet() {
+		if (getProcessIoSpec().getInputSets().size() == 0) {
+			getProcessIoSpec().getInputSets().add(new InputSet());
+		}
+		return getProcessIoSpec().getInputSets().get(0);
+	}
+	
+	private String getProcessInputRefName(String name) {
+	    return "_" + name + "Input"; // JBPM naming convention
+	}
+	
+	private void assignProcessInputExpression(DataInput dataInput, String value) {
+	    DataInputAssociation dia = new DataInputAssociation();
+	    getProcessDataInputAssociations().add(dia);
+	    dia.setTargetRef(dataInput);
+	
+	    Assignment assignment = new Assignment();
+	    
+	    TFormalExpression tfeFrom = new TFormalExpression();
+	    tfeFrom.getContent().add(value);
+	    assignment.setFrom(tfeFrom);
+	          
+	    TFormalExpression tfeTo = new TFormalExpression();
+	    tfeTo.getContent().add(dataInput.getId());
+	    assignment.setTo(tfeTo);
+	    
+	    dia.getAssignments().add(assignment); 
+	}	
+	
+	private List<DataInputAssociation> getProcessDataInputAssociations() {
+		return getProcessIoSpec().getDataInputAssociations();
+	}	*/
     
 
 }

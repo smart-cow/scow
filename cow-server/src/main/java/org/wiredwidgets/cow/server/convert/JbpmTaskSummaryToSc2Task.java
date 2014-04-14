@@ -24,16 +24,20 @@ import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.log4j.Logger;
 import org.jbpm.task.Content;
 import org.jbpm.task.utils.ContentMarshallerHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.AbstractUserTaskNodeBuilder;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.DecisionTaskNodeBuilder;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.UserTaskNodeBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -46,7 +50,10 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
     @Autowired(required=false)
     org.jbpm.task.TaskService taskClient;
     
-    private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
+    @Autowired
+    ObjectMapper objectMapper;
+    
+    private final Logger log = LoggerFactory.getLogger(JbpmTaskSummaryToSc2Task.class);
 
     @Override
     public Task convert(org.jbpm.task.query.TaskSummary source) {
@@ -54,7 +61,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
     		return doConvert(source);
     	}
     	catch (Exception e) {
-    		log.error("Error converting task ID " + source.getId(), e);
+    		log.error("Error converting task ID {}", source.getId(), e);
     		return null;
     	}
     }
@@ -85,7 +92,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
 	            target.setName(parts[1]); // used for display to the user
             }
             else {
-            	log.error("Expecting task name in [key]/[name] format, but was: " + source.getName());
+            	log.error("Expecting task name in [key]/[name] format, but was: {}", source.getName());
             	target.setName(parts[0]); // something is broken here, not sure what to do.
             }
         }
@@ -97,7 +104,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
 
         org.jbpm.task.Task task = taskClient.getTask(source.getId());
         if (task == null) {
-        	log.error("Unable to find task ID " + source.getId());
+        	log.error("Unable to find task ID {}", source.getId());
         	return null;
         }
 
@@ -109,15 +116,28 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
 	        		content.getContent(), null);  
         }
         else {
-        	log.info("No content found for task ID: " + task.getId() + " content ID " + task.getTaskData().getDocumentContentId() );
+        	log.info("No content found for task ID: {} content ID {}", task.getId(), task.getTaskData().getDocumentContentId() );
         	map = new HashMap<String, Object>();
         }
         
         // add task outcomes using the "Options" variable from the task
-        String optionsString = (String) map.get("Options");
+        String optionsString = (String) map.get(DecisionTaskNodeBuilder.OPTIONS);
         if (optionsString != null) {     
 	        String[] options = ( (String) map.get("Options") ).split(",");
 	        target.getOutcomes().addAll(Arrays.asList(options));
+        }
+        
+        // get variables info
+        
+        Map<String, Map<String, Boolean>> varsInfoMap = new HashMap<String, Map<String, Boolean>>();
+        String varsJson = (String)map.get(AbstractUserTaskNodeBuilder.TASK_VARIABLES_INFO);
+        if (varsJson != null && !varsJson.isEmpty()) {
+	        try {
+	        	varsInfoMap = objectMapper.readValue(varsJson, Map.class);
+	        }
+	        catch (Exception e) {
+	        	log.error("Json parsing exception", e);
+	        }
         }
         
         // get ad-hoc variables map
@@ -126,7 +146,8 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         if (contentMap != null) {
 	        for (Entry<String, Object> entry : contentMap.entrySet()) {
 	        	log.debug(entry.getKey() + "=" + entry.getValue());
-	        	addVariable(target, entry.getKey(), entry.getValue());
+	        	// ad hoc variables are not required and are modifiable
+	        	addVariable(target, entry.getKey(), entry.getValue(), false, true);
 	        }
         }
         else {
@@ -137,14 +158,23 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         Set<String> systemVarNames = UserTaskNodeBuilder.getSystemVariableNames();
         for (String key : map.keySet()) {
         	if (! systemVarNames.contains(key)) {
-        		// log.info("Additional var: " + key);
-        		addVariable(target, key, map.get(key));
+        		log.debug("Additional var: {}", key);
+        		boolean required = false;
+        		boolean modifiable = true;
+        		if (varsInfoMap.containsKey(key) && varsInfoMap.get(key).get("output").equals(Boolean.FALSE)) {
+        			// this is an input only declared variable
+        			modifiable = false;
+        		}
+        		if (varsInfoMap.containsKey(key) && varsInfoMap.get(key).get("required").equals(Boolean.TRUE)) {
+        			required = true;
+        		}
+        		addVariable(target, key, map.get(key), required, modifiable);
         	}
         }
         return target;
     }    
     
-    private void addVariable(Task task, String key, Object value) {
+    private void addVariable(Task task, String key, Object value, boolean required, boolean modifiable) {
         Variable var = new Variable();
         var.setName(key);
         // Support strings only.  Other types will cause ClassCastException
@@ -152,7 +182,9 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
             var.setValue((String)value);
         } catch (ClassCastException e) {
             var.setValue("Variable type " + value.getClass().getName() + " is not supported");
-        }    	
+        }    
+        var.setModifiable(modifiable);
+        var.setRequired(required);
         addVariable(task, var);
     }
 

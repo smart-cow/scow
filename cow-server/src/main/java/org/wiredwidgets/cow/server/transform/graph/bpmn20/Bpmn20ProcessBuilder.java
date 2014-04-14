@@ -28,6 +28,8 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.omg.spec.bpmn._20100524.model.Definitions;
+import org.omg.spec.bpmn._20100524.model.IoSpecification;
+import org.omg.spec.bpmn._20100524.model.TActivity;
 import org.omg.spec.bpmn._20100524.model.TFlowNode;
 import org.omg.spec.bpmn._20100524.model.TFormalExpression;
 import org.omg.spec.bpmn._20100524.model.TProcess;
@@ -182,6 +184,6 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         // incomings and outgoings are required by igrafx       
         sourceNode.getOutgoings().add(new QName(BPMN20_MODEL_NAMESPACE, sequenceFlow.getId()));
         targetNode.getIncomings().add(new QName(BPMN20_MODEL_NAMESPACE, sequenceFlow.getId()));
-    }    
-    
+    } 
+   
 }

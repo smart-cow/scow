@@ -24,6 +24,7 @@ import org.wiredwidgets.cow.server.transform.graph.activity.DecisionTask;
 public class DecisionTaskNodeBuilder extends AbstractUserTaskNodeBuilder<DecisionTask> {
 	
 	public static final String DECISION_VAR_NAME = "DecisionVarName";
+	public static final String OPTIONS = "Options";
 	
 	@Override
 	public void buildInternal(TUserTask t, DecisionTask source,
@@ -31,7 +32,7 @@ public class DecisionTaskNodeBuilder extends AbstractUserTaskNodeBuilder<Decisio
 		
 		super.buildInternal(t, source, context);
 		
-        addDataInputFromExpression("Options", getOptionsString(source), t);
+        addDataInputFromExpression(OPTIONS, getOptionsString(source), t);
         String decisionVar = getDecisionVarName(t.getId());
         addDataOutputFromProperty(decisionVar, decisionVar, t, context);
         

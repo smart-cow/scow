@@ -186,13 +186,28 @@
             <element minOccurs="0" maxOccurs="unbounded" name="name" type="string"/>
         </sequence>
     </complexType>
-
+   
     <complexType name="Variable">
         <annotation>
             <documentation>A name/value pair.</documentation>
         </annotation>
         <attribute name="name" type="string"/>
         <attribute name="value" type="string"/>
+        <attribute name="type" type="string" />
+        <attribute name="required" type="boolean" default="false">
+        	<annotation>
+	            <documentation>
+	            	Indicates that a value MUST be provided for this variable.  Applies only where output=true.
+	            </documentation>
+	        </annotation>          
+        </attribute>        
+        <attribute name="modifiable" type="boolean" default="true" >
+        	<annotation>
+	            <documentation>
+	            	Indicates whether this variable can be modified or should be treated as read-only.
+	            </documentation>
+	        </annotation>          
+        </attribute>
     </complexType>
 
     <complexType name="Variables">
@@ -277,7 +292,7 @@
         </sequence>
     </complexType>
 
-    <complexType name="Participation">
+  	<complexType name="Participation">
         <attribute name="type" type="string" use="required"/>
         <attribute name="id" type="string" use="required"/>
         <attribute name="user" type="string" use="optional"/>
