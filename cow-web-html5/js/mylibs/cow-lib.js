@@ -18,13 +18,14 @@ var COW = (function ($) {
 
         var defaultAjaxParams = {
             url: cowConfig.cowServerHost + path,
-            dataType: 'json',
+            contentType: "application/json",
+            dataType: "json",
             xhrFields: {
                 withCredentials: true
             }
         };
         var optionalParams = {
-            data: data,
+            data: JSON.stringify(data),
             type: httpMethod
         };
 
@@ -34,10 +35,10 @@ var COW = (function ($) {
     };
 
     my.activeWorkflowIds = function (callBack) {
-        my.cowRequest('processInstances').done(function (data) {
+        my.cowRequest("processInstances").done(function (data) {
             var ids = $.map(data.processInstance, function (procInstance) {
                 var nameId = procInstance.id;
-                var dotPosition = nameId.lastIndexOf('.');
+                var dotPosition = nameId.lastIndexOf(".");
                 return +nameId.substr(dotPosition + 1);
             });
             callBack(ids);
@@ -63,7 +64,7 @@ var COW = (function ($) {
         var destination = cowConfig.amqpExchange + subscription.routingKey;
         stomp.subscribe(destination, function (message) {
             // Extract routing key from message headers
-            var slashPosition = message.headers.destination.lastIndexOf('/');
+            var slashPosition = message.headers.destination.lastIndexOf("/");
             var routingKey = message.headers.destination.substr(slashPosition);
             // Message comes in as text
             var parsedBody = $.parseJSON(message.body);
@@ -72,7 +73,7 @@ var COW = (function ($) {
     };
 
     /*
-     Called by external code inorder to add an AMQP subscription. Doesn't actually connect.
+     Called by external code inorder to add an AMQP subscription. Doesn"t actually connect.
      Need to call COW.amqpConnect() in order to connect.
      onReceive = function(data, routingKey). Data is the Javascript object from the body of the
      message, routingKey is the routing the message was sent with
@@ -85,7 +86,7 @@ var COW = (function ($) {
         if (amqpIsConnected) {
             addSubscription(subscription);
         }
-        // If it's not connect just add to list. When Stomp reconnects all amqpSubscriptions
+        // If it"s not connect just add to list. When Stomp reconnects all amqpSubscriptions
         // in the list are set up.
         amqpSubscriptions.push(subscription);
     };
@@ -112,15 +113,15 @@ var COW = (function ($) {
             amqpFailedConnectionAttempts++;
 
             if (amqpFailedConnectionAttempts < 6) {
-                stomp.connect('guest', 'guest', onConnect, onError);
+                stomp.connect("guest", "guest", onConnect, onError);
             }
             else {
                 setTimeout(function () {
-                    stomp.connect('guest', 'guest', onConnect, onError);
+                    stomp.connect("guest", "guest", onConnect, onError);
                 }, 500);
             }
         };
-        stomp.connect('guest', 'guest', onConnect, onError);
+        stomp.connect("guest", "guest", onConnect, onError);
     };
 
 

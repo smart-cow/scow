@@ -27,12 +27,16 @@
 
 <table class="table table-striped" data-bind="if: workflows().length">
     <thead>
+        <!-- Create heading column for each user mentioned in a task -->
         <tr data-bind="foreach: tableHeadings">
             <th data-bind="text: $data"></th>
         </tr>
     </thead>
+    <!-- Create a row for each workflow -->
     <tbody id="chiclet-chart" data-bind="foreach: workflows">
+        <!-- Create a cell for each heading -->
         <tr data-bind="foreach: columnValues">
+            <!-- Set CSS class and text to the completion state -->
             <td data-bind="text: $data, css: $data"></td>
         </tr>
     </tbody>
