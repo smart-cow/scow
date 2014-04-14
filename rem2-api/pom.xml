@@ -5,15 +5,15 @@
     <parent>
         <groupId>org.wiredwidgets</groupId>
 		<artifactId>scow-projects-parent</artifactId>
-		<version>1.01-SNAPSHOT</version>
+		<version>1.01</version>
     </parent>
-    
+
     <artifactId>rem2-api</artifactId>
     <packaging>jar</packaging>
 
     <name>rem2-api</name>
     <url>http://maven.apache.org</url>
-    
+
     <properties>
     	<license.dir>${project.basedir}/..</license.dir>
     </properties>
@@ -35,8 +35,8 @@
                     <arguments>-extension simpleBinding.xsd</arguments>
                     <extension>true</extension>
                 </configuration>
-            </plugin>         
+            </plugin>
         </plugins>
     </build>
- 
+
 </project>
