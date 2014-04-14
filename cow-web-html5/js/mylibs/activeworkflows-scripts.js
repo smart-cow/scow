@@ -1,6 +1,8 @@
 ﻿/*global ko: false, COW: false, cowConfig: false*/
 
-
+/*
+Holds the information for one cell in the table.
+*/
 function Task(newTaskData) {
     var self = this;
 
@@ -14,6 +16,11 @@ function Task(newTaskData) {
     };
 }
 
+
+/*
+Holds the information for one row in the table.
+Requires a reference to tableHeadings so it can return the values in the correct order.
+*/
 function Workflow(wflowData, tableHeadings) {
     var self = this;
 
@@ -21,11 +28,17 @@ function Workflow(wflowData, tableHeadings) {
     self.tasks = ko.observableArray();
 
 
+    /*
+    Returns the information for each cell in the row.
+    It is a computed so it automatically updates when tableHeadings changes.
+    */
     self.columnValues = ko.computed(function () {
-        var colValues = $.map(tableHeadings(), function (heading, index) {
+        return $.map(tableHeadings(), function (heading, index) {
+            // First column is the workflow name
             if (index === 0 && heading === "Workflow") {
                 return self.id;
             }
+            // Search for task that has a matching name
             var task = ko.utils.arrayFirst(self.tasks(), function (e) {
                 return e.name() === heading;
             });
@@ -36,14 +49,18 @@ function Workflow(wflowData, tableHeadings) {
                 return "";
             }
         });
-        return colValues;
     });
 
 
+    /*
+    Not sure what to do if there is more than one entry for a user in a single row.
+    For now it just chooses one that isn't completed
+    */
     self.handleMultipleTasksForUser = function (tasks) {
         var tasksMap = {};
         var tasksToRemove = [];
         $.each(tasks, function (i, task) {
+            // If we already saw this name, that means it is a duplicate
             if (tasksMap[task.name] != null) {
                 if (task.status === "completed") {
                     tasksToRemove.push(task);
@@ -54,13 +71,19 @@ function Workflow(wflowData, tableHeadings) {
             }
             tasksMap[task.name] = task;
         });
+        // Return tasks that weren't in tasksToRemove
         return ko.utils.arrayFilter(tasks, function (task) {
             return tasksToRemove.indexOf(task) < 0;
         });
     };
 
+
+    /*
+    Called when new task info comes in
+    */
     self.updateTasks = function (newTasks) {
         newTasks = self.handleMultipleTasksForUser(newTasks);
+        // Update or create tasks
         $.each(newTasks, function (i, newTask) {
             var existingTask = ko.utils.arrayFirst(self.tasks(), function (e) {
                 return newTask.key === e.key;
@@ -73,6 +96,7 @@ function Workflow(wflowData, tableHeadings) {
             }
         });
 
+        // Remove tasks that aren't in newTasks
         self.tasks.remove(function (existingTask) {
             var newTaskData = ko.utils.arrayFirst(newTasks, function (e) {
                 return e.key === existingTask.key;
@@ -84,13 +108,17 @@ function Workflow(wflowData, tableHeadings) {
     self.updateTasks(wflowData.statusSummary);
 }
 
-function ActiveWorkflows() {
+
+function ActiveWorkflowsViewModel() {
     var self = this;
 
     self.workflows = ko.observableArray();
 
     self.tableHeadings = ko.observableArray(["Workflow"]);
 
+    /*
+    Adds table headings that aren't already in self.tableHeadings.
+    */
     self.updateTableHeadings = function (tasks) {
         $.each(tasks, function (i, task) {
             if (self.tableHeadings.indexOf(task.name) < 0) {
@@ -126,12 +154,15 @@ function ActiveWorkflows() {
     };
 
 
+    /*
+    Reloads whichever workflow the task is associated with
+    */
     self.onAmqpReceive = function (task) {
+        // Convert from wflowName.id to just id
         var dotPosition = task.processInstanceId.lastIndexOf(".");
         var idNumber = +task.processInstanceId.substr(dotPosition + 1);
         self.loadWorkflow(idNumber);
     };
-
 
 
 
@@ -154,5 +185,5 @@ function ActiveWorkflows() {
 
 
 $(function() {
-    ko.applyBindings(new ActiveWorkflows());
+    ko.applyBindings(new ActiveWorkflowsViewModel());
 });
