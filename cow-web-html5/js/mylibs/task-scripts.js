@@ -16,7 +16,7 @@ var TASK_MAPPING = {
         },
         update: function (options) {
             if (options.data == null) {
-                return ko.observableArray();
+                return options.target;
             }
             //sometimes it is "variable", other times it is "variables"
             var variables = options.data.variable || options.data.variables;
@@ -58,20 +58,6 @@ function Task(newTaskData) {
     });
 
 
-    // Find out if any variable names have been duplicated
-    self.hasVariableConflicts = ko.computed(function () {
-        var varsObj = {};
-        for (var i = 0; i < self.variables().length; i++) {
-            var variable = self.variables()[i];
-            if (varsObj[variable.name()] != null) {
-                return true;
-            }
-            varsObj[variable.name()] = true;
-        }
-        return false;
-    });
-
-
     /*** Behaviours ***/
     self.addVariable = function () {
         self.variables.push({ name: ko.observable(), value: ko.observable() });
@@ -82,20 +68,12 @@ function Task(newTaskData) {
     };
 
 
+    // Find out if any variable names have been duplicated
+    self.hasVariableConflicts = COW.hasVariableConflicts(self.variables);
+
+
     // Find out if a specific variable"s name has been duplicated
-    self.variableHasConflict = function (variable) {
-        var foundMatch = false;
-        for (var i = 0; i < self.variables().length; i++) {
-            var name = self.variables()[i].name();
-            if (name === variable.name()) {
-                if (foundMatch) {
-                    return true;
-                }
-                foundMatch = true;
-            }
-        }
-        return false;
-    };
+    self.variableHasConflict = COW.variableHasConflict(self.variables);
 }
 
 

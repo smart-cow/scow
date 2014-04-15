@@ -1,4 +1,4 @@
-/*global cowConfig: false, SockJS: false, Stomp: false*/
+/*global cowConfig: false, SockJS: false, Stomp: false, ko: false*/
 /*
 Module containing general cow related functions.
 Following module pattern from http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
@@ -45,6 +45,43 @@ var COW = (function ($) {
         });
     };
 
+
+    /*
+    Find out if any variable names have been duplicated
+    */
+    my.hasVariableConflicts = function (variables) {
+        return ko.computed(function () {
+            var varsMap = {};
+            for (var i = 0; i < variables().length; i++) {
+                var name = variables()[i].name();
+                if (varsMap[name] != null) {
+                    return true;
+                }
+                varsMap[name] = true;
+            }
+            return false;
+        });
+    };
+
+
+    /*
+    Find out if a specific variable"s name has been duplicated
+    */
+    my.variableHasConflict = function (variables) {
+        return function (variable) {
+            var foundMatch = false;
+            for (var i = 0; i < variables().length; i++) {
+                var name = variables()[i].name();
+                if (name === variable.name()) {
+                    if (foundMatch) {
+                        return true;
+                    }
+                    foundMatch = true;
+                }
+            }
+            return false;
+        };
+    };
 
 
     // Configure Stomp to use SockJs to connect to AMQP

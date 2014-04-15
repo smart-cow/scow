@@ -66,16 +66,25 @@
       </div>
       <div class="modal-body">
          <strong>Variables</strong>
-          <ul data-bind="foreach: selectedWorkflowVariables">
-              <li class="form-inline">
-                   <strong data-bind="text: name"></strong>
+          <ul class="form-inline" data-bind="foreach: selectedWorkflowVariables">
+              <li class="form-group"
+                  data-bind="css: { 'has-error': $root.variableHasConflict($data)}">
+
+                   <label class="help-block" data-bind="visible: $root.variableHasConflict($data)">
+                       Cannot have duplicate variable names
+                   </label>
+                   Name: <input class="form-control" data-bind="value: name" />
                    Value: <input class="form-control" data-bind="value: value" /> 
+                   <button data-bind="click: $root.removeVariable"> Delete </button>
+
               </li>
           </ul>
+          <button data-bind="click: addVariable"> Add Variable </button>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-bind="click: $root.startWorkflow">
+        <button type="button" class="btn btn-primary" 
+                data-bind="click: $root.startWorkflow, disable: hasVariableConflicts">
             Start Workflow
         </button>
       </div>
