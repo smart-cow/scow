@@ -1,15 +1,15 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
   <title>Build Workflow</title>
 
-  <script src="js/libs/jquery.js" type="text/javascript"></script>
+  <script src="js/libs/jquery-for-tree.js" type="text/javascript"></script>
   <script src="js/libs/jquery-ui.custom.js" type="text/javascript"></script>
   <script src="js/libs/jquery.cookie.js" type="text/javascript"></script>
 
   <link href="css/ui.dynatree.css" rel="stylesheet" type="text/css">
-  <link href="css/custom.css" rel="stylesheet" type="text/css">
+  <link href="css/tree-styles.css" rel="stylesheet" type="text/css">
   <script src="js/libs/jquery.dynatree.js" type="text/javascript"></script>
 
   <!-- (Irrelevant source removed.) -->
@@ -20,24 +20,24 @@ $(function(){
   var nodeCounter = 0;
   //Function from http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
   function guid() {
-	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-		var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-		return v.toString(16);
-	});
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
   }
   
   function loadForm(key, type){
-	console.log("Loading form for " + type);
-	$("#nodeForm").html("Key: " + key + "<br>" + "Type: " + type );
+    console.log("Loading form for " + type);
+    $("#nodeForm").html("Key: " + key + "<br>" + "Type: " + type );
   
   }
   
   
   $("#tree").dynatree({
     initAjax: {
-      url: "data/sample-data1.json"
+      url: "data/sample-data1.js"
     },
-	selectMode: 1,
+    selectMode: 1,
     dnd: {
       preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
       onDragStart: function(node) {
@@ -46,7 +46,7 @@ $(function(){
          */
         return true;
       },
-	  onDragOver: function(node, sourceNode, hitMode) {
+      onDragOver: function(node, sourceNode, hitMode) {
         /** Return false to disallow dropping this node.
          *
          */
@@ -74,10 +74,10 @@ $(function(){
         //  return false;
         //}
         // Don't allow dropping *over* a node unless its a folder
-		if( node.data.isFolder){
+        if( node.data.isFolder){
           return "over";
         }
-		return ["before", "after"];
+        return ["before", "after"];
       },
       onDrop: function(node, sourceNode, hitMode, ui, draggable) {
          /* This function MUST be defined to enable dropping of items on the tree.
@@ -85,63 +85,63 @@ $(function(){
          */
         logMsg("tree.onDrop(%o, %o)", node, sourceNode);
         var copynode;
-		var guidKey = guid();
+        var guidKey = guid();
         if(sourceNode) {
-			if( node.data.addClass === "decision" ){
-				var guidKey = guid();
-				decisionArrowNode = {title: "Option" + nodeCounter++, addClass: "decisionArrow", isFolder: true, key: guidKey};
-				node.addChild(decisionArrowNode);
-				var tree = $("#tree").dynatree("getTree");
-				var parent = tree.getNodeByKey(guidKey);
-				sourceNode.move(parent, hitMode);
-				
-				parent.expand(true);
-				//;
-			}
-			else {
-			sourceNode.move(node, hitMode);
-			
-			}
-			var tree = $("#tree").dynatree("getTree");
-			tree.selectKey(guidKey)
-		}
-		else{
-			copynode = {title: ui.helper.nodeTitle + nodeCounter++, addClass: ui.helper.nodeClass, isFolder: ui.helper.nodeIsFolder, key: guidKey};
-			if( node.data.addClass === "decision" ){
-				var decisionGuidKey = guid();
-				decisionArrowNode = {title: "Option" + nodeCounter++, addClass: "decisionArrow", isFolder: true, key: decisionGuidKey};
-				node.addChild(decisionArrowNode);
-				var tree = $("#tree").dynatree("getTree");
-				var parent = tree.getNodeByKey(decisionGuidKey);
-				parent.addChild(copynode);
-				node.expand(true);
-				parent.expand(true);
-				
-			}
-			else {
-				
-				console.log("------------------");
-				console.log(ui.helper);
-				console.log("------------------");
-				
-				if(hitMode == "over"){
-				  // Append as child node
-				  node.addChild(copynode);
-				  // expand the drop target
-				  node.expand(true);
-				}else if(hitMode == "before"){
-				  // Add before this, i.e. as child of current parent
-				  node.parent.addChild(copynode, node);
-				}else if(hitMode == "after"){
-				  // Add after this, i.e. as child of current parent
-				  node.parent.addChild(copynode, node.getNextSibling());
-				}
-				
-			}
-			var tree = $("#tree").dynatree("getTree");
-			tree.selectKey(guidKey)
+            if( node.data.addClass === "decision" ){
+                var guidKey = guid();
+                decisionArrowNode = {title: "Option" + nodeCounter++, addClass: "decisionArrow", isFolder: true, key: guidKey};
+                node.addChild(decisionArrowNode);
+                var tree = $("#tree").dynatree("getTree");
+                var parent = tree.getNodeByKey(guidKey);
+                sourceNode.move(parent, hitMode);
+                
+                parent.expand(true);
+                //;
+            }
+            else {
+            sourceNode.move(node, hitMode);
+            
+            }
+            var tree = $("#tree").dynatree("getTree");
+            tree.selectKey(guidKey)
+        }
+        else{
+            copynode = {title: ui.helper.nodeTitle + nodeCounter++, addClass: ui.helper.nodeClass, isFolder: ui.helper.nodeIsFolder, key: guidKey};
+            if( node.data.addClass === "decision" ){
+                var decisionGuidKey = guid();
+                decisionArrowNode = {title: "Option" + nodeCounter++, addClass: "decisionArrow", isFolder: true, key: decisionGuidKey};
+                node.addChild(decisionArrowNode);
+                var tree = $("#tree").dynatree("getTree");
+                var parent = tree.getNodeByKey(decisionGuidKey);
+                parent.addChild(copynode);
+                node.expand(true);
+                parent.expand(true);
+                
+            }
+            else {
+                
+                console.log("------------------");
+                console.log(ui.helper);
+                console.log("------------------");
+                
+                if(hitMode == "over"){
+                  // Append as child node
+                  node.addChild(copynode);
+                  // expand the drop target
+                  node.expand(true);
+                }else if(hitMode == "before"){
+                  // Add before this, i.e. as child of current parent
+                  node.parent.addChild(copynode, node);
+                }else if(hitMode == "after"){
+                  // Add after this, i.e. as child of current parent
+                  node.parent.addChild(copynode, node.getNextSibling());
+                }
+                
+            }
+            var tree = $("#tree").dynatree("getTree");
+            tree.selectKey(guidKey)
       }
-	  },
+      },
       onDragLeave: function(node, sourceNode) {
         /** Always called if onDragEnter was called.
          */
@@ -149,14 +149,14 @@ $(function(){
       }
       
     },
-	  onQueryActivate: function(activate, node) {
+      onQueryActivate: function(activate, node) {
         logMsg("onQueryActivate(%o, %o)", activate, node);
 //        return false;
       },
       onActivate: function(node) {
         logMsg("onActivate(%o)", node);
         
-		console.log("+++++++++++++++++++++");
+        console.log("+++++++++++++++++++++");
       },
       onDeactivate: function(node) {
         logMsg("onDeactivate(%o)", node);
@@ -171,10 +171,10 @@ $(function(){
       onSelect: function(select, node) {
         logMsg("onSelect(%o, %o)", node);
         var s = node.tree.getSelectedNodes().join(", ");
-		loadForm(node.data.key, node.data.addClass)
+        loadForm(node.data.key, node.data.addClass)
 
       },
-	  onClick: function(node, event) {
+      onClick: function(node, event) {
         logMsg("onClick(%o, %o)", node, event);
         node.toggleSelect();
       },
@@ -209,9 +209,9 @@ $(function(){
       // Therefore we have to make an extra check, if the target node
       // was rejected by a Dynatree callback.
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "task";
-	   helper.nodeClass = "task";
-	   helper.nodeIsFolder = false;
+       helper.nodeTitle = "task";
+       helper.nodeClass = "task";
+       helper.nodeIsFolder = false;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -228,9 +228,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "decision";
-	   helper.nodeClass = "decision";
-	   helper.nodeIsFolder = true;
+       helper.nodeTitle = "decision";
+       helper.nodeClass = "decision";
+       helper.nodeIsFolder = true;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -247,9 +247,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "list";
-	   helper.nodeClass = "list";
-	   helper.nodeIsFolder = true;
+       helper.nodeTitle = "list";
+       helper.nodeClass = "list";
+       helper.nodeIsFolder = true;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -265,9 +265,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "script";
-	   helper.nodeClass = "script";
-	   helper.nodeIsFolder = false;
+       helper.nodeTitle = "script";
+       helper.nodeClass = "script";
+       helper.nodeIsFolder = false;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -283,9 +283,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "loop";
-	   helper.nodeClass = "loop";
-	   helper.nodeIsFolder = true;
+       helper.nodeTitle = "loop";
+       helper.nodeClass = "loop";
+       helper.nodeIsFolder = true;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -301,9 +301,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "exit";
-	   helper.nodeClass = "exit";
-	   helper.nodeIsFolder = false;
+       helper.nodeTitle = "exit";
+       helper.nodeClass = "exit";
+       helper.nodeIsFolder = false;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -319,9 +319,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "copy";
-	   helper.nodeClass = "copy";
-	   helper.nodeIsFolder = false;
+       helper.nodeTitle = "copy";
+       helper.nodeClass = "copy";
+       helper.nodeIsFolder = false;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -337,9 +337,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "serviceTask";
-	   helper.nodeClass = "serviceTask";
-	   helper.nodeIsFolder = false;
+       helper.nodeTitle = "serviceTask";
+       helper.nodeClass = "serviceTask";
+       helper.nodeIsFolder = false;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -355,9 +355,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "subProcess";
-	   helper.nodeClass = "subProcess";
-	   helper.nodeIsFolder = false;
+       helper.nodeTitle = "subProcess";
+       helper.nodeClass = "subProcess";
+       helper.nodeIsFolder = false;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -373,9 +373,9 @@ $(function(){
         return !dropped;
       }
       var helper = $.ui.ddmanager && $.ui.ddmanager.current && $.ui.ddmanager.current.helper;
-	   helper.nodeTitle = "decisionArrow";
-	   helper.nodeClass = "decisionArrow";
-	   helper.nodeIsFolder = true;
+       helper.nodeTitle = "decisionArrow";
+       helper.nodeClass = "decisionArrow";
+       helper.nodeIsFolder = true;
       var isRejected = helper && helper.hasClass("dynatree-drop-reject");
       return isRejected;
       },
@@ -393,56 +393,56 @@ $(function(){
   
   <table id="dropItem">
   <tr>
-	<td>
-	<div id="draggableTask">
+    <td>
+    <div id="draggableTask">
         <img src="images/Icon_Task.png" alt="task" title="task" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableDecision">
+    <td>
+    <td>
+    <div id="draggableDecision">
         <img src="images/Icon_Decision.png" alt="decision" title="decision" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableList">
+    <td>
+    <td>
+    <div id="draggableList">
         <img src="images/Icon_List.png" alt="list" title="list" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableScript">
+    <td>
+    <td>
+    <div id="draggableScript">
         <img src="images/Icon_Script.png" alt="script" title="script" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableLoop">
+    <td>
+    <td>
+    <div id="draggableLoop">
         <img src="images/Icon_Loop.png" alt="loop" title="loop" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableExit">
+    <td>
+    <td>
+    <div id="draggableExit">
         <img src="images/Icon_Exit.png" alt="exit" title="exit" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableCopy">
+    <td>
+    <td>
+    <div id="draggableCopy">
         <img src="images/Icon_Copy.png" alt="copy" title="copy" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableServiceTask">
+    <td>
+    <td>
+    <div id="draggableServiceTask">
         <img src="images/Icon_ServiceTask.png" alt="service task" title="service task" height="25" width="25">
     </div>
-	<td>
-	<td>
-	<div id="draggableSubProcess">
+    <td>
+    <td>
+    <div id="draggableSubProcess">
         <img src="images/Icon_SubProcess.png" alt="subProccess"  title="subProccess"height="25" width="25">
     </div>
-	<td>
-	<!--td>
-	<div id="draggableDecisionArrow">
+    <td>
+    <!--td>
+    <div id="draggableDecisionArrow">
         <img src="images/Icon_Decision_Arrow.png" alt="decision arrow" title="decision arrow" height="25" width="25">
     </div>
-	<td-->
+    <td-->
   </tr>
   </table>
   
