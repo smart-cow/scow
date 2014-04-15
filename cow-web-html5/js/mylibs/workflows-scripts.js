@@ -5,8 +5,7 @@ function WorkflowsViewModel() {
 
     self.workflows = ko.observableArray();
 
-    // When self.loadingWorkflow has a value the yellow warning alert show up
-    self.loadingWorkflow = ko.observable(null);
+
     // When self.lastLoadedWorkflow has a value the green warning alert show up
     self.lastLoadedWorkflow = ko.observable();
     // Holds information about the selected workflow
@@ -21,11 +20,9 @@ function WorkflowsViewModel() {
     self.startWorkflow = function () {
         var body = {};
         body.processDefinitionKey = self.selectedWorkflow();
-        self.addVariables(body);
+        self.encodeVariables(body);
 
         COW.cowRequest("/processInstances", "post", body).done(function (data) {
-            // Hide yellow alert since workflow has been started
-            self.loadingWorkflow(null);
             // Set lastLoadedWorkflow to make green alert show up
             self.lastLoadedWorkflow(data.key);
             $("#variables-modal").modal("hide");
@@ -36,7 +33,7 @@ function WorkflowsViewModel() {
     /*
     Add variables to the body of the ajax request that starts a workflow
     */
-    self.addVariables = function (data) {
+    self.encodeVariables = function (data) {
         if (self.selectedWorkflowVariables().length < 1) {
             return;
         }
@@ -52,7 +49,7 @@ function WorkflowsViewModel() {
     Convert process level variables to observables to allow the user to edit them before 
     starting the process
     */
-    self.handleWorkflowVars = function (variables) {
+    self.loadWorkflowVars = function (variables) {
         $.each(variables, function (i, variable) {
             self.selectedWorkflowVariables.push({
                 name: ko.observable(variable.name),
@@ -67,8 +64,6 @@ function WorkflowsViewModel() {
     Called when a user selects a workflow from the table
     */
     self.workflowSelected = function (workflow) {
-        // Set loadingWorkflow to workflow to make the yellow alert showup
-        self.loadingWorkflow(workflow);
         self.selectedWorkflow(workflow);
         // Show modal to allow user to enter values for process variables
         $("#variables-modal").modal("show");
@@ -78,7 +73,7 @@ function WorkflowsViewModel() {
             self.selectedWorkflowVariables.removeAll();
             if (data.variables != null && data.variables.variable != null &&
                     data.variables.variable.length > 0) {
-                self.handleWorkflowVars(data.variables.variable);
+                self.loadWorkflowVars(data.variables.variable);
             }
         });
     };
@@ -89,7 +84,42 @@ function WorkflowsViewModel() {
             $.each(data.processDefinition, function (i, pd) {
                 self.workflows.push(pd.key);
             });
+
+            self.workflows.sort(self.caseInsensitiveSort);
         });
+    };
+
+
+    self.removeVariable = function (variable) {
+        self.selectedWorkflowVariables.remove(variable);
+    };
+
+
+    self.addVariable = function () {
+        self.selectedWorkflowVariables.push({
+            name: ko.observable(),
+            value: ko.observable()
+        });
+    };
+
+
+    self.hasVariableConflicts = COW.hasVariableConflicts(self.selectedWorkflowVariables);
+
+    self.variableHasConflict = COW.variableHasConflict(self.selectedWorkflowVariables);
+
+
+    self.caseInsensitiveSort = function (left, right) {
+        var leftLower = left.toLowerCase();
+        var rightLower = right.toLowerCase();
+        if (leftLower < rightLower) {
+            return -1;
+        }
+        else if (leftLower > rightLower) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
     };
 
 

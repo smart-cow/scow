@@ -80,27 +80,37 @@
     Refresh task lists
 </button>
 
+<br />
+<br />
 
-<h3>History Tasks</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th> ID </th>
-            <th> Assignee </th>
-            <th> Workflow </th>
-            <th> State </th> 	
-        </tr>
-    </thead>
-    <tbody data-bind="foreach: historyTasks">
-        <tr>		
-            <td data-bind="text: id"></td>
-            <td data-bind="text: assignee"></td>
-            <td data-bind="text: executionId"></td>
-            <td data-bind="text: state"></td>
-        </tr>	
-    </tbody>
-</table>
+<button class="btn btn-primary" data-bind="click: toggleHistory, visible: !showHistory()">
+    Show history
+</button>
 
+<div data-bind="if: showHistory">
+    <button class="btn btn-primary" data-bind="click: toggleHistory">
+        Hide history
+    </button>
+    <h3>History Tasks</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th> ID </th>
+                <th> Assignee </th>
+                <th> Workflow </th>
+                <th> State </th> 	
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: historyTasks">
+            <tr>		
+                <td data-bind="text: id"></td>
+                <td data-bind="text: assignee"></td>
+                <td data-bind="text: executionId"></td>
+                <td data-bind="text: state"></td>
+            </tr>	
+        </tbody>
+    </table>
+</div>
 
 
 <!-- See http://getbootstrap.com/javascript/#modals, copy and pasted their modal example -->
