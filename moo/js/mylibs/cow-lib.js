@@ -95,9 +95,18 @@ var COW = (function ($) {
 
     var amqpConnectTimerId = 0;
 
+    /*
+    For an unknown reason stomp occasionally hangs while establishing the connection.
+    This handles disconnecting and reconnecting after a timeout period
+    */
     var startAmqpTimeout = function () {
         amqpConnectTimerId = setTimeout(function () {
-            alert("Could not connect to amqp with in timeout limit");
+            console.log("Could not connect to amqp with in timeout limit!!");
+            stomp.disconnect(function () {
+                sock = new SockJS(cowConfig.amqpUrl);
+                stomp = Stomp.over(sock);
+                my.amqpConnect();
+            });
         }, cowConfig.amqpConnectTimeout);
     };
 

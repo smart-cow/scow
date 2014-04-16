@@ -4,5 +4,5 @@ var cowConfig = {
     //cowServerHost: "http://localhost:8080/cow-server/",
     amqpUrl: "http://scout2:15674/stomp",
     amqpExchange: "/exchange/amq.topic/",
-    amqpConnectTimeout: 20 * 1000
+    amqpConnectTimeout: 5 * 1000
 };
