@@ -93,6 +93,18 @@ var COW = (function ($) {
     // Keeps track of the number of consecutive failed connection attemps
     var amqpFailedConnectionAttempts = 0;
 
+    var amqpConnectTimerId = 0;
+
+    var startAmqpTimeout = function () {
+        amqpConnectTimerId = setTimeout(function () {
+            alert("Could not connect to amqp with in timeout limit");
+        }, cowConfig.amqpConnectTimeout);
+    };
+
+    var clearAmqpTimeout = function () {
+        clearTimeout(amqpConnectTimerId);
+    };
+
     /*
     Attaches a subscription to the Stomp client
     */
@@ -139,6 +151,7 @@ var COW = (function ($) {
         }
 
         var onConnect = function () {
+            clearAmqpTimeout();
             $.each(amqpSubscriptions, function (i, e) {
                 addSubscription(e);
             });
@@ -151,13 +164,16 @@ var COW = (function ($) {
 
             if (amqpFailedConnectionAttempts < 6) {
                 stomp.connect("guest", "guest", onConnect, onError);
+                startAmqpTimeout();
             }
             else {
                 setTimeout(function () {
                     stomp.connect("guest", "guest", onConnect, onError);
+                    startAmqpTimeout();
                 }, 500);
             }
         };
+        startAmqpTimeout();
         stomp.connect("guest", "guest", onConnect, onError);
     };
 
