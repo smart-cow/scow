@@ -3,22 +3,22 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>COW</title>
-    
-    
+
+
     <script src="js/libs/jquery-1.11.0.js"></script>
-    
+
     <link href="css/bootstrap.css" rel="stylesheet" />
     <script src="js/libs/bootstrap.js"></script>
-    
+
     <script src="js/libs/knockout-3.0.0.debug.js"></script>
     <script src="js/libs/knockout.mapping.js"></script>
-    
+
     <script src="js/libs/stomp.js"></script>
     <script src="js/libs/sockjs-0.3.min.js"></script>
-    
+
     <script src="js/config.js"></script>
     <script src="js/mylibs/cow-lib.js"></script>
-    <script src="js/mylibs/workflows-scripts.js"></script>
+    <script src="coffee/workflows.js"></script>
 </head>
 <body>
 
@@ -74,7 +74,7 @@
                        Cannot have duplicate variable names
                    </label>
                    Name: <input class="form-control" data-bind="value: name" />
-                   Value: <input class="form-control" data-bind="value: value" /> 
+                   Value: <input class="form-control" data-bind="value: value" />
                    <button data-bind="click: $root.removeVariable"> Delete </button>
 
               </li>
@@ -83,7 +83,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" 
+        <button type="button" class="btn btn-primary"
                 data-bind="click: $root.startWorkflow, disable: hasVariableConflicts">
             Start Workflow
         </button>
@@ -91,6 +91,6 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-        
+
 </body>
 </html>
