@@ -8,7 +8,9 @@ class WorkflowsViewModel
         @selectedWorkflow = ko.observable()
         @selectedWorkflowVariables = ko.observableArray()
 
+        # Find out if any variable names have been duplicated
         @hasVariableConflicts = COW.hasVariableConflicts @selectedWorkflowVariables
+        # Find out if a specific variable"s name has been duplicated
         @variableHasConflict = COW.variableHasConflict @selectedWorkflowVariables
 
         @loadWorkflows()
@@ -22,11 +24,13 @@ class WorkflowsViewModel
             @lastLoadedWorkflow data.key
             $("#variables-modal").modal "hide"
 
+
     # Encode variables in the weird way required by the server's Json serializer
     insertVariables: (data) =>
         return if @selectedWorkflowVariables().length < 1
         varList = (name: v.name(), value: v.value() for v in @selectedWorkflowVariables())
         data.variables = variable: varList
+
 
     # Convert process level variables to observables to allow the user to edit them before
     # starting the process
@@ -47,6 +51,7 @@ class WorkflowsViewModel
             # Null checks to account for serializer
             vars = data.variables?.variable
             @loadWorkflowVars vars if vars?.length > 0
+
 
     loadWorkflows: =>
         COW.cowRequest("processDefinitions").done (data) =>
