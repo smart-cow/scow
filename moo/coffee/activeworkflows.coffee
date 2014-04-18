@@ -1,5 +1,3 @@
-String::rightOf = (char) ->
-    @.substr(@.lastIndexOf(char) + 1)
 
 $ -> ko.applyBindings new ActiveWorkflowsViewModel()
 

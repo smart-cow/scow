@@ -28,7 +28,7 @@
         processDefinitionKey: this.selectedWorkflow()
       };
       this.insertVariables(requestBody);
-      return COW.cowRequest("/processInstances", "post", requestBody).done((function(_this) {
+      return COW.cowRequest("processInstances", "post", requestBody).done((function(_this) {
         return function(data) {
           _this.lastLoadedWorkflow(data.key);
           return $("#variables-modal").modal("hide");

@@ -20,7 +20,7 @@ class WorkflowsViewModel
     startWorkflow: =>
         requestBody = processDefinitionKey: @selectedWorkflow()
         @insertVariables requestBody
-        COW.cowRequest("/processInstances", "post", requestBody).done (data) =>
+        COW.cowRequest("processInstances", "post", requestBody).done (data) =>
             @lastLoadedWorkflow data.key
             $("#variables-modal").modal "hide"
 
