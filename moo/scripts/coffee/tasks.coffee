@@ -4,7 +4,7 @@ $ -> ko.applyBindings new TasksViewModel()
 
 # Knockout JS to observable mapping options
 TASK_MAPPING =
-    key: (item) -> ko.utils.unwrapObservable item.id
+    key: (item) -> ko.utils.unwrapObservable(item.id)
     variables:
         create: (options) ->
             if options.data?
@@ -26,7 +26,7 @@ class TasksViewModel
         # The tasks the user can take or are assigned to them
         @activeTasks = ko.observableArray()
 
-        @showHistory = ko.observable false
+        @showHistory = ko.observable(false)
         @historyTasks = ko.observableArray()
 
         # Holds the task that the user last clicked on, and will show up in the modal
@@ -38,11 +38,11 @@ class TasksViewModel
 
         # Get username first so we know which username to use in the ajax calls for tasks
         COW.cowRequest("whoami").done (data) =>
-            @username data.id
+            @username(data.id)
             @refreshAllTasks()
             # Right now this subscribes to all task messages, we may want to filter on
             # username and group eventually
-            COW.amqpSubscribe "#.tasks.#", @createOrUpdateTask
+            COW.amqpSubscribe("#.tasks.#", @createOrUpdateTask)
             # Establish amqp connection when the page is loaded
             COW.amqpConnect()
 
@@ -58,25 +58,32 @@ class TasksViewModel
                 t.state() is "Ready"
 
 
+    userCanCompleteOrTakeTask: (task) =>
+        # Can't complete a task that is already completed
+        return false if task.state() is "Completed"
+        # User can complete task if it hasn't been assigned to someone
+        return true unless task.assignee()?
+        # If the task is assigned to the user
+        return task.assignee() is @username()
+
+
+
     # Creates/updates task using task data from either the ajax calls or amqp notfications
     createOrUpdateTask: (newTaskData) =>
         # check if task exists
-        task = ko.utils.arrayFirst @activeTasks(), (t) =>
-            t.id() is newTaskData.id
+        task = @activeTasks().first (t) => t.id() is newTaskData.id
 
         # update existing task
         if task?
-            @mapTaskToKoTask newTaskData, task
+            @mapTaskToKoTask(newTaskData, task)
             # Remove tasks that are completed or have been assigned to someone else
-            @activeTasks.remove (t) =>
-                t.state() is "Completed" or (t.assignee()? and t.assignee() isnt @username())
+            @activeTasks.remove (t) => not @userCanCompleteOrTakeTask(task)
         # create new task
         else
-            task = @mapTaskToKoTask newTaskData
+            task = @mapTaskToKoTask(newTaskData)
             # Add the new task if user can take or complete it
-            if task.state() isnt "Completed" and
-                    (not task.assignee()? or task.assignee() is @username())
-                @activeTasks.push task
+            @activeTasks.push(task) if @userCanCompleteOrTakeTask(task)
+
 
         # AMQP doesn"t send notifications about the task history, so if a task was created
         # get the task with ajax.
@@ -94,17 +101,17 @@ class TasksViewModel
         if updateTarget?
             ko.mapping.fromJS(newTaskData, TASK_MAPPING, updateTarget)
         else
-            new Task newTaskData
+            new Task(newTaskData)
 
 
     # Use ajax to load tasks. This is mainly just used when the page first loads because
     # it will use amqp to stay in sync.
     # Can also be used to explicitly sync with the server
     updateAssignedTasks: =>
-        @updateTaskList "assignee"
+        @updateTaskList("assignee")
 
     updateAvailableTasks: =>
-        @updateTaskList "candidate"
+        @updateTaskList("candidate")
 
     # Use cowRequest method to make the CORS ajax request
     updateTaskList: (queryStringKey) =>
@@ -140,7 +147,7 @@ class TasksViewModel
 
     # Called when a user clicks on a task from one of the tables
     showTask: (task) =>
-        @selectedTask task
+        @selectedTask(task)
 
 
     # Called when a user clicks Assign to me. Use ajax to assign task to user on cow-server.
@@ -152,7 +159,7 @@ class TasksViewModel
             @createOrUpdateTask(data)
             # Wait till after the ajax call completes to close the modal, so the user doesn"t
             # see the table until it has been updated.
-            $("#taskInfoModal").modal "hide"
+            $("#taskInfoModal").modal("hide")
 
     # Called when a user clicks complete. Use ajax to set the task as completed.
     completeSelectedTask: =>
@@ -160,35 +167,40 @@ class TasksViewModel
                           @selectedTask().outcomes().length is 0
         if not outcomeSelected
             # show error if user needs to select on outcome
-            $("#outcomes-form").addClass "has-error"
-            $("#outcomes-form .has-error").removeClass "hidden"
+            $("#outcomes-form").addClass("has-error")
+            $("#outcomes-form .has-error").removeClass("hidden")
             return
-        #Build querystring for outcome and variables
-        varsQueryString = @encodeVariables @selectedTask().variables()
-        outcome = @selectedTask().selectedOutcome()
-        outomeQS = if outcome? then "outcome=#{outcome}" else null
-        nParts = 0
-        nParts += 1 if varsQueryString?
-        nParts += 1 if outomeQS?
 
-        queryString = switch nParts
-            when 0 then ""
-            when 1 then "?" + varsQueryString ? outomeQS
-            when 2 then "?" + varsQueryString + "&" + outomeQS
-
+        queryString = @buildCompleteTaskQueryString(@selectedTask())
         url = "tasks/" + @selectedTask().id() + queryString
         COW.cowRequest(url, "delete").done =>
             # Since the call was successful the task no longer belongs in activeTasks
             @activeTasks.remove(@selectedTask())
             # Wait till after the ajax call completes to close the modal, so the user doesn"t
             # see the table until it has been updated.
-            $("#taskInfoModal").modal "hide"
+            $("#taskInfoModal").modal("hide")
+
+
+    buildCompleteTaskQueryString: (task) =>
+        qsBuilder = []
+        for v in task.variables()
+            encoded = $.param(var: "#{v.name()}:#{v.value()}")
+            qsBuilder.push(encoded)
+
+        if task.selectedOutcome()
+            encoded = $.param(outcome: task.selectedOutcome())
+            qsBuilder.push(encoded)
+
+        if qsBuilder.length > 0
+            return "?" + qsBuilder.join("&")
+        else
+            return ""
 
 
     encodeVariables: (variables) =>
-        return if variables.length is 0
+        return null if variables.length is 0
         varPairs = ("var=#{v.name()}:#{v.value()}" for v in variables)
-        varPairs.join "&"
+        varPairs.join("&")
 
 
 
@@ -214,9 +226,9 @@ class Task
         @canCompleteTask = ko.computed => @state() is "Reserved"
 
         # Find out if any variable names have been duplicated
-        @hasVariableConflicts = COW.hasVariableConflicts @variables
+        @hasVariableConflicts = COW.hasVariableConflicts(@variables)
         # Find out if a specific variable"s name has been duplicated
-        @variableHasConflict = COW.variableHasConflict @variables
+        @variableHasConflict = COW.variableHasConflict(@variables)
 
     addVariable: () =>
         @variables.push
@@ -224,4 +236,4 @@ class Task
             value: ko.observable()
 
     removeVariable: (variable) =>
-        @variables.remove variable
+        @variables.remove(variable)

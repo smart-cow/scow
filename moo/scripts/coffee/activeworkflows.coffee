@@ -5,27 +5,26 @@ $ -> ko.applyBindings new ActiveWorkflowsViewModel()
 class ActiveWorkflowsViewModel
     constructor: ->
         @workflows = ko.observableArray()
-        @tableHeadings = ko.observableArray ["Workflow"]
-
+        @tableHeadings = ko.observableArray(["Workflow"])
         @loadAllWorkflows()
-        COW.amqpSubscribe "#.tasks.#", @onAmqpReceive
+        COW.amqpSubscribe("#.tasks.#", @onAmqpReceive)
         COW.amqpConnect()
 
 
     createOrUpdateWorkflow: (newWflowData) =>
-        workflow = ko.utils.arrayFirst @workflows(), (w) =>
-            newWflowData.id is w.id
+        workflow = @workflows().first (w) -> newWflowData is w.id
+
         if workflow?
-            workflow.updateStatuses newWflowData.statusSummary
+            workflow.updateStatuses(newWflowData.statusSummary)
         else
-            workflow = new Workflow newWflowData, @tableHeadings
-            @workflows.push workflow
-        @updateTableHeadings newWflowData.statusSummary
+            workflow = new Workflow(newWflowData, @tableHeadings)
+            @workflows.push(workflow)
+        @updateTableHeadings(newWflowData.statusSummary)
 
 
     loadWorkflow: (id) =>
         COW.cowRequest("processInstances/#{id}/status").done (data) =>
-            @createOrUpdateWorkflow data
+            @createOrUpdateWorkflow(data)
 
     loadAllWorkflows: =>
         COW.activeWorkflowIds (ids) =>
@@ -33,10 +32,10 @@ class ActiveWorkflowsViewModel
 
     # Reloads whichever workflow the task is associated with
     onAmqpReceive: (task) =>
-        @loadWorkflow task.processInstanceId.rightOf "."
+        @loadWorkflow(task.processInstanceId.rightOf("."))
 
     updateTableHeadings: (statuses) =>
-        @tableHeadings.push s.name for s in statuses when s.name not in @tableHeadings()
+        @tableHeadings.push(s.name) for s in statuses when s.name not in @tableHeadings()
 
 
 
@@ -46,8 +45,8 @@ class ActiveWorkflowsViewModel
 class Workflow
     constructor: (wflowData, @tableHeadings) ->
         @id = wflowData.id
-        @statuses = ko.observableArray [ name: "Workflow", status: ko.observable @id ]
-        @updateStatuses wflowData.statusSummary
+        @statuses = ko.observableArray([ name: "Workflow", status: ko.observable(@id) ])
+        @updateStatuses(wflowData.statusSummary)
 
         @setComputed()
 
@@ -56,21 +55,23 @@ class Workflow
             @getStatus(heading)?.status for heading in @tableHeadings()
 
     getStatus: (name) =>
-        ko.utils.arrayFirst @statuses(), (s) => name is s.name
+        @statuses().first (s) => name is s.name
 
     updateStatuses: (newStatuses) =>
         # Build map of new higer priority statuses for each name
         newStatusesMap = {}
         for s in newStatuses
             existingStatus = newStatusesMap[s.name]
-            newStatusesMap[s.name] = @getHigherPriorityStatus s.status, existingStatus
+            newStatusesMap[s.name] = @getHigherPriorityStatus(s.status, existingStatus)
 
         for name, status of newStatusesMap
-            existingStatus = @getStatus name
+            existingStatus = @getStatus(name)
             if existingStatus?
-                existingStatus.status status
+                existingStatus.status(status)
             else
-                @statuses.push name: name, status: ko.observable status
+                @statuses.push
+                    name: name,
+                    status: ko.observable(status)
 
 
     statusPriority = [
@@ -82,8 +83,8 @@ class Workflow
         "open"
     ]
     getHigherPriorityStatus: (status1, status2) =>
-        index1 = statusPriority.indexOf status1
-        index2 = statusPriority.indexOf status2
+        index1 = statusPriority.indexOf(status1)
+        index2 = statusPriority.indexOf(status2)
         if index1 > index2 then status1 else status2
 
 

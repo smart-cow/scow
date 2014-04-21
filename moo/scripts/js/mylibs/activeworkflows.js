@@ -24,11 +24,9 @@
 
     ActiveWorkflowsViewModel.prototype.createOrUpdateWorkflow = function(newWflowData) {
       var workflow;
-      workflow = ko.utils.arrayFirst(this.workflows(), (function(_this) {
-        return function(w) {
-          return newWflowData.id === w.id;
-        };
-      })(this));
+      workflow = this.workflows().first(function(w) {
+        return newWflowData === w.id;
+      });
       if (workflow != null) {
         workflow.updateStatuses(newWflowData.statusSummary);
       } else {
@@ -116,7 +114,7 @@
     };
 
     Workflow.prototype.getStatus = function(name) {
-      return ko.utils.arrayFirst(this.statuses(), (function(_this) {
+      return this.statuses().first((function(_this) {
         return function(s) {
           return name === s.name;
         };

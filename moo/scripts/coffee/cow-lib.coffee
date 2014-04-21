@@ -1,7 +1,14 @@
-String::rightOf = (char) ->
-    @substr(@lastIndexOf(char) + 1)
 
 
+(typeExtensions = ->
+    String::rightOf = (char) ->
+        @substr(@lastIndexOf(char) + 1)
+
+    Array::first = (predicate) ->
+        for e in @
+            return e if predicate(e)
+        return null
+)()
 
 class CowUtil
     # Helper function to make CORS AJAX requests to cow-server.
@@ -38,7 +45,7 @@ class CowUtil
     variableHasConflict: (variables) =>
         (variable) =>
             matchingVars = variables().filter (v) => v.name() is variable.name()
-            matchingVars > 1
+            matchingVars.length > 1
 
     AMQP = null
     # Called by external code inorder to add an AMQP subscription. Doesn"t actually connect.

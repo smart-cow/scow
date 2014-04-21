@@ -1,5 +1,7 @@
 ﻿# CoffeeScript
 
+$ -> ko.applyBindings new WorkflowsViewModel()
+
 class WorkflowsViewModel
     constructor: ->
         @workflows = ko.observableArray()
@@ -9,9 +11,9 @@ class WorkflowsViewModel
         @selectedWorkflowVariables = ko.observableArray()
 
         # Find out if any variable names have been duplicated
-        @hasVariableConflicts = COW.hasVariableConflicts @selectedWorkflowVariables
+        @hasVariableConflicts = COW.hasVariableConflicts(@selectedWorkflowVariables)
         # Find out if a specific variable"s name has been duplicated
-        @variableHasConflict = COW.variableHasConflict @selectedWorkflowVariables
+        @variableHasConflict = COW.variableHasConflict(@selectedWorkflowVariables)
 
         @loadWorkflows()
 
@@ -19,10 +21,10 @@ class WorkflowsViewModel
     # Build and send ajax request to start the workflow
     startWorkflow: =>
         requestBody = processDefinitionKey: @selectedWorkflow()
-        @insertVariables requestBody
+        @insertVariables(requestBody)
         COW.cowRequest("processInstances", "post", requestBody).done (data) =>
-            @lastLoadedWorkflow data.key
-            $("#variables-modal").modal "hide"
+            @lastLoadedWorkflow(data.key)
+            $("#variables-modal").modal("hide")
 
 
     # Encode variables in the weird way required by the server's Json serializer
@@ -37,29 +39,30 @@ class WorkflowsViewModel
     loadWorkflowVars:  (variables) =>
         for v in variables
             @selectedWorkflowVariables.push
-                name: ko.observable v.name
-                value: ko.observable v.value
+                name: ko.observable(v.name)
+                value: ko.observable(v.value)
+
 
     # Called when a user clicks on workflow from the table
     workflowSelected: (workflow) =>
-        @selectedWorkflow workflow
+        @selectedWorkflow(workflow)
         # Show modal to allow user to enter values for process variables
-        $("#variables-modal").modal "show"
+        $("#variables-modal").modal("show")
         # Get process level variables for the selected workflow
         COW.cowRequest("processes/#{ workflow }").done (data) =>
             @selectedWorkflowVariables.removeAll()
             # Null checks to account for serializer
             vars = data.variables?.variable
-            @loadWorkflowVars vars if vars?.length > 0
+            @loadWorkflowVars(vars) if vars?.length > 0
 
 
     loadWorkflows: =>
         COW.cowRequest("processDefinitions").done (data) =>
-            @workflows.push pd.key for pd in data.processDefinition
-            @workflows.sort @caseInsensitiveSort
+            @workflows.push(pd.key) for pd in data.processDefinition
+            @workflows.sort(@caseInsensitiveSort)
 
     removeVariable: (variable) =>
-        @selectedWorkflowVariables.remove variable
+        @selectedWorkflowVariables.remove(variable)
 
     addVariable: =>
         @selectedWorkflowVariables.push
@@ -78,4 +81,3 @@ class WorkflowsViewModel
             0
 
 
-$ -> ko.applyBindings new WorkflowsViewModel()

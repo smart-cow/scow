@@ -3,6 +3,10 @@
   var WorkflowsViewModel,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
+  $(function() {
+    return ko.applyBindings(new WorkflowsViewModel());
+  });
+
   WorkflowsViewModel = (function() {
     function WorkflowsViewModel() {
       this.caseInsensitiveSort = __bind(this.caseInsensitiveSort, this);
@@ -128,9 +132,5 @@
     return WorkflowsViewModel;
 
   })();
-
-  $(function() {
-    return ko.applyBindings(new WorkflowsViewModel());
-  });
 
 }).call(this);

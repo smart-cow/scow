@@ -34,6 +34,7 @@
   TasksViewModel = (function() {
     function TasksViewModel() {
       this.encodeVariables = __bind(this.encodeVariables, this);
+      this.buildCompleteTaskQueryString = __bind(this.buildCompleteTaskQueryString, this);
       this.completeSelectedTask = __bind(this.completeSelectedTask, this);
       this.takeSelectedTask = __bind(this.takeSelectedTask, this);
       this.showTask = __bind(this.showTask, this);
@@ -45,6 +46,7 @@
       this.updateAssignedTasks = __bind(this.updateAssignedTasks, this);
       this.mapTaskToKoTask = __bind(this.mapTaskToKoTask, this);
       this.createOrUpdateTask = __bind(this.createOrUpdateTask, this);
+      this.userCanCompleteOrTakeTask = __bind(this.userCanCompleteOrTakeTask, this);
       this.setComputed = __bind(this.setComputed, this);
       this.activeTasks = ko.observableArray();
       this.showHistory = ko.observable(false);
@@ -79,9 +81,19 @@
       })(this));
     };
 
+    TasksViewModel.prototype.userCanCompleteOrTakeTask = function(task) {
+      if (task.state() === "Completed") {
+        return false;
+      }
+      if (task.assignee() == null) {
+        return true;
+      }
+      return task.assignee() === this.username();
+    };
+
     TasksViewModel.prototype.createOrUpdateTask = function(newTaskData) {
       var task;
-      task = ko.utils.arrayFirst(this.activeTasks(), (function(_this) {
+      task = this.activeTasks().first((function(_this) {
         return function(t) {
           return t.id() === newTaskData.id;
         };
@@ -90,12 +102,12 @@
         this.mapTaskToKoTask(newTaskData, task);
         this.activeTasks.remove((function(_this) {
           return function(t) {
-            return t.state() === "Completed" || ((t.assignee() != null) && t.assignee() !== _this.username());
+            return !_this.userCanCompleteOrTakeTask(task);
           };
         })(this));
       } else {
         task = this.mapTaskToKoTask(newTaskData);
-        if (task.state() !== "Completed" && ((task.assignee() == null) || task.assignee() === this.username())) {
+        if (this.userCanCompleteOrTakeTask(task)) {
           this.activeTasks.push(task);
         }
       }
@@ -190,34 +202,14 @@
     };
 
     TasksViewModel.prototype.completeSelectedTask = function() {
-      var nParts, outcome, outcomeSelected, outomeQS, queryString, url, varsQueryString;
+      var outcomeSelected, queryString, url;
       outcomeSelected = (this.selectedTask().selectedOutcome() != null) || this.selectedTask().outcomes().length === 0;
       if (!outcomeSelected) {
         $("#outcomes-form").addClass("has-error");
         $("#outcomes-form .has-error").removeClass("hidden");
         return;
       }
-      varsQueryString = this.encodeVariables(this.selectedTask().variables());
-      outcome = this.selectedTask().selectedOutcome();
-      outomeQS = outcome != null ? "outcome=" + outcome : null;
-      nParts = 0;
-      if (varsQueryString != null) {
-        nParts += 1;
-      }
-      if (outomeQS != null) {
-        nParts += 1;
-      }
-      queryString = (function() {
-        var _ref;
-        switch (nParts) {
-          case 0:
-            return "";
-          case 1:
-            return (_ref = "?" + varsQueryString) != null ? _ref : outomeQS;
-          case 2:
-            return "?" + varsQueryString + "&" + outomeQS;
-        }
-      })();
+      queryString = this.buildCompleteTaskQueryString(this.selectedTask());
       url = "tasks/" + this.selectedTask().id() + queryString;
       return COW.cowRequest(url, "delete").done((function(_this) {
         return function() {
@@ -227,10 +219,34 @@
       })(this));
     };
 
+    TasksViewModel.prototype.buildCompleteTaskQueryString = function(task) {
+      var encoded, qsBuilder, v, _i, _len, _ref;
+      qsBuilder = [];
+      _ref = task.variables();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        v = _ref[_i];
+        encoded = $.param({
+          "var": "" + (v.name()) + ":" + (v.value())
+        });
+        qsBuilder.push(encoded);
+      }
+      if (task.selectedOutcome()) {
+        encoded = $.param({
+          outcome: task.selectedOutcome()
+        });
+        qsBuilder.push(encoded);
+      }
+      if (qsBuilder.length > 0) {
+        return "?" + qsBuilder.join("&");
+      } else {
+        return "";
+      }
+    };
+
     TasksViewModel.prototype.encodeVariables = function(variables) {
       var v, varPairs;
       if (variables.length === 0) {
-        return;
+        return null;
       }
       varPairs = (function() {
         var _i, _len, _results;
