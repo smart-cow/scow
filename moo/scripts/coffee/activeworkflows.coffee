@@ -37,7 +37,8 @@ class ActiveWorkflowsViewModel
     updateTableHeadings: (statuses) =>
         @tableHeadings.push(s.name) for s in statuses when s.name not in @tableHeadings()
 
-
+    selectRow: (item) =>
+        item.isSelected(not item.isSelected())
 
 
 # Holds the information for one row in the table.
@@ -45,6 +46,7 @@ class ActiveWorkflowsViewModel
 class Workflow
     constructor: (wflowData, @tableHeadings) ->
         @id = wflowData.id
+        @isSelected = ko.observable(false)
         @statuses = ko.observableArray([ name: "Workflow", status: ko.observable(@id) ])
         @updateStatuses(wflowData.statusSummary)
 

@@ -10,6 +10,7 @@
 
   ActiveWorkflowsViewModel = (function() {
     function ActiveWorkflowsViewModel() {
+      this.selectRow = __bind(this.selectRow, this);
       this.updateTableHeadings = __bind(this.updateTableHeadings, this);
       this.onAmqpReceive = __bind(this.onAmqpReceive, this);
       this.loadAllWorkflows = __bind(this.loadAllWorkflows, this);
@@ -74,6 +75,10 @@
       return _results;
     };
 
+    ActiveWorkflowsViewModel.prototype.selectRow = function(item) {
+      return item.isSelected(!item.isSelected());
+    };
+
     return ActiveWorkflowsViewModel;
 
   })();
@@ -88,6 +93,7 @@
       this.getStatus = __bind(this.getStatus, this);
       this.setComputed = __bind(this.setComputed, this);
       this.id = wflowData.id;
+      this.isSelected = ko.observable(false);
       this.statuses = ko.observableArray([
         {
           name: "Workflow",
