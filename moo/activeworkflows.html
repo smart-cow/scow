@@ -16,10 +16,11 @@
     <script src="scripts/js/libs/stomp.js"></script>
     <script src="scripts/js/libs/sockjs-0.3.min.js"></script>
 
-    <link href="css/styles.css" rel="stylesheet" />
+   
     <script src="scripts/config.js"></script>
     <script src="scripts/js/mylibs/cow-lib.js"></script>
     <script src="scripts/js/mylibs/activeworkflows.js"></script>
+	 <link href="css/styles.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -35,7 +36,7 @@
     <!-- Create a row for each workflow -->
     <tbody id="chiclet-chart" data-bind="foreach: workflows">
         <!-- Create a cell for each heading -->
-        <tr data-bind="foreach: columnValues">
+        <tr data-bind="foreach: columnValues, event:{ click: $root.selectRow}, css: {selected: isSelected}">
             <!-- Set CSS class and text to the completion state -->
             <td data-bind="text: $data, css: $data"></td>
         </tr>
