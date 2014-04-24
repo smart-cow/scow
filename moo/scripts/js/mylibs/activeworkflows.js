@@ -26,7 +26,7 @@
     ActiveWorkflowsViewModel.prototype.createOrUpdateWorkflow = function(newWflowData) {
       var workflow;
       workflow = this.workflows().first(function(w) {
-        return newWflowData === w.id;
+        return newWflowData.id === w.id;
       });
       if (workflow != null) {
         workflow.updateStatuses(newWflowData.statusSummary);
@@ -68,7 +68,7 @@
       _results = [];
       for (_i = 0, _len = statuses.length; _i < _len; _i++) {
         s = statuses[_i];
-        if (_ref = s.name, __indexOf.call(this.tableHeadings(), _ref) < 0) {
+        if ((s.name != null) && (_ref = s.name, __indexOf.call(this.tableHeadings(), _ref) < 0)) {
           _results.push(this.tableHeadings.push(s.name));
         }
       }
@@ -107,14 +107,25 @@
     Workflow.prototype.setComputed = function() {
       return this.columnValues = ko.computed((function(_this) {
         return function() {
-          var heading, _i, _len, _ref, _ref1, _results;
+          var colVals, heading, status, _i, _len, _ref, _ref1, _ref2;
+          colVals = [];
           _ref = _this.tableHeadings();
-          _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             heading = _ref[_i];
-            _results.push((_ref1 = _this.getStatus(heading)) != null ? _ref1.status : void 0);
+            if (heading === "Workflow") {
+              colVals.push({
+                text: _this.id,
+                "class": "workflow-name"
+              });
+            } else {
+              status = (_ref1 = (_ref2 = _this.getStatus(heading)) != null ? _ref2.status : void 0) != null ? _ref1 : "empty";
+              colVals.push({
+                text: "",
+                "class": status
+              });
+            }
           }
-          return _results;
+          return colVals;
         };
       })(this));
     };

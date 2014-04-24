@@ -1,5 +1,5 @@
 
-$ -> ko.applyBindings new ActiveWorkflowsViewModel()
+$ -> ko.applyBindings(new ActiveWorkflowsViewModel())
 
 
 class ActiveWorkflowsViewModel
@@ -12,7 +12,7 @@ class ActiveWorkflowsViewModel
 
 
     createOrUpdateWorkflow: (newWflowData) =>
-        workflow = @workflows().first (w) -> newWflowData is w.id
+        workflow = @workflows().first (w) -> newWflowData.id is w.id
 
         if workflow?
             workflow.updateStatuses(newWflowData.statusSummary)
@@ -35,7 +35,8 @@ class ActiveWorkflowsViewModel
         @loadWorkflow(task.processInstanceId.rightOf("."))
 
     updateTableHeadings: (statuses) =>
-        @tableHeadings.push(s.name) for s in statuses when s.name not in @tableHeadings()
+        for s in statuses when s.name? and s.name not in @tableHeadings()
+            @tableHeadings.push(s.name)
 
     selectRow: (item) =>
         item.isSelected(not item.isSelected())
@@ -54,7 +55,16 @@ class Workflow
 
     setComputed: =>
         @columnValues = ko.computed =>
-            @getStatus(heading)?.status for heading in @tableHeadings()
+            colVals = []
+            for heading in @tableHeadings()
+                if heading is "Workflow"
+                    colVals.push(text: @id, class: "workflow-name")
+                else
+                    status = @getStatus(heading)?.status ? "empty"
+                    colVals.push(text:"", class: status)
+            return colVals
+
+            #(@getStatus(heading)?.status) ? "empty" for heading in @tableHeadings()
 
     getStatus: (name) =>
         @statuses().first (s) => name is s.name

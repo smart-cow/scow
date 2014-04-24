@@ -16,7 +16,7 @@
     <script src="scripts/js/libs/stomp.js"></script>
     <script src="scripts/js/libs/sockjs-0.3.min.js"></script>
 
-   
+
     <script src="scripts/config.js"></script>
     <script src="scripts/js/mylibs/cow-lib.js"></script>
     <script src="scripts/js/mylibs/activeworkflows.js"></script>
@@ -26,7 +26,7 @@
 <body>
 <h1>Active Workflows</h1>
 
-<table class="table table-striped table-bordered" data-bind="if: workflows().length">
+<table class="table table-bordered" data-bind="if: workflows().length">
     <thead>
         <!-- Create heading column for each user mentioned in a task -->
         <tr data-bind="foreach: tableHeadings">
@@ -36,9 +36,9 @@
     <!-- Create a row for each workflow -->
     <tbody id="chiclet-chart" data-bind="foreach: workflows">
         <!-- Create a cell for each heading -->
-        <tr data-bind="foreach: columnValues, event:{ click: $root.selectRow}, css: {selected: isSelected}">
+        <tr data-bind="foreach: columnValues, click: $root.selectRow, css: {selected: isSelected}">
             <!-- Set CSS class and text to the completion state -->
-            <td data-bind="text: $data, css: $data"></td>
+            <td data-bind="text: text, css: $data.class"></td>
         </tr>
     </tbody>
 </table>

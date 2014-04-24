@@ -1,57 +1,58 @@
 ﻿
 
 /** Chiclet chart colors **/
-#chiclet-chart > tr:nth-child(odd) > td{
-    background-color: #fdfcf5;	
-	
+#chiclet-chart  tr:nth-child(odd) td.empty,
+#chiclet-chart  tr:nth-child(odd) td.workflow-name {
+    background-color: #fdfcf5;
 }
 
 #chiclet-chart tr td{
     border-bottom:none;
 	border-top:none;
-	
+
+}
+
+#chiclet-chart td.workflow-name {
+    font-weight: bold;
 }
 
 
-
-
 #chiclet-chart > tr.selected:nth-child(odd) > td{
-    background-color: #cbb765;	
+    background-color: #cbb765;
 	border-top: 2px solid #000000;
-    border-bottom: 2px solid #000000; 	
-	
+    border-bottom: 2px solid #000000;
+
 }
 
 #chiclet-chart > tr.selected:nth-child(even) > td{
     background-color: #DED29E;
 	border-top: 2px solid #000000;
-    border-bottom: 2px solid #000000; 	
-	
+    border-bottom: 2px solid #000000;
+
 }
 
 #chiclet-chart tr.selected:hover td{
     border-top: 1px dashed #000000;
-    border-bottom: 1px dashed #000000; 	
-	background-color: #e7de8c;	
-	
+    border-bottom: 1px dashed #000000;
+	background-color: #e7de8c;
+
 }
 
 #chiclet-chart tr:hover td{
     border-top: 1px dashed #000000;
-    border-bottom: 1px dashed #000000; 	
-	background-color: #e7de8c;	
-	
+    border-bottom: 1px dashed #000000;
+	background-color: #e7de8c;
+
 }
 
 
 #chiclet-chart td.completed {
     background-color: #BFFEBF;
-	font-size: 0;
-    
+
 }
 #chiclet-chart tr:hover td.completed {
     background-color: #80FE80;
-    
+
 }
 #chiclet-chart tr.selected td.completed{
     background-color: #00CC00;
@@ -62,11 +63,10 @@
 
 #chiclet-chart td.open {
     background-color: #fdff8c;
-	font-size: 0;
 }
 #chiclet-chart tr:hover td.open {
     background-color: #fdff73;
-    
+
 }
 #chiclet-chart tr.selected td.open{
     background-color: #FFFF00;
@@ -77,12 +77,11 @@
 
 #chiclet-chart td.planned {
     background-color: #BFCFFE;
-	font-size: 0;
-    
+
 }
 #chiclet-chart tr:hover td.planned {
     background-color: #809FFE;
-    
+
 }
 #chiclet-chart tr.selected td.planned{
     background-color: #0033CC;
@@ -94,12 +93,11 @@
 
 #chiclet-chart td.precluded {
     background-color: #BFCFFE;
-	font-size: 0;
-    
+
 }
 #chiclet-chart tr:hover td.precluded {
     background-color: #000000;
-    
+
 }
 #chiclet-chart tr.selected td.precluded{
     background-color: #000000;
@@ -110,12 +108,11 @@
 
 #chiclet-chart td.contingent{
     background-color: #bbbbbb;
-	font-size: 0;
 }
 
 #chiclet-chart tr:hover td.contingent {
     background-color: #949494;
-    
+
 }
 #chiclet-chart tr.selected td.contingent{
     background-color: #808080;
