@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<process xmlns="http://www.wiredwidgets.org/cow/server/schema/model-v2" name="v2-simple" key="v2-simple" maxId="0">
+    <activities sequential="true" key="_52A61E60-01DF-4E9A-9558-00BF29AE8F9A">
+        <task name="task one" key="_D8033DD1-B776-4F2C-A629-AC757FAEE98C">
+            <description>this is a description of task 1</description>
+            <assignee>jkranes</assignee>
+        </task>
+        <task name="task two" key="_5A1C6B9F-04B3-4272-A27F-FB5719DFE806">
+            <description>this is a description of task 2</description>
+            <candidateGroups>group1</candidateGroups>
+        </task>
+    </activities>
+    <variables>
+        <variable name="test" value="xxx"/>
+    </variables>
+</process>

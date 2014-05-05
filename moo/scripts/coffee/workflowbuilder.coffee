@@ -55,20 +55,11 @@ class WorkflowBuilderViewModel
         new PrettyPrintVisitor(@tree)
 
     save: =>
-        dto = new WorkflowDto(@tree).getDto()
-        console.log(dto)
-        $("#debug").text(JSON.stringify(dto))
-        COW.cowRequest("processes", "post", dto).done (d) ->
-            console.log("done")
-            console.log(d)
+        converter = new WorkflowXmlConverter(@tree)
+        xml = converter.getXml()
+        COW.xmlRequest("processes/#{converter.key}", "put", xml).done (d) ->
+            alert("xml saved")
 
-#        COW.cowRequest("processes/#{dto.key}", "put", dto).done (d) ->
-#            console.log("done")
-#            console.log(d)
-
-#        COW.cowRequest("processes", "post", @data).done (d) ->
-#            console.log("done")
-#            console.log(d)
 
 
 createDisplay = (label, value, inputType = "text") ->
@@ -80,63 +71,79 @@ createDisplay = (label, value, inputType = "text") ->
 
 
 
-class WorkflowDto
+class WorkflowXmlConverter
     constructor: (tree) ->
+        @xml = $($.parseXML(
+              '<process xmlns="http://www.wiredwidgets.org/cow/server/schema/model-v2"></process>'))
+        @xmlPosition = @xml
         workflowRoot = tree.rootNode.children[0]
+        console.log(@xml)
         @visit(workflowRoot)
 
-    getDto: => @dto
+    getXml: -> @xml[0]
 
     visit: (node) ->
         node.data.self.accept(@, node)
 
-    visitWorkflow: (node) ->
-        @dto = @attrsToDto(node)
-        children = @visit(node.children[0])
-        @dto.activity = children
-        return @dto
+    visitWorkflow: (node) =>
+        # Should have only one root node
+        workflow = node.data.self
 
-    visitActivities: (node) ->
-        valueDto = @attrsToDto(node)
-        children = (@visit(child) for child in node.children)
-        valueDto.activity = children
-        return @activityDto(node, valueDto)
+        process = $(@xmlPosition.find("process"))
+        @key = workflow.key
+        process.attr("name", workflow.key)
+        process.attr("key", workflow.key)
+
+        after = @moveXmlPosition(@, process)
+        @visit(node.children[0])
+        after();
 
 
-    visitHumanTask: (node) -> @visitNoChildren(node)
+    moveXmlPosition: (self, newXmlPosition) ->
+        [oldPosition, self.xmlPosition] = [self.xmlPosition, newXmlPosition]
+        return ->
+            self.xmlPosition = oldPosition
 
-    visitServiceTask: (node) -> @visitNoChildren(node)
 
-    visitScript: (node) -> @visitNoChildren(node)
+    visitActivities: (node) =>
+        activities = node.data.self
+        xmlActivities = $("<activities />").appendTo(@xmlPosition)
+
+        xmlActivities.attr("sequential", activities.isSequential)
+
+        after = @moveXmlPosition(@, xmlActivities)
+        @visit(child) for child in node.children
+        after();
+
+
+
+    visitHumanTask: (node) =>
+        task = node.data.self
+        xmlTask = $("<task />").appendTo(@xmlPosition)
+        xmlTask.attr("name", task.name)
+        @createTextNode(xmlTask, "description", task.description)
+        @createTextNode(xmlTask, "assignee", task.assignee)
+        @createTextNode(xmlTask, "candidateGroups", task.candidateGroups)
+
+
+    visitServiceTask: (node) -> console.log(node)
+
+    visitScript: (node) -> console.log(node)
 
     visitDecision: (node) -> console.log(node)
 
-    visitExit: (node) -> @visitNoChildren(node)
+    visitExit: (node) -> console.log(node)
 
     visitLoop: (node) -> console.log(node)
 
-    visitSignal: (node) -> @visitNoChildren(node)
+    visitSignal: (node) -> console.log(node)
 
-    visitSubprocess: (node) -> @visitNoChildren(node)
-
-
-    visitNoChildren: (node) ->
-        valueDto = @attrsToDto(node)
-        return @activityDto(node, valueDto)
+    visitSubprocess: (node) -> console.log(node)
 
 
-    attrsToDto: (node) ->
-        attrs = ko.mapping.toJS(node.data.self.attributes())
-        dto = { }
-        for attr in attrs when attr.value?
-            dto[attr.key] = attr.value
-        return dto
 
-    activityDto: (node, valueObj) ->
-        declaredType: node.data.self.typeStr()
-        value: valueObj
-
-
+    createTextNode: (target, tag, content) ->
+        $("<#{tag}>#{content}</#{tag}>").appendTo(target)
 
 
 
@@ -202,6 +209,7 @@ class PrettyPrintVisitor
 class Activity
     constructor: (@data) ->
         @title = @data.name ? @.constructor.name
+        @name = @title
         @key = @data.key
         @icon = "Icon_Task.png"
         @draggable = true
@@ -210,24 +218,15 @@ class Activity
         @isDecision = false
         @isActivities = false
         @folder = false
+        @description = @data.description
 
-        @attributes = ko.observableArray()
-        @setAttr("Name", "name")
-        @setAttr("Description", "description")
-        @setAttr("Bypassable", "bypassable", "checkbox")
-        @setAttr("Key", "key")
 
     dragEnter: =>
         if @folder
             return ["over"]
         return ["before", "after"]
 
-    setAttr: (label, key, inputType = "text") =>
-        @attributes.push
-            label: ko.observable(label)
-            key: key
-            value: ko.observable(@data[key])
-            inputType: ko.observable(inputType)
+
 
 
 
@@ -240,9 +239,7 @@ class Workflow extends Activity
         @folder = true
         @expanded = true
         @self = @
-        @attributes = ko.observableArray()
-        @setAttr("Name", "name")
-        @setAttr("Key", "key")
+
 
     dragEnter: -> false
 
@@ -268,9 +265,6 @@ class Activities extends Activity
         @folder = true
         @isActivities = true
 
-        @setAttr("Sequential", "sequential", "checkbox")
-
-
 
     dragEnter: (data) =>
         if data.node.getParent()?.data.self.isDecision and data.otherNode.data.self.isActivities
@@ -290,9 +284,9 @@ class HumanTask extends Activity
 
     constructor: (@data) ->
         super(@data)
-        @setAttr("Assignee", "assignee")
-        @setAttr("Candidate users", "candidateUsers")
-        @setAttr("Candidate groups", "candidateGroups")
+        @assignee = data.assignee
+        @candidateGroups = data.candidateGroups
+
 
     accept: (visitor, node) ->
         visitor.visitHumanTask(node)
@@ -308,12 +302,6 @@ class ServiceTask extends Activity
         super(@data)
         @icon = "Icon_ServiceTask.png"
 
-        @setAttr("Method", "method")
-        @setAttr("URL", "url")
-        @setAttr("Content", "content")
-        @setAttr("Content type", "contentType")
-        @setAttr("Var", "var")
-        @setAttr("Result selector XPath", "resultSelectorXPath")
 
 
     accept: (visitor, node) ->
@@ -330,7 +318,6 @@ class ScriptTask extends Activity
         super
         @icon = "Icon_Script.png"
 
-        @setAttr("Content", "content")
 
     accept: (visitor, node) ->
         visitor.visitScript(node)

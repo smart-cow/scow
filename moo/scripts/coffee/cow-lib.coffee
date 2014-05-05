@@ -28,6 +28,16 @@ class CowUtil
             xhrFields:
                 withCredentials: true
 
+    xmlRequest: (path, httpMethod, xml) ->
+        $.ajax
+            url: cowConfig.cowServerHost + path
+            data: new XMLSerializer().serializeToString(xml)
+            type: httpMethod
+            contentType: "application/xml"
+            dataType: "xml"
+            xhrFields:
+                withCredentials: true
+
 
     activeWorkflowIds: (callBack) =>
         COW.cowRequest("processInstances").done (data) ->

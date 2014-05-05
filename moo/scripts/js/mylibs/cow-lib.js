@@ -50,6 +50,19 @@
       });
     };
 
+    CowUtil.prototype.xmlRequest = function(path, httpMethod, xml) {
+      return $.ajax({
+        url: cowConfig.cowServerHost + path,
+        data: new XMLSerializer().serializeToString(xml),
+        type: httpMethod,
+        contentType: "application/xml",
+        dataType: "xml",
+        xhrFields: {
+          withCredentials: true
+        }
+      });
+    };
+
     CowUtil.prototype.activeWorkflowIds = function(callBack) {
       return COW.cowRequest("processInstances").done(function(data) {
         var pi;
