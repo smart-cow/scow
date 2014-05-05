@@ -151,6 +151,37 @@ class TasksViewModel
 
 
     # Called when a user clicks Assign to me. Use ajax to assign task to user on cow-server.
+    takeTask:(task) =>
+        # url format: tasks/{id}/task?assignee={username}
+        url = "tasks/#{ task.id() }/take?assignee=#{ @username() }"
+        COW.cowRequest(url, "post").done (data) =>
+            # cow-server returns the updated task
+            @createOrUpdateTask(data)
+            # Wait till after the ajax call completes to close the modal, so the user doesn"t
+            # see the table until it has been updated.
+            $("#taskInfoModal").modal("hide")
+
+    # Called when a user clicks complete. Use ajax to set the task as completed.
+    completeTask:(task) =>
+        outcomeSelected = task.selectedOutcome()? or
+                          task.outcomes().length is 0
+        if not outcomeSelected
+            # show error if user needs to select on outcome
+            $("#outcomes-form").addClass("has-error")
+            $("#outcomes-form .has-error").removeClass("hidden")
+            return
+
+        queryString = @buildCompleteTaskQueryString(task)
+        url = "tasks/" + task.id() + queryString
+        COW.cowRequest(url, "delete").done =>
+            # Since the call was successful the task no longer belongs in activeTasks
+            @activeTasks.remove(task)
+            # Wait till after the ajax call completes to close the modal, so the user doesn"t
+            # see the table until it has been updated.
+            $("#taskInfoModal").modal("hide")
+
+
+    # Called when a user clicks Assign to me. Use ajax to assign task to user on cow-server.
     takeSelectedTask: =>
         # url format: tasks/{id}/task?assignee={username}
         url = "tasks/#{ @selectedTask().id() }/take?assignee=#{ @username() }"
