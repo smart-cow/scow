@@ -27,18 +27,21 @@ dndOptions =
 class WorkflowBuilderViewModel
     constructor: ->
         @workflow = ko.observable()
-        @loadWorkflow("SvcAndScript")
+        #@loadWorkflow("BrianTempSvc")
+        @loadWorkflow("v2-simple")
+        #@loadWorkflow("complicated")
         @selectedActivity = ko.observable()
 
 
     loadWorkflow: (workflowName) =>
         COW.cowRequest("processes/#{workflowName}").done (data) =>
+            @data = data
             @workflow(new Workflow(data))
             @configTree(@workflow())
 
 
     configTree: (workflow) =>
-        $("#test-tree").fancytree
+        $("#tree").fancytree
             extensions: ["dnd"]
             debugLevel: 2
             source: [workflow]
@@ -46,6 +49,26 @@ class WorkflowBuilderViewModel
             icons: false
             dnd: dndOptions
             click: (event, data) => @selectedActivity(data.node.data.self)
+        @tree = $("#tree").fancytree("getTree")
+
+    prettyPrint: =>
+        new PrettyPrintVisitor(@tree)
+
+    save: =>
+        dto = new WorkflowDto(@tree).getDto()
+        console.log(dto)
+        $("#debug").text(JSON.stringify(dto))
+        COW.cowRequest("processes", "post", dto).done (d) ->
+            console.log("done")
+            console.log(d)
+
+#        COW.cowRequest("processes/#{dto.key}", "put", dto).done (d) ->
+#            console.log("done")
+#            console.log(d)
+
+#        COW.cowRequest("processes", "post", @data).done (d) ->
+#            console.log("done")
+#            console.log(d)
 
 
 createDisplay = (label, value, inputType = "text") ->
@@ -54,20 +77,124 @@ createDisplay = (label, value, inputType = "text") ->
     inputType: ko.observable(inputType)
 
 
-ACTIVITY_TYPE_MAP =
-    "org.wiredwidgets.cow.server.api.model.v2.Activities" : (data) -> new Activities(data)
-    "org.wiredwidgets.cow.server.api.model.v2.Task" : (data) -> new HumanTask(data)
-    "org.wiredwidgets.cow.server.api.model.v2.ServiceTask" : (data) -> new ServiceTask(data)
-    "org.wiredwidgets.cow.server.api.model.v2.Script" : (data) -> new ScriptTask(data)
-    "org.wiredwidgets.cow.server.api.model.v2.Decision": (data) -> new Decision(data)
-    "org.wiredwidgets.cow.server.api.model.v2.Exit": (data) -> new Exit(data)
-    "org.wiredwidgets.cow.server.api.model.v2.Loop": (data) -> new Loop(data)
-    "org.wiredwidgets.cow.server.api.model.v2.Signal": (data) -> new Signal(data)
-    "org.wiredwidgets.cow.server.api.model.v2.SubProcess": (data) -> new Subprocess(data)
 
-getActivity = (data) ->
-    ACTIVITY_TYPE_MAP[data.declaredType](data.value)
 
+
+class WorkflowDto
+    constructor: (tree) ->
+        workflowRoot = tree.rootNode.children[0]
+        @visit(workflowRoot)
+
+    getDto: => @dto
+
+    visit: (node) ->
+        node.data.self.accept(@, node)
+
+    visitWorkflow: (node) ->
+        @dto = @attrsToDto(node)
+        children = @visit(node.children[0])
+        @dto.activity = children
+        return @dto
+
+    visitActivities: (node) ->
+        valueDto = @attrsToDto(node)
+        children = (@visit(child) for child in node.children)
+        valueDto.activity = children
+        return @activityDto(node, valueDto)
+
+
+    visitHumanTask: (node) -> @visitNoChildren(node)
+
+    visitServiceTask: (node) -> @visitNoChildren(node)
+
+    visitScript: (node) -> @visitNoChildren(node)
+
+    visitDecision: (node) -> console.log(node)
+
+    visitExit: (node) -> @visitNoChildren(node)
+
+    visitLoop: (node) -> console.log(node)
+
+    visitSignal: (node) -> @visitNoChildren(node)
+
+    visitSubprocess: (node) -> @visitNoChildren(node)
+
+
+    visitNoChildren: (node) ->
+        valueDto = @attrsToDto(node)
+        return @activityDto(node, valueDto)
+
+
+    attrsToDto: (node) ->
+        attrs = ko.mapping.toJS(node.data.self.attributes())
+        dto = { }
+        for attr in attrs when attr.value?
+            dto[attr.key] = attr.value
+        return dto
+
+    activityDto: (node, valueObj) ->
+        declaredType: node.data.self.typeStr()
+        value: valueObj
+
+
+
+
+
+class PrettyPrintVisitor
+    constructor: (@tree) ->
+        @tabs = ""
+        workflowRoot = @tree.rootNode.children[0]
+        @visit(workflowRoot)
+
+
+    display: (title) ->
+        console.log(@tabs + title)
+
+    indent: => @tabs += "\t"
+
+    dedent: => @tabs = @tabs.substr(1)
+
+    visit: (node) ->
+        node.data.self.accept(@, node)
+
+    visitChildren: (node) ->
+        @indent()
+        @visit(child) for child in node.children
+        @dedent()
+
+    visitWorkflow: (node) ->
+        @display(node.key)
+        @visitChildren(node)
+
+    visitActivities: (node) ->
+        @display(node.title)
+        @visitChildren(node)
+
+    visitHumanTask: (node) ->
+        @display(node.title)
+
+    visitServiceTask: (node) ->
+        @display(node.title)
+
+    visitScript: (node) ->
+        @display(node.title)
+
+    visitDecision: (node) ->
+        @display(node.title)
+        @visitChildren(node)
+
+    visitExit: (node) ->
+        @display(node.title)
+
+    visitLoop: (node) ->
+        @display(node.title)
+        @visitChildren(node)
+
+    visitSignal: (node) ->
+        @display(node.title)
+
+    visitSubprocess: (node) ->
+        @display(node.title)
 
 
 
@@ -82,11 +209,13 @@ class Activity
         @self = @
         @isDecision = false
         @isActivities = false
+        @folder = false
 
         @attributes = ko.observableArray()
         @setAttr("Name", "name")
         @setAttr("Description", "description")
         @setAttr("Bypassable", "bypassable", "checkbox")
+        @setAttr("Key", "key")
 
     dragEnter: =>
         if @folder
@@ -96,26 +225,36 @@ class Activity
     setAttr: (label, key, inputType = "text") =>
         @attributes.push
             label: ko.observable(label)
+            key: key
             value: ko.observable(@data[key])
             inputType: ko.observable(inputType)
 
 
+
 class Workflow extends Activity
-    constructor: (wflowData) ->
-        @key = wflowData.key
+    constructor: (@data) ->
+        @key = @data.key
         @title = "<span class='glyphicon glyphicon-list-alt'></span> #{@key}"
-        @children = [ getActivity(wflowData.activity) ]
+        @children = [ ActivityFactory.create(@data.activity) ]
         @draggable = false
         @folder = true
         @expanded = true
         @self = @
         @attributes = ko.observableArray()
+        @setAttr("Name", "name")
+        @setAttr("Key", "key")
 
     dragEnter: -> false
 
+    accept: (visitor, node) ->
+        visitor.visitWorkflow(node)
+
+
+
+
 
 class Activities extends Activity
-    @typeString = "org.wiredwidgets.cow.server.api.model.v2.Activities"
+    @typeString: "org.wiredwidgets.cow.server.api.model.v2.Activities"
 
     constructor: (@data) ->
         super(@data)
@@ -124,7 +263,7 @@ class Activities extends Activity
             @title = @data.name
         else
             @title = if @isSequential then "List" else "Parallel List"
-        @children = (getActivity(d) for d in @data.activity)
+        @children = (ActivityFactory.create(d) for d in @data.activity)
         @icon = "Icon_List.png"
         @folder = true
         @isActivities = true
@@ -132,11 +271,18 @@ class Activities extends Activity
         @setAttr("Sequential", "sequential", "checkbox")
 
 
+
     dragEnter: (data) =>
         if data.node.getParent()?.data.self.isDecision and data.otherNode.data.self.isActivities
             return ["over", "after", "before"]
         else
             return ["over"]
+
+    accept: (visitor, node) ->
+        visitor.visitActivities(node)
+
+    typeStr: -> Activities.typeString
+
 
 
 class HumanTask extends Activity
@@ -147,6 +293,12 @@ class HumanTask extends Activity
         @setAttr("Assignee", "assignee")
         @setAttr("Candidate users", "candidateUsers")
         @setAttr("Candidate groups", "candidateGroups")
+
+    accept: (visitor, node) ->
+        visitor.visitHumanTask(node)
+
+    typeStr: -> HumanTask.typeString
+
 
 
 class ServiceTask extends Activity
@@ -164,6 +316,13 @@ class ServiceTask extends Activity
         @setAttr("Result selector XPath", "resultSelectorXPath")
 
 
+    accept: (visitor, node) ->
+        visitor.visitServiceTask(node)
+
+    typeStr: -> ServiceTask.typeString
+
+
+
 class ScriptTask extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Script"
 
@@ -173,13 +332,19 @@ class ScriptTask extends Activity
 
         @setAttr("Content", "content")
 
+    accept: (visitor, node) ->
+        visitor.visitScript(node)
+
+    typeStr: -> ScriptTask.typeString
+
+
 
 class Decision extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Decision"
 
     constructor: (data) ->
         super
-        @children = (getActivity(option.activity) for option in data.option)
+        @children = (ActivityFactory.create(option.activity) for option in data.option)
         c.icon = "Icon_Decision_Arrow.png" for c in @children
         @icon = "Icon_Decision.png"
         @folder = true
@@ -188,6 +353,10 @@ class Decision extends Activity
     dragEnter: (data) =>
         if data.otherNode.data.self.isActivities then ["over"] else false
 
+    accept: (visitor, node) ->
+        visitor.visitDecision(node)
+
+    typeStr: -> Decision.typeString
 
 
 class Exit extends Activity
@@ -197,6 +366,13 @@ class Exit extends Activity
         super(data)
         @icon = "Icon_Exit.png"
 
+    accept: (visitor, node) ->
+        visitor.visitExit(node)
+
+
+    typeStr: -> Exit.typeString
+
+
 
 class Signal extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Signal"
@@ -204,6 +380,12 @@ class Signal extends Activity
     constructor: (data) ->
         super(data)
         @icon = "Icon_Signal.png"
+
+    accept: (visitor, node) ->
+        visitor.visitSignal(node)
+
+    typeStr: -> Signal.typeString
+
 
 
 class Subprocess extends Activity
@@ -213,13 +395,42 @@ class Subprocess extends Activity
         super(data)
         @icon = "Icon_SubProcess.png"
 
+    accept: (visitor, node) ->
+        visitor.visitSubprocess(node)
+
+    typeStr: -> Subprocess.typeString
+
 
 class Loop extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Loop"
 
     constructor: (data) ->
         super
-        @children = getActivity(data.activity).children
+        @children = ActivityFactory.create(data.activity).children
         @icon = "Icon_Loop.png"
         @folder = true
+
+    accept: (visitor, node) ->
+        visitor.visitLoop(node)
+
+    typeStr: -> Loop.typeString
+
+
+
+
+
+class ActivityFactory
+    @typeMap: {}
+    @typeMap[Activities.typeString] = Activities
+    @typeMap[HumanTask.typeString] = HumanTask
+    @typeMap[ServiceTask.typeString] = ServiceTask
+    @typeMap[ScriptTask.typeString] = ScriptTask
+    @typeMap[Decision.typeString] = Decision
+    @typeMap[Exit.typeString] = Exit
+    @typeMap[Loop.typeString] = Loop
+    @typeMap[Signal.typeString] = Signal
+
+    @create: (data) ->
+        new @typeMap[data.declaredType](data.value)
+
 

@@ -206,3 +206,5 @@
   window.COW = new CowUtil();
 
 }).call(this);
+
+//# sourceMappingURL=cow-lib.map
