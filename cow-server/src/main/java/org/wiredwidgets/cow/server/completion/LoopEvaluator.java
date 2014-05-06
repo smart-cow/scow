@@ -23,8 +23,9 @@ package org.wiredwidgets.cow.server.completion;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.*;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
-import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 /**
  *
@@ -39,7 +40,7 @@ public class LoopEvaluator extends AbstractEvaluator<Loop> {
         evaluate(this.activity.getLoopTask());
         evaluate(this.activity.getActivity().getValue());
         
-        CompletionState loopTaskCompletionState = CompletionState.forName(this.activity.getLoopTask().getCompletionState());
+        CompletionState loopTaskCompletionState = this.activity.getLoopTask().getCompletionState();
         
         switch (loopTaskCompletionState) {
         	case OPEN:
@@ -51,7 +52,7 @@ public class LoopEvaluator extends AbstractEvaluator<Loop> {
         		completionState = isRepeat() ? OPEN : COMPLETED;
         		break;
         	case PLANNED:
-        		completionState = CompletionState.forName(this.activity.getActivity().getValue().getCompletionState());
+        		completionState = this.activity.getActivity().getValue().getCompletionState();
         		
         		if (completionState.equals(COMPLETED)) {
         			// this is not realistic but code for it anyway

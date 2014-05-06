@@ -23,14 +23,18 @@ package org.wiredwidgets.cow.server.service;
 import static org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.drools.KnowledgeBase;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
+import org.jbpm.process.audit.NodeInstanceLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
 import org.jbpm.process.audit.VariableInstanceLog;
 import org.jbpm.ruleflow.core.RuleFlowProcess;
@@ -45,6 +49,7 @@ import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.completion.Evaluator;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
 import org.wiredwidgets.cow.server.completion.ProcessInstanceInfo;
+import org.wiredwidgets.cow.server.completion.graph.GraphCompletionEvaluator;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 
@@ -59,6 +64,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Autowired
 	ProcessInstanceLogRepository processInstanceLogRepo;
+    
+    @Autowired
+    GraphCompletionEvaluator graphEvaluator;
     
     @Autowired
     ProcessService processService;
@@ -210,14 +218,23 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Override
     public ProcessInstance getProcessInstanceStatus(Long processInstanceId) {
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
+		
 		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
 		org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pil.getProcessId());
 
 		String instanceId = process.getKey() + "." + processInstanceId;
 		
-		ProcessInstanceInfo info = new ProcessInstanceInfo(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), 
-				getProcessInstanceVariables(processInstanceId));
+		ProcessInstanceInfo info = new ProcessInstanceInfo(
+				taskService.getHistoryActivities(processInstanceId), 
+				pil.getStatus(), 
+				getProcessInstanceVariables(processInstanceId), 
+				getNodeMap(processInstanceId));
 		
+		
+		// execute the graph based evaluator.  this will populate the completion status
+		// for activity nodes based on the NodeInstanceLog
+		graphEvaluator.evaluate(process, processInstanceId);
+
 		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(instanceId, process, info);
 		evaluator.evaluate();
 		
@@ -304,6 +321,31 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     		vars.put(log.getVariableId(), log.getValue());
     	}
     	return vars;
+    }
+    
+    private Map<String, Set<NodeInstanceLog>> getNodeMap(Long processInstanceId) {
+    	// get all node instances for the process instance Id and put them into a map
+    	// where the map key is the unique node name and the value is a sorted set in descending date/time order
+    	List<NodeInstanceLog> nodes = JPAProcessInstanceDbLog.findNodeInstances(processInstanceId);
+    	Map<String, Set<NodeInstanceLog>> nodeMap = new HashMap<String, Set<NodeInstanceLog>>();
+    	
+    	for (NodeInstanceLog nil : nodes) {
+    		String nodeName = nil.getNodeName();
+    		if (nodeMap.get(nodeName) == null) {
+    			// create a sorted set based on the Date
+    			Set<NodeInstanceLog> nodeSet = new TreeSet<NodeInstanceLog>(
+    					new Comparator<NodeInstanceLog>() {
+    						@Override
+    						public int compare(NodeInstanceLog o1, NodeInstanceLog o2) {
+    							// descending order so most recent date/time is always first
+    							return o2.getDate().compareTo(o1.getDate());
+    						}
+    					});
+    			nodeMap.put(nodeName, nodeSet);
+    		}
+    		nodeMap.get(nodeName).add(nil);	
+    	}
+    	return nodeMap;
     }
     
 }

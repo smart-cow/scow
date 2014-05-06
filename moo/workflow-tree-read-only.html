@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>COW</title>
+
+
+
+
+
+    <script src="scripts/js/libs/jquery-for-tree.js" type="text/javascript"></script>
+    <script src="scripts/js/libs/jquery-ui.custom.js" type="text/javascript"></script>
+    <script src="scripts/js/libs/jquery.cookie.js" type="text/javascript"></script>
+    <link href="css/ui.dynatree.css" rel="stylesheet" type="text/css">
+    <link href="css/tree-styles.css" rel="stylesheet" type="text/css">
+    <script src="scripts/js/libs/jquery.dynatree.js" type="text/javascript"></script>
+
+
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <script src="scripts/js/libs/bootstrap.js"></script>
+
+    <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
+    <script src="scripts/js/libs/knockout.mapping.js"></script>
+
+    <script src="scripts/js/libs/stomp.js"></script>
+    <script src="scripts/js/libs/sockjs-0.3.min.js"></script>
+
+    <script src="scripts/config.js"></script>
+    <script src="scripts/js/mylibs/cow-lib.js"></script>
+    <script src="scripts/js/mylibs/workflow-tree-read-only.js"></script>
+</head>
+<body>
+
+
+
+<div data-bind="foreach: workflows">
+    <div class="wflowTree" data-bind="template: {name: 'workflow-template', value: $data }">
+    </div>
+</div>
+
+<form id="addWorkflowForm" data-bind="submit: formSubmit">
+    <input id="newWorkflowName" name="workflowName" type="text" />
+    <input type="submit" />
+</form>
+
+
+
+<script id="workflow-template" type="text/html">
+    <ul>
+        <li data="addClass: 'workflow-root', myOtherAttr: 'true'">
+            <span data-bind="text: key"></span>
+            <ul data-bind="template: { name: $root.templateName, foreach: activities.children }">
+            </ul>
+        </li>
+    </ul>
+</script>
+
+
+<script id="activities-template" type="text/html">
+    <li class="folder" data-bind="attr { data: icon }">
+        <span data-bind="text: name"></span>
+        <ul data-bind="template: {name: $root.templateName, foreach: children}">
+        </ul>
+    </li>
+</script>
+
+
+<script type="text/html" id="task-template">
+    <li data-bind="text: name, attr: { data: icon }"></li>
+</script>
+
+
+
+<script type="text/html" id="option-template">
+    <li class="folder" data-bind="attr: { data: icon }" >
+        <span data-bind="text: name"></span>
+        <ul data-bind="template: { name: $root.templateName, foreach: options}">
+        </ul>
+    </li>
+</script>
+
+</body>
+</html>

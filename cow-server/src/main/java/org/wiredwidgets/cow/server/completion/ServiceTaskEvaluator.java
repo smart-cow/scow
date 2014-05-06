@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.ServiceTask;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 

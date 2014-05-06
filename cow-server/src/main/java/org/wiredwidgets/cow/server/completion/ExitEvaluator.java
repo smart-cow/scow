@@ -20,6 +20,7 @@ package org.wiredwidgets.cow.server.completion;
 import org.drools.runtime.process.ProcessInstance;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 

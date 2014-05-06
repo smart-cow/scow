@@ -22,7 +22,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
-import static org.wiredwidgets.cow.server.completion.CompletionState.*;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.*;
 
 @Component
 @Scope("prototype")
@@ -38,7 +39,7 @@ public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
             Activity act = jbe.getValue();
             
             evaluate(act);
-            CompletionState state = CompletionState.forName(act.getCompletionState());
+            CompletionState state = act.getCompletionState();
             if (state == COMPLETED) {
                 completedCount++;
             } else if (state == OPEN) {

@@ -77,6 +77,9 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<Bpmn20Node, TPr
     private static org.omg.spec.bpmn._20100524.model.ObjectFactory modelFactory = new org.omg.spec.bpmn._20100524.model.ObjectFactory();
     private Map<String, Property> properties = new HashMap<String, Property>();
     private Set<String> imports = new HashSet<String>();
+    
+    // for ensuring that each node has a unique name
+    private Map<String, Integer> nodeNames = new HashMap<String, Integer>();
         
     public Bpmn20ProcessContext(Process source, TProcess target) {
         super(source, target);
@@ -178,6 +181,30 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<Bpmn20Node, TPr
 			
 		}
 		
+	}
+	
+	/**
+	 * Returns a unique node name for the proposed name.  If the name is already used we append a number 
+	 * to make it unique
+	 * @param name
+	 * @return
+	 */
+	protected String getUniqueNodeName(String name) {
+		int count = 0;
+		while (nodeNames.get(name) != null) {
+			// check to see if the name already has a number appended
+			String[] parts = name.split("-");
+			if (parts.length == 2) {
+				if (nodeNames.containsKey(parts[0])) {
+					name = parts[0];
+					count =  nodeNames.get(name);
+				}
+			}
+			count++;
+			nodeNames.put(name, count);
+			name += ("-" + count);
+		}
+		return name;
 	}
 	
 	public Definitions getDefinitions() {

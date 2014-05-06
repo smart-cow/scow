@@ -20,15 +20,26 @@ import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.ClassBasedEdgeFactory;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.transform.graph.activity.StartActivity;
 
 public class ActivityGraph extends DefaultDirectedGraph<Activity, ActivityEdge> {
 	
 	private static final long serialVersionUID = 1L;
 	
+	private StartActivity start;
+	
 	private static EdgeFactory<Activity, ActivityEdge> ef = new ClassBasedEdgeFactory<Activity, ActivityEdge>(ActivityEdge.class);
 	
 	public ActivityGraph() {
 		super(ef);		
+	}
+	
+	public void setStart(StartActivity start) {
+		this.start = start;
+	}
+	
+	public StartActivity getStart() {
+		return this.start;
 	}
 
 }

@@ -51,6 +51,7 @@ public class GraphBuilder {
 		// create the graph
 		ActivityGraph graph = new ActivityGraph();
 		graph.addVertex(start);
+		graph.setStart(start);
 		graph.addVertex(main);
 		graph.addVertex(end);
 		

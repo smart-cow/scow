@@ -22,12 +22,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.SubProcess;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 
-@Component
-@Scope("prototype")
+//@Component
+//@Scope("prototype")
 public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
     
     @Autowired

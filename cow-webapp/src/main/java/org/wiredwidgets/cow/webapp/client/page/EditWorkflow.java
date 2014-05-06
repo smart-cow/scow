@@ -810,7 +810,7 @@ public class EditWorkflow extends PageWidget {
 						
 						//Create Variables Table
 						ArrayList<FormItem> items = new ArrayList<FormItem>();
-						items.addAll(Arrays.asList(basic, name, assignee, description, advanced,  bypass));
+						items.addAll(Arrays.asList(basic, name,assigneeType, assignee, description, advanced,  bypass));
 						
 											
 						varTable = generateVarTable(t.getRawWariables());

@@ -171,7 +171,9 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends
 					.getVariables().entrySet()) {
 				Variable v = new Variable();
 				v.setName(entry.getKey());
-				v.setValue(entry.getValue().toString());
+				if (entry.getValue() != null) {
+					v.setValue(entry.getValue().toString());
+				}
 				vars.getVariables().add(v);
 			}
 		}

@@ -19,10 +19,11 @@ package org.wiredwidgets.cow.server.completion;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.*;
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Option;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
-import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 @Component
 @Scope("prototype")
@@ -35,7 +36,7 @@ public class DecisionEvaluator extends AbstractEvaluator<Decision> {
     	   	
         // first, evaluate the decision task
         evaluate(this.activity.getTask());      
-        CompletionState decisionTaskCompletionState = CompletionState.forName(decisionTask.getCompletionState());
+        CompletionState decisionTaskCompletionState = decisionTask.getCompletionState();
           
         switch(decisionTaskCompletionState) {
         	case PLANNED :
@@ -69,7 +70,7 @@ public class DecisionEvaluator extends AbstractEvaluator<Decision> {
                 	}
                     evaluate(option.getActivity().getValue());
                     
-                    if (CompletionState.forName(option.getActivity().getValue().getCompletionState()) == CompletionState.OPEN) {
+                    if (option.getActivity().getValue().getCompletionState() == OPEN) {
                         isCompleted = false;
                     }
 

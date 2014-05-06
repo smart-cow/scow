@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>COW</title>
+
+
+    <script src="scripts/js/libs/jquery-1.11.0.js"></script>
+
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <script src="scripts/js/libs/bootstrap.js"></script>
+
+    <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
+    <script src="scripts/js/libs/knockout.mapping.js"></script>
+
+    <script src="scripts/js/libs/stomp.js"></script>
+    <script src="scripts/js/libs/sockjs-0.3.min.js"></script>
+
+
+    <script src="scripts/config.js"></script>
+    <script src="scripts/js/mylibs/cow-lib.js"></script>
+    <script src="scripts/js/mylibs/activeworkflows.js"></script>
+	 <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+<h1>Active Workflows</h1>
+
+<table class="table table-bordered" data-bind="if: workflows().length">
+    <thead>
+        <!-- Create heading column for each user mentioned in a task -->
+        <tr data-bind="foreach: tableHeadings">
+            <th data-bind="text: $data"></th>
+        </tr>
+    </thead>
+    <!-- Create a row for each workflow -->
+    <tbody id="chiclet-chart" data-bind="foreach: workflows">
+        <!-- Create a cell for each heading -->
+        <tr data-bind="foreach: columnValues, click: $root.selectRow, css: {selected: isSelected}">
+            <!-- Set CSS class and text to the completion state -->
+            <td data-bind="text: text, css: $data.class"></td>
+        </tr>
+    </tbody>
+</table>
+
+
+</body>
+</html>

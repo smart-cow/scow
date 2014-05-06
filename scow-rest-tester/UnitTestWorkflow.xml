@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<process name="UnitTestWorkflow" key="UnitTestWorkflow" maxId="0" xmlns="http://www.wiredwidgets.org/cow/server/schema/model-v2">
+<activities sequential="true">
+    <task name="Task 1"  bypassable="false">
+        <description>Input Celsius Temperature</description>
+        <candidateGroups>SIDO</candidateGroups>
+        <variables>
+            <variable name="tempInput" value="0" output="true"/>
+        </variables>
+    </task>
+    <serviceTask name="ServiceTask 1"  bypassable="false">
+        <description/>
+        <method>POST</method>
+        <url>http://www.w3schools.com/webservices/tempconvert.asmx</url>
+        <content>&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:web="http://www.w3schools.com/webservices/"&gt;    &lt;soapenv:Header/&gt;    &lt;soapenv:Body&gt;       &lt;web:CelsiusToFahrenheit&gt;          &lt;!--Optional:--&gt;          &lt;web:Celsius&gt;${tempInput}&lt;/web:Celsius&gt;       &lt;/web:CelsiusToFahrenheit&gt;    &lt;/soapenv:Body&gt; &lt;/soapenv:Envelope&gt;</content>
+        <contentType>text/xml</contentType>
+        <var>resulttemp</var>
+        <resultSelectorXPath>//CelsiusToFahrenheitResult/text()</resultSelectorXPath>
+    </serviceTask>
+    <script name="script" >
+        <content>
+            System.out.println("####script variables: " + variables); input = variables.get("tempInput"); result = variables.get("resulttemp"); message = input + " degrees Celsius equals " + result + " degrees Farenheight"; variables.put("message", message); System.out.println("####script variables: " + variables);
+        </content>
+    </script>
+    <task name="task 4" >
+        <description>Result is in message variable</description>
+        <candidateGroups>SIDO</candidateGroups>
+    </task>
+</activities>
+</process>

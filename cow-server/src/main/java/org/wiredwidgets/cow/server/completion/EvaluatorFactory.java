@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
@@ -54,14 +55,26 @@ public class EvaluatorFactory implements ApplicationContextAware {
             eval = applicationContext.getBean(LoopEvaluator.class);
         } else if (activity instanceof Exit) {
             eval = applicationContext.getBean(ExitEvaluator.class);
-        } else if (activity instanceof Script) {
-            eval = applicationContext.getBean(ScriptEvaluator.class);   
-        } else if (activity instanceof ServiceTask) {
-            eval = applicationContext.getBean(ServiceTaskEvaluator.class);            
-        } else if (activity instanceof Signal) {
-            eval = applicationContext.getBean(SignalEvaluator.class);
-        } else if (activity instanceof SubProcess) {
-            eval = applicationContext.getBean(SubProcessEvaluator.class);
+            
+        // use default for Script    
+        // } else if (activity instanceof Script) {
+        //    eval = applicationContext.getBean(ScriptEvaluator.class);
+            
+        // use default for ServiceTask
+        //} else if (activity instanceof ServiceTask) {
+        //    eval = applicationContext.getBean(ServiceTaskEvaluator.class);      
+            
+        // use default for Signal
+        //} else if (activity instanceof Signal) {
+        //     eval = applicationContext.getBean(SignalEvaluator.class);
+            
+        // use default for subprocess
+        //} else if (activity instanceof SubProcess) {
+        //    eval = applicationContext.getBean(SubProcessEvaluator.class);
+        }
+        else {
+        	// use the default evaluator
+        	eval = defaultEvaluator(activity.getClass());
         }
         eval.setProcessInstanceId(processInstanceId);
         eval.setActivity(activity);
@@ -85,4 +98,8 @@ public class EvaluatorFactory implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext ac) throws BeansException {
         this.applicationContext = ac;
     }
+    
+	private <T extends Activity> Evaluator defaultEvaluator(Class<T> type) {
+		return new DefaultEvaluator<T>(type);
+	}
 }

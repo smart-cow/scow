@@ -364,7 +364,7 @@
         </sequence>
         <attribute name="type" type="string" />
         <attribute name="name" type="string" />
-        <attribute name="status" type="string"/>
+        <attribute name="status" type="model:CompletionState"/>
         <attribute name="count" type="int"/>
     </complexType>
 

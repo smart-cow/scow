@@ -120,7 +120,7 @@ public class TasksController extends CowServerController {
     		return notFound();
     	}
     	if (task.getAssignee() == null) {
-    		conflict(task);
+    		return conflict(task);
     	}
     	
     	Map<String, String> varMap = getVarMap(variables);

@@ -218,11 +218,12 @@
                 <documentation>Currently unused.</documentation>
             </annotation>        
         </attribute>
-        <attribute fixed="" name="completionState" type="string">
+        <attribute name="completionState" type="tns:CompletionState">
             <annotation>
                 <documentation>Assigned by the server for process instance status reporting.  Not used for workflow definitions.</documentation>
             </annotation>         
         </attribute>
+        <attribute name="completionTime" type="date" />
 
     </complexType>
 
@@ -450,6 +451,17 @@
             	<attribute name="scriptFormat" type="string" />
             </extension>
         </complexContent>
-    </complexType>       
+    </complexType>    
+    
+    <simpleType name="CompletionState" >
+    	<restriction base="string">
+    		<enumeration value="COMPLETED" />
+    		<enumeration value="OPEN" />
+    		<enumeration value="PLANNED" />
+    		<enumeration value="CONTINGENT" />
+    		<enumeration value="PRECLUDED" />
+    		<enumeration value="UNKNOWN" />
+    	</restriction>
+    </simpleType>
      
 </schema>

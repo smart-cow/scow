@@ -274,6 +274,10 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         }    
         
         log.debug("Final output map: {}", outputMap);
+        if (outputMap.size() == 0) {
+        	// pass null rather than an empty map
+        	outputMap = null;
+        }
         
         // TODO: since we're passing the variables map further down, maybe we don't need to pass it here?  Test this.
         // ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);

@@ -17,6 +17,7 @@
 package org.wiredwidgets.cow.server.completion;
 
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 
 public interface Evaluator<T extends Activity> {
 	public void evaluate();

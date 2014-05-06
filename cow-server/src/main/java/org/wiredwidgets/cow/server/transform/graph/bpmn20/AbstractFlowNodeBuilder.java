@@ -48,6 +48,8 @@ public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlo
 	@Override
 	public Bpmn20Node build(Activity activity, Bpmn20ProcessContext context) {
 		U node = newNode();
+		// ensure that the activity has a unique name.  
+		activity.setName(context.getUniqueNodeName(activity.getName()));
 		setId(node, activity, context);
 		
 		buildInternal(node, (T)activity, context);
