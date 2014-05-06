@@ -37,6 +37,8 @@
       this.buildCompleteTaskQueryString = __bind(this.buildCompleteTaskQueryString, this);
       this.completeSelectedTask = __bind(this.completeSelectedTask, this);
       this.takeSelectedTask = __bind(this.takeSelectedTask, this);
+      this.completeTask = __bind(this.completeTask, this);
+      this.takeTask = __bind(this.takeTask, this);
       this.showTask = __bind(this.showTask, this);
       this.refreshAllTasks = __bind(this.refreshAllTasks, this);
       this.toggleHistory = __bind(this.toggleHistory, this);
@@ -190,6 +192,35 @@
       return this.selectedTask(task);
     };
 
+    TasksViewModel.prototype.takeTask = function(task) {
+      var url;
+      url = "tasks/" + (task.id()) + "/take?assignee=" + (this.username());
+      return COW.cowRequest(url, "post").done((function(_this) {
+        return function(data) {
+          _this.createOrUpdateTask(data);
+          return $("#taskInfoModal").modal("hide");
+        };
+      })(this));
+    };
+
+    TasksViewModel.prototype.completeTask = function(task) {
+      var outcomeSelected, queryString, url;
+      outcomeSelected = (task.selectedOutcome() != null) || task.outcomes().length === 0;
+      if (!outcomeSelected) {
+        $("#outcomes-form").addClass("has-error");
+        $("#outcomes-form .has-error").removeClass("hidden");
+        return;
+      }
+      queryString = this.buildCompleteTaskQueryString(task);
+      url = "tasks/" + task.id() + queryString;
+      return COW.cowRequest(url, "delete").done((function(_this) {
+        return function() {
+          _this.activeTasks.remove(task);
+          return $("#taskInfoModal").modal("hide");
+        };
+      })(this));
+    };
+
     TasksViewModel.prototype.takeSelectedTask = function() {
       var url;
       url = "tasks/" + (this.selectedTask().id()) + "/take?assignee=" + (this.username());
@@ -314,3 +345,5 @@
   })();
 
 }).call(this);
+
+//# sourceMappingURL=tasks.map
