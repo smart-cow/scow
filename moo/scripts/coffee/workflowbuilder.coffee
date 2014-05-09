@@ -1,6 +1,5 @@
 
-$ ->
-  ko.applyBindings(new WorkflowBuilderViewModel())
+$ -> ko.applyBindings(new WorkflowBuilderViewModel())
 
 #getWorkflows = ->
 #  $.getJSON("data/workflows.json")
@@ -11,11 +10,9 @@ dndOptions =
     preventVoidMoves: true
     preventRecursiveMoves: true
 
-    dragStart: (node) ->
-        node.data.draggable
+    dragStart: (node) -> node.data.draggable
 
-    dragEnter: (target, data) ->
-        target.data.act.dragEnter(data)
+    dragEnter: (target, data) -> target.data.act.dragEnter(data)
 
     dragDrop: (target, data) ->
         if data.hitMode is "over"
@@ -29,13 +26,14 @@ class WorkflowBuilderViewModel
         @workflow = ko.observable()
         #@loadWorkflow("BrianTempSvc")
 #        @loadWorkflow("v2-simple")
-        @loadWorkflow("complicated")
+#        @loadWorkflow("complicated")
+#        @loadWorkflow("Denim_Decision")
+        @loadWorkflow("LoopTest")
         @selectedActivity = ko.observable()
 
 
     loadWorkflow: (workflowName) =>
         COW.cowRequest("processes/#{workflowName}").done (data) =>
-            @data = data
             @workflow(new Workflow(data))
             @configTree(@workflow())
 
@@ -51,14 +49,15 @@ class WorkflowBuilderViewModel
             click: (event, data) => @selectedActivity(data.node.data.act)
         @tree = $("#tree").fancytree("getTree")
 
-    prettyPrint: =>
-        new PrettyPrintVisitor(@tree)
+    # Used to test tree visitor
+    prettyPrint: => new PrettyPrintVisitor(@tree)
 
     save: =>
         converter = new WorkflowXmlConverter(@tree)
         xml = converter.getXml()
+        window.xml = xml
         console.log(xml)
-#        COW.xmlRequest("processes/#{converter.key}", "put", xml).done (d) ->
+#        COW.xmlRequest("processes/#{converter.key}", "put", xml).done ->
 #            alert("xml saved")
 
 
@@ -66,84 +65,109 @@ class WorkflowBuilderViewModel
 
 
 
-
+# cow-server doesn't accept json workflows, so we need to use xml
+# The visitor pattern is used to build up the xml document
 class WorkflowXmlConverter
     constructor: (tree) ->
+        # create a new xml document
         @xml = $($.parseXML(
               '<process xmlns="http://www.wiredwidgets.org/cow/server/schema/model-v2"></process>'))
-        @xmlPosition = @xml
+        @parentXml = @xml
+        # tree root node only has one child, the workflow
         workflowRoot = tree.rootNode.children[0]
         console.log(@xml)
         @visit(workflowRoot)
 
+    # Get non-jquery xml document
     getXml: -> @xml[0]
 
+    # Delegate to correct visit* method
     visit: (node) ->
         node.data.act.accept(@, node)
 
+
+    # Visits children of a folder element
+    visitChildren: (nodeXml, nodeChildren) =>
+        # Since node is a folder set the parentXml to them self
+        [oldXmlPosition, @parentXml] = [@parentXml, nodeXml]
+        @visit(child) for child in nodeChildren
+        # Reset the parentXml since we have already visited the child elements
+        @parentXml = oldXmlPosition
+
+
     visitWorkflow: (node) =>
         # Should have only one root node
-        workflow = node.data.act
+        @key = node.key
 
-        process = $(@xmlPosition.find("process"))
-        @key = workflow.key
-        process.attr("name", workflow.key)
-        process.attr("key", workflow.key)
+        process = $(@parentXml.find("process"))
+        @addAttributesToNode(process, node.data.act.apiAttributes)
 
-        after = @moveXmlPosition(@, process)
-        @visit(node.children[0])
-        after();
-
-
-    moveXmlPosition: (self, newXmlPosition) ->
-        [oldPosition, self.xmlPosition] = [self.xmlPosition, newXmlPosition]
-        return ->
-            self.xmlPosition = oldPosition
+        # workflow should have only one child, activities
+        @visitChildren(process, [node.children[0]])
 
 
     visitActivities: (node) =>
-        activities = node.data.act
-        xmlActivities = $("<activities />").appendTo(@xmlPosition)
-
-        xmlActivities.attr("sequential", activities.isSequential)
-
-        after = @moveXmlPosition(@, xmlActivities)
-        @visit(child) for child in node.children
-        after();
+        xmlActivities = @createActivityElement("activities", node)
+        @visitChildren(xmlActivities, node.children)
 
 
+    visitDecision: (node) =>
+        xmlDecision = @createActivityElement("decision", node)
+        xmlTask = @createTag("task", xmlDecision)
+        @addAttributesToNode(xmlTask, node.data.act.task.apiAttributes)
+        @visitChildren(xmlDecision, node.children)
 
 
-    visitHumanTask: (node) =>
-        task = node.data.act
-        xmlTask = $("<task />").appendTo(@xmlPosition)
-        xmlTask.attr("name", task.name)
-        @createTextNode(xmlTask, "description", task.description)
-        @createTextNode(xmlTask, "assignee", task.assignee)
-        @createTextNode(xmlTask, "candidateGroups", task.candidateGroups)
+    visitOption: (node) =>
+        xmlOption = @createActivityElement("option", node)
+        @visitChildren(xmlOption, node.children)
 
 
-    visitServiceTask: (node) -> console.log(node)
-
-    visitScript: (node) -> console.log(node)
-
-    visitDecision: (node) -> console.log(node)
-
-    visitExit: (node) -> console.log(node)
-
-    visitLoop: (node) -> console.log(node)
-
-    visitSignal: (node) -> console.log(node)
-
-    visitSubprocess: (node) -> console.log(node)
+    visitLoop: (node) =>
+        xmlLoop = @createActivityElement("loop", node)
+        xmlLoopTask = @createTag("loopTask", xmlLoop)
+        @addAttributesToNode(xmlLoopTask, node.data.act.loopTask.apiAttributes)
+        @visitChildren(xmlLoop, node.children)
 
 
+    visitHumanTask: (node) => @createActivityElement("task", node)
 
-    createTextNode: (target, tag, content) ->
-        $("<#{tag}/>")
-            .text(content)
-            .appendTo(target)
+    visitServiceTask: (node) => @createActivityElement("serviceTask", node)
 
+    visitScript: (node) => @createActivityElement("script", node)
+
+    visitExit: (node) => @createActivityElement("exit", node)
+
+    visitSignal: (node) => @createActivityElement("signal", node)
+
+    visitSubprocess: (node) => @createActivityElement("subProcess", node)
+
+
+    createActivityElement: (tag, treeNode) =>
+        xml = @createTag(tag, @parentXml)
+        @addAttributesToNode($(xml), treeNode.data.act.apiAttributes)
+        return $(xml)
+
+    createTextElement: (parent, tag, content) ->
+        xml = @createTag(tag, parent)
+        $(xml).text(content)
+        return $(xml)
+
+    # If I do $("<tag />") jquery parses it as html and lowercases all the tags,
+    # if I do $.parseXML("<tag />"), then the new tag is in a separate xml document
+    createTag: (name, parent) ->
+        parent.append("<#{name} class='hack'/>")
+        newTag = parent.find(".hack")
+        newTag.removeAttr("class")
+        return newTag
+
+    addAttributesToNode: (xmlElement, attributes) =>
+        unwrappedAttributes = ko.mapping.toJS(attributes)
+        for attr in unwrappedAttributes when attr.value
+            if attr.isXmlAttribute
+                xmlElement.attr(attr.key, attr.value)
+            else
+                @createTextElement(xmlElement, attr.key, attr.value)
 
 
 
@@ -151,17 +175,20 @@ class WorkflowXmlConverter
 
 # Base class for all activities
 class Activity
+    # Set default values
     constructor: (@data) ->
-        @title = @data.name ? @.constructor.name
-        @key = @data.key
+        if @data?
+            @constructFromAjaxCall(@data)
+
+        @title ?= @.constructor.name
         @icon = "Icon_Task.png"
         @draggable = true
         @expanded = true
+        # Add reference to self so it can be accessed from fancytree nodes
         @act = @
         @isDecision = false
         @isActivities = false
         @folder = false
-        @description = @data.description
 
         @apiAttributes = ko.observableArray()
         @addAttr("name", "Name", true)
@@ -170,15 +197,19 @@ class Activity
         @addAttr("bypassable", "Bypassable", true, "checkbox")
 
 
+    constructFromAjaxCall: ->
+        @title = @data.name
+        @key = @data.key
 
     dragEnter: =>
         if @folder
             return ["over"]
         return ["before", "after"]
 
+    # Add to the set of attributes that can be edited and included in the xml
     addAttr: (key, label, isXmlAttribute = false, inputType = "text") =>
         @apiAttributes.push
-            key: ko.observable(key)
+            key: key
             value: ko.observable(@data[key] ? "")
             label: label
             isXmlAttribute: isXmlAttribute
@@ -207,7 +238,6 @@ class Workflow extends Activity
         @addInvisibleAttr("key", true)
 
 
-
     dragEnter: -> false
 
     accept: (visitor, node) ->
@@ -222,11 +252,12 @@ class Activities extends Activity
 
     constructor: (@data) ->
         super(@data)
-        @isSequential = @data.sequential
+        @isSequential = @data.sequential ? true
         if @data.name?
             @title = @data.name
         else
             @title = if @isSequential then "List" else "Parallel List"
+
         @children = (ActivityFactory.create(d) for d in @data.activity)
         @icon = "Icon_List.png"
         @folder = true
@@ -311,12 +342,12 @@ class Decision extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Decision"
 
     constructor: (data) ->
-        super
-        @children = (ActivityFactory.create(option.activity) for option in data.option)
-        c.icon = "Icon_Decision_Arrow.png" for c in @children
+        super(data)
+        @children = (new Option(opt) for opt in data.option)
         @icon = "Icon_Decision.png"
         @folder = true
         @isDecision = true
+        @task = new HumanTask(data.task)
 
     dragEnter: (data) =>
         if data.otherNode.data.act.isActivities then ["over"] else false
@@ -325,6 +356,18 @@ class Decision extends Activity
         visitor.visitDecision(node)
 
     typeStr: -> Decision.typeString
+
+
+
+class Option extends Activity
+    constructor: (@data) ->
+        super(@data)
+        @icon = "Icon_Decision_Arrow.png"
+        @children = [ ActivityFactory.create(@data.activity) ]
+        @folder = true
+
+    accept: (visitor, node) ->
+        visitor.visitOption(node)
 
 
 class Exit extends Activity
@@ -376,7 +419,8 @@ class Loop extends Activity
 
     constructor: (data) ->
         super
-        @children = ActivityFactory.create(data.activity).children
+        @children = [ ActivityFactory.create(data.activity) ]
+        @loopTask = new HumanTask(data.loopTask)
         @icon = "Icon_Loop.png"
         @folder = true
         @addAttr("doneName", "Done name", true)
@@ -408,7 +452,7 @@ class ActivityFactory
 
 
 
-
+# Test visitor pattern
 class PrettyPrintVisitor
     constructor: (@tree) ->
         @tabs = ""
@@ -449,6 +493,10 @@ class PrettyPrintVisitor
         @display(node.title)
 
     visitDecision: (node) ->
+        @display(node.title)
+        @visitChildren(node)
+
+    visitOption: (node) ->
         @display(node.title)
         @visitChildren(node)
 
