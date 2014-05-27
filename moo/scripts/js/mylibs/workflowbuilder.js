@@ -6,7 +6,15 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   $(function() {
-    return ko.applyBindings(new WorkflowBuilderViewModel());
+    ko.applyBindings(new WorkflowBuilderViewModel());
+    return $(".draggable").draggable({
+      revert: true,
+      cursorAt: {
+        top: -5,
+        left: -5
+      },
+      connectToFancytree: true
+    });
   });
 
   dndOptions = {
@@ -35,8 +43,9 @@
       this.configTree = __bind(this.configTree, this);
       this.loadWorkflow = __bind(this.loadWorkflow, this);
       this.workflow = ko.observable();
-      this.loadWorkflow("LoopTest");
+      this.loadWorkflow("vars-test");
       this.selectedActivity = ko.observable();
+      this.workflowComponents = ActivityFactory.all();
     }
 
     WorkflowBuilderViewModel.prototype.loadWorkflow = function(workflowName) {
@@ -74,7 +83,10 @@
       converter = new WorkflowXmlConverter(this.tree);
       xml = converter.getXml();
       window.xml = xml;
-      return console.log(xml);
+      console.log(xml);
+      return COW.xmlRequest("processes/" + converter.key, "put", xml).done(function() {
+        return alert("xml saved");
+      });
     };
 
     return WorkflowBuilderViewModel;
@@ -128,6 +140,7 @@
       this.key = node.key;
       process = $(this.parentXml.find("process"));
       this.addAttributesToNode(process, node.data.act.apiAttributes);
+      this.createVariablesElement(process, node.data.act.variables);
       return this.visitChildren(process, [node.children[0]]);
     };
 
@@ -186,15 +199,16 @@
     WorkflowXmlConverter.prototype.createActivityElement = function(tag, treeNode) {
       var xml;
       xml = this.createTag(tag, this.parentXml);
-      this.addAttributesToNode($(xml), treeNode.data.act.apiAttributes);
-      return $(xml);
+      this.addAttributesToNode(xml, treeNode.data.act.apiAttributes);
+      this.createVariablesElement(xml, treeNode.data.act.variables);
+      return xml;
     };
 
     WorkflowXmlConverter.prototype.createTextElement = function(parent, tag, content) {
       var xml;
       xml = this.createTag(tag, parent);
-      $(xml).text(content);
-      return $(xml);
+      xml.text(content);
+      return xml;
     };
 
     WorkflowXmlConverter.prototype.createTag = function(name, parent) {
@@ -222,21 +236,41 @@
       return _results;
     };
 
+    WorkflowXmlConverter.prototype.createVariablesElement = function(xmlElement, observableVars) {
+      var attrName, attrValue, unwrappedVars, varXml, variable, variablesXml, _i, _len, _results;
+      variablesXml = this.createTag("variables", xmlElement);
+      unwrappedVars = ko.mapping.toJS(observableVars);
+      _results = [];
+      for (_i = 0, _len = unwrappedVars.length; _i < _len; _i++) {
+        variable = unwrappedVars[_i];
+        varXml = this.createTag("variable", variablesXml);
+        _results.push((function() {
+          var _results1;
+          _results1 = [];
+          for (attrName in variable) {
+            if (!__hasProp.call(variable, attrName)) continue;
+            attrValue = variable[attrName];
+            _results1.push(varXml.attr(attrName, attrValue));
+          }
+          return _results1;
+        })());
+      }
+      return _results;
+    };
+
     return WorkflowXmlConverter;
 
   })();
 
   Activity = (function() {
     function Activity(data) {
+      var _ref, _ref1;
       this.data = data;
+      this.readVariables = __bind(this.readVariables, this);
+      this.addInvisibleAttr = __bind(this.addInvisibleAttr, this);
       this.addAttr = __bind(this.addAttr, this);
       this.dragEnter = __bind(this.dragEnter, this);
-      if (this.data != null) {
-        this.constructFromAjaxCall(this.data);
-      }
-      if (this.title == null) {
-        this.title = this.constructor.name;
-      }
+      this.title = (_ref = (_ref1 = this.data) != null ? _ref1.name : void 0) != null ? _ref : this.constructor.name;
       this.icon = "Icon_Task.png";
       this.draggable = true;
       this.expanded = true;
@@ -244,17 +278,14 @@
       this.isDecision = false;
       this.isActivities = false;
       this.folder = false;
+      this.variables = ko.observableArray();
+      this.readVariables();
       this.apiAttributes = ko.observableArray();
       this.addAttr("name", "Name", true);
       this.addAttr("description", "Description");
       this.addInvisibleAttr("key", true);
       this.addAttr("bypassable", "Bypassable", true, "checkbox");
     }
-
-    Activity.prototype.constructFromAjaxCall = function() {
-      this.title = this.data.name;
-      return this.key = this.data.key;
-    };
 
     Activity.prototype.dragEnter = function() {
       if (this.folder) {
@@ -264,7 +295,7 @@
     };
 
     Activity.prototype.addAttr = function(key, label, isXmlAttribute, inputType) {
-      var _ref;
+      var _ref, _ref1;
       if (isXmlAttribute == null) {
         isXmlAttribute = false;
       }
@@ -273,7 +304,7 @@
       }
       return this.apiAttributes.push({
         key: key,
-        value: ko.observable((_ref = this.data[key]) != null ? _ref : ""),
+        value: ko.observable((_ref = (_ref1 = this.data) != null ? _ref1[key] : void 0) != null ? _ref : ""),
         label: label,
         isXmlAttribute: isXmlAttribute,
         inputType: inputType
@@ -285,6 +316,31 @@
         isXmlAttribute = false;
       }
       return this.addAttr(key, null, isXmlAttribute);
+    };
+
+    Activity.prototype.readVariables = function() {
+      var v, varList, _i, _len, _ref, _ref1, _results;
+      varList = (_ref = this.data) != null ? (_ref1 = _ref.variables) != null ? _ref1.variable : void 0 : void 0;
+      if (varList == null) {
+        return;
+      }
+      _results = [];
+      for (_i = 0, _len = varList.length; _i < _len; _i++) {
+        v = varList[_i];
+        _results.push(this.variables.push(this.createObservableVar(v)));
+      }
+      return _results;
+    };
+
+    Activity.prototype.createObservableVar = function(variable) {
+      var _ref, _ref1;
+      return {
+        name: ko.observable(variable.name),
+        value: ko.observable(variable.value),
+        type: ko.observable(variable.type),
+        required: ko.observable((_ref = variable.required) != null ? _ref : false),
+        output: ko.observable((_ref1 = variable.output) != null ? _ref1 : false)
+      };
     };
 
     return Activity;
@@ -303,6 +359,8 @@
       this.folder = true;
       this.expanded = true;
       this.act = this;
+      this.variables = ko.observableArray();
+      this.readVariables();
       this.apiAttributes = ko.observableArray();
       this.addAttr("name", "Name", true);
       this.addAttr("bypassAssignee", "Bypass Assignee");
@@ -329,26 +387,29 @@
     Activities.typeString = "org.wiredwidgets.cow.server.api.model.v2.Activities";
 
     function Activities(data) {
-      var d, _ref;
-      this.data = data;
       this.dragEnter = __bind(this.dragEnter, this);
-      Activities.__super__.constructor.call(this, this.data);
-      this.isSequential = (_ref = this.data.sequential) != null ? _ref : true;
-      if (this.data.name != null) {
+      var childActivitiesData, d, _ref, _ref1, _ref2, _ref3;
+      Activities.__super__.constructor.call(this, data);
+      this.isSequential = (_ref = (_ref1 = this.data) != null ? _ref1.sequential : void 0) != null ? _ref : true;
+      if (((_ref2 = this.data) != null ? _ref2.name : void 0) != null) {
         this.title = this.data.name;
       } else {
         this.title = this.isSequential ? "List" : "Parallel List";
       }
-      this.children = (function() {
-        var _i, _len, _ref1, _results;
-        _ref1 = this.data.activity;
-        _results = [];
-        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          d = _ref1[_i];
-          _results.push(ActivityFactory.create(d));
-        }
-        return _results;
-      }).call(this);
+      childActivitiesData = (_ref3 = this.data) != null ? _ref3.activity : void 0;
+      if (childActivitiesData) {
+        this.children = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = childActivitiesData.length; _i < _len; _i++) {
+            d = childActivitiesData[_i];
+            _results.push(ActivityFactory.create(d));
+          }
+          return _results;
+        })();
+      } else {
+        this.children = [];
+      }
       this.icon = "Icon_List.png";
       this.folder = true;
       this.isActivities = true;
@@ -386,8 +447,10 @@
     function HumanTask(data) {
       this.data = data;
       HumanTask.__super__.constructor.call(this, this.data);
-      this.assignee = data.assignee;
-      this.candidateGroups = data.candidateGroups;
+      if (this.data != null) {
+        this.assignee = data.assignee;
+        this.candidateGroups = data.candidateGroups;
+      }
       this.addAttr("assignee", "Assignee");
       this.addAttr("candidateUsers", "Candidate users");
       this.addAttr("candidateGroups", "Candidate groups");
@@ -440,7 +503,7 @@
     ScriptTask.typeString = "org.wiredwidgets.cow.server.api.model.v2.Script";
 
     function ScriptTask(data) {
-      ScriptTask.__super__.constructor.apply(this, arguments);
+      ScriptTask.__super__.constructor.call(this, data);
       this.icon = "Icon_Script.png";
       this.addAttr("import", "Imports");
       this.addAttr("content", "Content");
@@ -465,22 +528,26 @@
 
     function Decision(data) {
       this.dragEnter = __bind(this.dragEnter, this);
-      var opt;
+      var opt, optionsData;
       Decision.__super__.constructor.call(this, data);
-      this.children = (function() {
-        var _i, _len, _ref, _results;
-        _ref = data.option;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          opt = _ref[_i];
-          _results.push(new Option(opt));
-        }
-        return _results;
-      })();
+      optionsData = data != null ? data.option : void 0;
+      if (optionsData) {
+        this.children = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = optionsData.length; _i < _len; _i++) {
+            opt = optionsData[_i];
+            _results.push(new Option(opt));
+          }
+          return _results;
+        })();
+      } else {
+        this.children = [];
+      }
       this.icon = "Icon_Decision.png";
       this.folder = true;
       this.isDecision = true;
-      this.task = new HumanTask(data.task);
+      this.task = new HumanTask(data != null ? data.task : void 0);
     }
 
     Decision.prototype.dragEnter = function(data) {
@@ -507,10 +574,16 @@
     __extends(Option, _super);
 
     function Option(data) {
+      var childActivitiesData, _ref;
       this.data = data;
       Option.__super__.constructor.call(this, this.data);
       this.icon = "Icon_Decision_Arrow.png";
-      this.children = [ActivityFactory.create(this.data.activity)];
+      childActivitiesData = (_ref = this.data) != null ? _ref.activity : void 0;
+      if (childActivitiesData) {
+        this.children = [ActivityFactory.create(childActivitiesData)];
+      } else {
+        this.children = [];
+      }
       this.folder = true;
     }
 
@@ -596,9 +669,15 @@
     Loop.typeString = "org.wiredwidgets.cow.server.api.model.v2.Loop";
 
     function Loop(data) {
-      Loop.__super__.constructor.apply(this, arguments);
-      this.children = [ActivityFactory.create(data.activity)];
-      this.loopTask = new HumanTask(data.loopTask);
+      var childData, _ref;
+      Loop.__super__.constructor.call(this, data);
+      childData = (_ref = this.data) != null ? _ref.activity : void 0;
+      if (childData) {
+        this.children = [ActivityFactory.create(childData)];
+      } else {
+        this.children = [];
+      }
+      this.loopTask = new HumanTask(data != null ? data.loopTask : void 0);
       this.icon = "Icon_Loop.png";
       this.folder = true;
       this.addAttr("doneName", "Done name", true);
@@ -641,6 +720,17 @@
 
     ActivityFactory.create = function(data) {
       return new this.typeMap[data.declaredType](data.value);
+    };
+
+    ActivityFactory.all = function() {
+      var act, key, _ref, _results;
+      _ref = this.typeMap;
+      _results = [];
+      for (key in _ref) {
+        act = _ref[key];
+        _results.push(new act());
+      }
+      return _results;
     };
 
     return ActivityFactory;

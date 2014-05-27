@@ -1,5 +1,11 @@
 
-$ -> ko.applyBindings(new WorkflowBuilderViewModel())
+$ ->
+    ko.applyBindings(new WorkflowBuilderViewModel())
+    $(".draggable").draggable
+        revert: true
+        cursorAt: {top: -5, left: -5}
+        connectToFancytree: true
+
 
 #getWorkflows = ->
 #  $.getJSON("data/workflows.json")
@@ -28,8 +34,12 @@ class WorkflowBuilderViewModel
 #        @loadWorkflow("v2-simple")
 #        @loadWorkflow("complicated")
 #        @loadWorkflow("Denim_Decision")
-        @loadWorkflow("LoopTest")
+#        @loadWorkflow("LoopTest")
+        @loadWorkflow("vars-test")
         @selectedActivity = ko.observable()
+
+        @workflowComponents = ActivityFactory.all()
+
 
 
     loadWorkflow: (workflowName) =>
@@ -57,8 +67,8 @@ class WorkflowBuilderViewModel
         xml = converter.getXml()
         window.xml = xml
         console.log(xml)
-#        COW.xmlRequest("processes/#{converter.key}", "put", xml).done ->
-#            alert("xml saved")
+        COW.xmlRequest("processes/#{converter.key}", "put", xml).done ->
+            alert("xml saved")
 
 
 
@@ -101,6 +111,7 @@ class WorkflowXmlConverter
 
         process = $(@parentXml.find("process"))
         @addAttributesToNode(process, node.data.act.apiAttributes)
+        @createVariablesElement(process, node.data.act.variables)
 
         # workflow should have only one child, activities
         @visitChildren(process, [node.children[0]])
@@ -145,13 +156,14 @@ class WorkflowXmlConverter
 
     createActivityElement: (tag, treeNode) =>
         xml = @createTag(tag, @parentXml)
-        @addAttributesToNode($(xml), treeNode.data.act.apiAttributes)
-        return $(xml)
+        @addAttributesToNode(xml, treeNode.data.act.apiAttributes)
+        @createVariablesElement(xml, treeNode.data.act.variables)
+        return xml
 
     createTextElement: (parent, tag, content) ->
         xml = @createTag(tag, parent)
-        $(xml).text(content)
-        return $(xml)
+        xml.text(content)
+        return xml
 
     # If I do $("<tag />") jquery parses it as html and lowercases all the tags,
     # if I do $.parseXML("<tag />"), then the new tag is in a separate xml document
@@ -170,6 +182,16 @@ class WorkflowXmlConverter
                 @createTextElement(xmlElement, attr.key, attr.value)
 
 
+    createVariablesElement: (xmlElement, observableVars) ->
+        variablesXml = @createTag("variables", xmlElement)
+        unwrappedVars = ko.mapping.toJS(observableVars)
+        for variable in unwrappedVars
+            varXml = @createTag("variable", variablesXml)
+            for own attrName, attrValue of variable
+                varXml.attr(attrName, attrValue)
+
+
+
 
 
 
@@ -177,10 +199,8 @@ class WorkflowXmlConverter
 class Activity
     # Set default values
     constructor: (@data) ->
-        if @data?
-            @constructFromAjaxCall(@data)
-
-        @title ?= @.constructor.name
+#        @key = @data.key
+        @title = @data?.name ? @.constructor.name
         @icon = "Icon_Task.png"
         @draggable = true
         @expanded = true
@@ -189,17 +209,14 @@ class Activity
         @isDecision = false
         @isActivities = false
         @folder = false
+        @variables = ko.observableArray()
+        @readVariables()
 
         @apiAttributes = ko.observableArray()
         @addAttr("name", "Name", true)
         @addAttr("description", "Description")
         @addInvisibleAttr("key", true)
         @addAttr("bypassable", "Bypassable", true, "checkbox")
-
-
-    constructFromAjaxCall: ->
-        @title = @data.name
-        @key = @data.key
 
     dragEnter: =>
         if @folder
@@ -210,12 +227,27 @@ class Activity
     addAttr: (key, label, isXmlAttribute = false, inputType = "text") =>
         @apiAttributes.push
             key: key
-            value: ko.observable(@data[key] ? "")
+            value: ko.observable(@data?[key] ? "")
             label: label
             isXmlAttribute: isXmlAttribute
             inputType: inputType
 
-    addInvisibleAttr: (key, isXmlAttribute = false) -> @addAttr(key, null, isXmlAttribute)
+
+    addInvisibleAttr: (key, isXmlAttribute = false) => @addAttr(key, null, isXmlAttribute)
+
+
+    readVariables: =>
+        varList = @data?.variables?.variable
+        return unless varList?
+        @variables.push(@createObservableVar(v)) for v in varList
+
+
+    createObservableVar: (variable) ->
+        name: ko.observable(variable.name)
+        value: ko.observable(variable.value)
+        type: ko.observable(variable.type)
+        required: ko.observable(variable.required ? false)
+        output: ko.observable(variable.output ? false)
 
 
 
@@ -229,6 +261,8 @@ class Workflow extends Activity
         @folder = true
         @expanded = true
         @act = @
+        @variables = ko.observableArray()
+        @readVariables()
 
         @apiAttributes = ko.observableArray()
         @addAttr("name", "Name", true)
@@ -250,15 +284,20 @@ class Workflow extends Activity
 class Activities extends Activity
     @typeString: "org.wiredwidgets.cow.server.api.model.v2.Activities"
 
-    constructor: (@data) ->
-        super(@data)
-        @isSequential = @data.sequential ? true
-        if @data.name?
+    constructor: (data) ->
+        super(data)
+        @isSequential = @data?.sequential ? true
+        if @data?.name?
             @title = @data.name
         else
             @title = if @isSequential then "List" else "Parallel List"
 
-        @children = (ActivityFactory.create(d) for d in @data.activity)
+        childActivitiesData = @data?.activity
+        if childActivitiesData
+            @children = (ActivityFactory.create(d) for d in childActivitiesData)
+        else
+            @children = []
+
         @icon = "Icon_List.png"
         @folder = true
         @isActivities = true
@@ -287,8 +326,9 @@ class HumanTask extends Activity
 
     constructor: (@data) ->
         super(@data)
-        @assignee = data.assignee
-        @candidateGroups = data.candidateGroups
+        if @data?
+            @assignee = data.assignee
+            @candidateGroups = data.candidateGroups
 
         @addAttr("assignee", "Assignee")
         @addAttr("candidateUsers", "Candidate users")
@@ -325,7 +365,7 @@ class ScriptTask extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Script"
 
     constructor: (data) ->
-        super
+        super(data)
         @icon = "Icon_Script.png"
         @addAttr("import", "Imports")
         @addAttr("content", "Content")
@@ -343,11 +383,17 @@ class Decision extends Activity
 
     constructor: (data) ->
         super(data)
-        @children = (new Option(opt) for opt in data.option)
+        optionsData = data?.option
+        if optionsData
+            @children = (new Option(opt) for opt in optionsData)
+        else
+            @children = []
+
         @icon = "Icon_Decision.png"
         @folder = true
         @isDecision = true
-        @task = new HumanTask(data.task)
+        @task = new HumanTask(data?.task)
+
 
     dragEnter: (data) =>
         if data.otherNode.data.act.isActivities then ["over"] else false
@@ -363,7 +409,13 @@ class Option extends Activity
     constructor: (@data) ->
         super(@data)
         @icon = "Icon_Decision_Arrow.png"
-        @children = [ ActivityFactory.create(@data.activity) ]
+
+        childActivitiesData = @data?.activity;
+        if (childActivitiesData)
+            @children = [ ActivityFactory.create(childActivitiesData) ]
+        else
+            @children = []
+
         @folder = true
 
     accept: (visitor, node) ->
@@ -418,9 +470,13 @@ class Loop extends Activity
     @typeString = "org.wiredwidgets.cow.server.api.model.v2.Loop"
 
     constructor: (data) ->
-        super
-        @children = [ ActivityFactory.create(data.activity) ]
-        @loopTask = new HumanTask(data.loopTask)
+        super(data)
+        childData = @data?.activity
+        if childData
+            @children = [ ActivityFactory.create(childData) ]
+        else
+            @children = []
+        @loopTask = new HumanTask(data?.loopTask)
         @icon = "Icon_Loop.png"
         @folder = true
         @addAttr("doneName", "Done name", true)
@@ -449,6 +505,13 @@ class ActivityFactory
 
     @create: (data) ->
         new @typeMap[data.declaredType](data.value)
+
+    @all: ->
+        (new act() for key, act of @typeMap)
+
+
+
+
 
 
 

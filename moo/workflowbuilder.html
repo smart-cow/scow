@@ -40,11 +40,80 @@
             <label data-bind="text: label"></label>
             <input data-bind="attr: { type: inputType }, value: value" />
         </div>
+
+
+
     </form>
+ <!-- Variable edit section -->
+    <div>
+        <strong>Variables</strong>
+        <!-- Each variable's editors appear in a li -->
+        <ul class="form-inline" data-bind="foreach: variables">
+            <li class="form-group">
+                Name: <input class="form-control" data-bind="value: name"/>
+                Value: <input class="form-control" data-bind="value: value"/>
+                <button data-bind="click: $parent.removeVariable">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </button>
+            </li>
+            </br>
+        </ul>
+        <!--<button data-bind="click: addVariable">-->
+            <!--<span class="glyphicon glyphicon-plus"></span>-->
+        <!--</button>-->
+    </div>
 </span>
 
 <button data-bind="click: save"> Save </button>
 <button data-bind="click: prettyPrint"> Pretty print to console </button>
+
+<hr/>
+
+<div data-bind="foreach: workflowComponents">
+    <div class="draggable">
+        <img data-bind="attr: { src: 'images/' + icon }" height="25" width="25" />
+        <span data-bind="text: title"></span>
+    </div>
+</div>
+
+<!--<div id="workflowComponents">-->
+    <!--<div id="draggableTask">-->
+        <!--<img src="images/Icon_Task.png" alt="task" title="task" height="25" width="25">-->
+        <!--Human Task-->
+    <!--</div>-->
+    <!--<div id="draggableDecision">-->
+        <!--<img src="images/Icon_Decision.png" alt="decision" title="decision" height="25" width="25">-->
+        <!--Decision-->
+    <!--</div>-->
+    <!--<div id="draggableList">-->
+        <!--<img src="images/Icon_List.png" alt="list" title="list" height="25" width="25">-->
+        <!--List-->
+    <!--</div>-->
+    <!--<div id="draggableScript">-->
+        <!--<img src="images/Icon_Script.png" alt="script" title="script" height="25" width="25">-->
+        <!--Script-->
+    <!--</div>-->
+    <!--<div id="draggableLoop">-->
+        <!--<img src="images/Icon_Loop.png" alt="loop" title="loop" height="25" width="25">-->
+        <!--Loop-->
+    <!--</div>-->
+    <!--<div id="draggableExit">-->
+        <!--<img src="images/Icon_Exit.png" alt="exit" title="exit" height="25" width="25">-->
+        <!--Exit-->
+    <!--</div>-->
+    <!--<div id="draggableServiceTask">-->
+        <!--<img src="images/Icon_ServiceTask.png" alt="service task" title="service task" height="25" width="25">-->
+        <!--Service-->
+    <!--</div>-->
+    <!--<div id="draggableSubProcess">-->
+        <!--<img src="images/Icon_SubProcess.png" alt="subProccess"  title="subProccess"height="25" width="25">-->
+        <!--Subprocess-->
+    <!--</div>-->
+    <!--<div id="draggableCopy">-->
+        <!--<img src="images/Icon_Copy.png" alt="copy" title="copy" height="25" width="25">-->
+        <!--Copy-->
+    <!--</div>-->
+<!--</div>-->
 
 <p id="debug"></p>
 
