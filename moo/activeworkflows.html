@@ -25,6 +25,18 @@
 
 <body>
 <h1>Active Workflows</h1>
+<table id="legend" class="table table-bordered" data-bind="if: workflows().length">
+    <tbody  class="chiclet-chart">
+        <tr >
+            <td class="completed">Completed</td>
+            <td class="open">Open</td>
+            <td class="planned">Planned</td>
+            <td class="contingent">Contingent</td>
+            <td class="precluded">Precluded</td>
+        </tr>
+    </tbody>
+</table>
+
 
 <table class="table table-bordered" data-bind="if: workflows().length">
     <thead>
@@ -34,7 +46,7 @@
         </tr>
     </thead>
     <!-- Create a row for each workflow -->
-    <tbody id="chiclet-chart" data-bind="foreach: workflows">
+    <tbody id="chiclet-chart" class="chiclet-chart" data-bind="foreach: workflows">
         <!-- Create a cell for each heading -->
         <tr data-bind="foreach: columnValues, click: $root.selectRow, css: {selected: isSelected}">
             <!-- Set CSS class and text to the completion state -->
