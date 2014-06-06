@@ -132,6 +132,7 @@
         this.subscribe = __bind(this.subscribe, this);
         this.addSubscription = __bind(this.addSubscription, this);
         this.stomp = Stomp.over(new SockJS(cowConfig.amqpUrl));
+        this.stomp.debug = null;
         this.subscriptions = [];
         this.isConnected = false;
         this.numFailedConnectionAttempts = 0;
@@ -191,6 +192,7 @@
             console.log("Could not connect to amqp with in timeout limit!!");
             return _this.stomp.disconnect(function() {
               _this.stomp = Stomp.over(new SockJS(cowConfig.amqpUrl));
+              _this.stomp.debug = null;
               return _this.connect();
             });
           };

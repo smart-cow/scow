@@ -74,6 +74,7 @@ class CowUtil
     class Amqp
         constructor: ->
             @stomp = Stomp.over(new SockJS cowConfig.amqpUrl)
+            @stomp.debug = null
             @subscriptions = []
             @isConnected = false
             @numFailedConnectionAttempts = 0
@@ -112,6 +113,7 @@ class CowUtil
                 console.log "Could not connect to amqp with in timeout limit!!"
                 @stomp.disconnect =>
                     @stomp = Stomp.over(new SockJS(cowConfig.amqpUrl))
+                    @stomp.debug = null
                     @connect()
                 ), cowConfig.amqpConnectTimeout)
 

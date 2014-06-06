@@ -2,21 +2,65 @@
 
 $ -> ko.applyBindings new TasksViewModel()
 
+# Hack for Matt's demo
+prVarValues =
+    "Locate Isolated Personnel": [
+        { name: "dataSource", value: "Isolated Personnel" }
+        { name: "activityType", value: "Monitoring" }
+    ]
+    "Confirm and Authenticate Personnel": [
+        { name: "dataSource", value: "PRMS Simulator" }
+        { name: "activityType", value: "Monitoring" }
+    ]
+    "Get Area Population": [
+        { name: "dataSource", value: "Oregon Population" }
+        { name: "activityType", value: "Monitoring" }
+    ]
+    "Select Course of Action": [
+        { name: "dataSource", value: "Decision Spaces API" }
+        { name: "activityType", value: "Deciding" }
+    ]
+    "Execute Recovery": [
+        { name: "dataSource", value: "Rescuers" }
+        { name: "activityType", value: "Monitoring" }
+    ]
+
+
+
+needToUseHack = (mappingOptions) ->
+    # Only need to fix Personnel_Recovery
+    workflowName = mappingOptions.parent.processInstanceId().split(".")[0]
+    return workflowName is "Personnel_Recovery"
+
+hack = (mappingOptions) ->
+    return unless needToUseHack(mappingOptions)
+    actualVariables = mappingOptions.data.variable ? mappingOptions.data.variables
+    actualVariables.splice(0, actualVariables.length)
+    hackVariables = prVarValues[mappingOptions.parent.name()]
+    unless hackVariables?
+        console.log("Null hack vars")
+    for variable in hackVariables
+        actualVariables.push(variable)
+
+
 # Knockout JS to observable mapping options
 TASK_MAPPING =
     key: (item) -> ko.utils.unwrapObservable(item.id)
     variables:
-        create: (options) ->
-            if options.data?
+        create: (mappingOptions) ->
+            if mappingOptions.data?
                 # sometimes it is "variable", other times it is "variables"
-                ko.mapping.fromJS(options.data.variable ? options.data.variables)
+                ko.mapping.fromJS(mappingOptions.data.variable ? mappingOptions.data.variables)
             else
                 ko.observableArray()
-        update: (options) ->
-            if options.data?
-                ko.mapping.fromJS(options.data.variable ? options.data.variables)
+
+        update: (mappingOptions) ->
+            hack(mappingOptions)
+
+            if mappingOptions.data?
+                ko.mapping.fromJS(mappingOptions.data.variable ? mappingOptions.data.variables)
             else
-                options.target
+                mappingOptions.target
 
 
 
