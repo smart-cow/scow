@@ -41,9 +41,13 @@ class WorkflowBuilderViewModel
         @workflow = ko.observable() # Current workflow being displayed
         @selectedActivity = ko.observable() # The last clicked on activity
         @workflowComponents = ACT_FACTORY.draggableActivities() # The list of draggables to display
+        if window.location.hash is ""
+            @createNewWorkflow()
+        else
+            @loadWorkflow(window.location.hash.substring(1))
 #        @createNewWorkflow()
 
-        @loadWorkflow("BrianTempSvc")
+#        @loadWorkflow("BrianTempSvc")
 #        @loadWorkflow("v2-simple")
 #        @loadWorkflow("complicated")
 #        @loadWorkflow("Denim_Decision")

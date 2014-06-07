@@ -41,16 +41,21 @@
         <tr>
             <th>Workflow</th>
             <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody data-bind="foreach: workflows">
-        <tr >
+        <tr>
             <td data-bind="text: $data"></td>
             <td>
                 <button class="btn btn-primary" data-bind="click: $root.workflowSelected">
                     Start Workflow
                 </button>
             </td>
+            <td>
+                <a data-bind="attr: { href: 'workflowbuilder.html#' + $data }">Edit</a>
+            </td>
+
         </tr>
     </tbody>
 </table>

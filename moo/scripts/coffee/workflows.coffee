@@ -56,10 +56,13 @@ class WorkflowsViewModel
             @loadWorkflowVars(vars) if vars?.length > 0
 
 
+
+#    loadWorkflows: =>
+#        COW.cowRequest("processDefinitions").done (data) =>
+#            @workflows.push(pd.key) for pd in data.processDefinition
+#            @workflows.sort(@caseInsensitiveSort)
     loadWorkflows: =>
-        COW.cowRequest("processDefinitions").done (data) =>
-            @workflows.push(pd.key) for pd in data.processDefinition
-            @workflows.sort(@caseInsensitiveSort)
+        @workflows.push(w) for w in ["Brian", "Hello", "World"]
 
     removeVariable: (variable) =>
         @selectedWorkflowVariables.remove(variable)

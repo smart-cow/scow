@@ -41,7 +41,11 @@
       this.workflow = ko.observable();
       this.selectedActivity = ko.observable();
       this.workflowComponents = ACT_FACTORY.draggableActivities();
-      this.loadWorkflow("BrianTempSvc");
+      if (window.location.hash === "") {
+        this.createNewWorkflow();
+      } else {
+        this.loadWorkflow(window.location.hash.substring(1));
+      }
     }
 
     WorkflowBuilderViewModel.prototype.loadWorkflow = function(workflowName) {
