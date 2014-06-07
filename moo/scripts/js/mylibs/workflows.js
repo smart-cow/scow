@@ -92,14 +92,17 @@
     };
 
     WorkflowsViewModel.prototype.loadWorkflows = function() {
-      var w, _i, _len, _ref, _results;
-      _ref = ["Brian", "Hello", "World"];
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        w = _ref[_i];
-        _results.push(this.workflows.push(w));
-      }
-      return _results;
+      return COW.cowRequest("processDefinitions").done((function(_this) {
+        return function(data) {
+          var pd, _i, _len, _ref;
+          _ref = data.processDefinition;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            pd = _ref[_i];
+            _this.workflows.push(pd.key);
+          }
+          return _this.workflows.sort(_this.caseInsensitiveSort);
+        };
+      })(this));
     };
 
     WorkflowsViewModel.prototype.removeVariable = function(variable) {
