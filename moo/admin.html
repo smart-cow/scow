@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>COW</title>
+
+
+    <script src="scripts/js/libs/jquery-1.11.0.js"></script>
+
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <script src="scripts/js/libs/bootstrap.js"></script>
+
+    <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
+    <script src="scripts/js/libs/knockout.mapping.js"></script>
+
+    <script src="scripts/js/libs/stomp.js"></script>
+    <script src="scripts/js/libs/sockjs-0.3.min.js"></script>
+
+    <script src="scripts/config.js"></script>
+    <script src="scripts/js/mylibs/cow-lib.js"></script>
+    <script src="scripts/js/mylibs/admin.js"></script>
+</head>
+
+<body>
+    <ul class="nav nav-tabs">
+        <li><a href="activeworkflows.html"> Active Workflows </a></li>
+        <li class="active"><a href="#">Admin</a></li>
+        <li><a href="tasks.html"> Tasks </a></li>
+        <li><a href="workflows.html"> Workflows </a></li>
+    </ul>
+    <button data-bind="click: adminFunction">Admin Function</button>
+</body>
+</html>
