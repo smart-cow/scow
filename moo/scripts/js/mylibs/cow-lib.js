@@ -28,6 +28,7 @@
       this.variableHasConflict = __bind(this.variableHasConflict, this);
       this.hasVariableConflicts = __bind(this.hasVariableConflicts, this);
       this.activeWorkflowIds = __bind(this.activeWorkflowIds, this);
+      this.deleteRunningInstances = __bind(this.deleteRunningInstances, this);
       this.cowRequest = __bind(this.cowRequest, this);
     }
 
@@ -56,11 +57,15 @@
         data: new XMLSerializer().serializeToString(xml),
         type: httpMethod,
         contentType: "application/xml",
-        dataType: "xml",
+        dataType: "json",
         xhrFields: {
           withCredentials: true
         }
       });
+    };
+
+    CowUtil.prototype.deleteRunningInstances = function(workflowName) {
+      return this.cowRequest("processes/" + workflowName + "/processInstances", "delete");
     };
 
     CowUtil.prototype.activeWorkflowIds = function(callBack) {

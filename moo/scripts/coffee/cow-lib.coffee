@@ -34,9 +34,12 @@ class CowUtil
             data: new XMLSerializer().serializeToString(xml)
             type: httpMethod
             contentType: "application/xml"
-            dataType: "xml"
+            dataType: "json"
             xhrFields:
                 withCredentials: true
+
+    deleteRunningInstances: (workflowName) =>
+        @cowRequest("processes/#{workflowName}/processInstances", "delete")
 
 
     activeWorkflowIds: (callBack) =>

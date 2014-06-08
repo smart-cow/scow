@@ -39,6 +39,7 @@ dndOptions =
 class WorkflowBuilderViewModel
     constructor: ->
         @workflow = ko.observable() # Current workflow being displayed
+        @conflictingInstances = ko.observableArray() # Holds list of running work flows preventing update
         @selectedActivity = ko.observable() # The last clicked on activity
         @workflowComponents = ACT_FACTORY.draggableActivities() # The list of draggables to display
         if window.location.hash is ""
@@ -64,6 +65,12 @@ class WorkflowBuilderViewModel
         @workflow(ACT_FACTORY.createWorkflow())
         @configTree(@workflow())
 
+    deleteRunningInstances: =>
+        COW.deleteRunningInstances(@workflow().name()).done ->
+            $("#conflicts-modal").modal("hide")
+            $("#confirm-save-modal").modal("show")
+
+
 
     # Initialize fancy tree
     configTree: (workflow) =>
@@ -80,13 +87,27 @@ class WorkflowBuilderViewModel
     # Used to test tree visitor
     prettyPrint: => new PrettyPrintVisitor(@tree)
 
+
     save: =>
         converter = new WorkflowXmlConverter(@tree)
         xml = converter.getXml()
-        window.xml = xml
         console.log(xml)
-#        COW.xmlRequest("processes/#{converter.key}", "put", xml).done ->
-#            alert("xml saved")
+        unless converter.hasAtLeaskOneTask
+            alert("Workflow must have at least one task to save it")
+            return
+        COW.xmlRequest("processes/#{converter.name}", "put", xml)
+            .always ->
+                $("#confirm-save-modal").modal("hide")
+            .done ->
+                alert("Workflow saved")
+            .fail (resp, ..., errorType) =>
+                unless errorType is "Conflict"
+                    alert("Error: #{errorType}")
+                    return
+                @conflictingInstances.removeAll()
+                @conflictingInstances.push(pi.id) for pi in resp.responseJSON.processInstance
+                $('#conflicts-modal').modal('show')
+
 
 
 
@@ -97,6 +118,7 @@ class WorkflowBuilderViewModel
 # The visitor pattern is used to build up the xml document
 class WorkflowXmlConverter
     constructor: (tree) ->
+        @hasAtLeaskOneTask = false
         # create a new xml document
         @xml = $($.parseXML(
               '<process xmlns="http://www.wiredwidgets.org/cow/server/schema/model-v2"></process>'))
@@ -125,8 +147,7 @@ class WorkflowXmlConverter
 
 
     visitWorkflow: (node) =>
-        # Should have only one root node
-        @key = node.key
+        @name = node.data.act.name()
 
         # Find process element at the root of the document
         process = $(@parentXml.find("process"))
@@ -139,6 +160,7 @@ class WorkflowXmlConverter
 
     visitActivities: (node) =>
         xmlActivities = @createActivityElement("activities", node)
+        @hasAtLeaskOneTask = node.children?.length > 0
         @visitChildren(xmlActivities, node.children)
 
 
@@ -195,7 +217,7 @@ class WorkflowXmlConverter
 
     addAttributesToNode: (xmlElement, attributes) =>
         unwrappedAttributes = ko.mapping.toJS(attributes)
-        for attr in unwrappedAttributes when attr.value
+        for attr in unwrappedAttributes when attr.value?
             # Handle properties stored as attributes
             if attr.isXmlAttribute
                 xmlElement.attr(attr.key, attr.value)
@@ -241,7 +263,7 @@ class PrettyPrintVisitor
         @dedent()
 
     visitWorkflow: (node) ->
-        @display(node.key)
+        @display(node.data.act.name())
         @visitChildren(node)
 
     visitActivities: (node) ->

@@ -234,11 +234,11 @@
     Workflow.prototype.folder = true;
 
     function Workflow(data) {
-      var _ref, _ref1;
       this.data = data;
+      this.syncNameDisplays = __bind(this.syncNameDisplays, this);
       this.setTitle = __bind(this.setTitle, this);
       Workflow.__super__.constructor.call(this, this.data);
-      this.name = (_ref = (_ref1 = this.data) != null ? _ref1.name : void 0) != null ? _ref : this.constructor.name;
+      this.syncNameDisplays();
       if (this.data != null) {
         this.children = [ActivityFactory.create(this.data.activity)];
       } else {
@@ -252,6 +252,19 @@
 
     Workflow.prototype.setTitle = function(newTitle) {
       return Workflow.__super__.setTitle.call(this, "<span class='glyphicon glyphicon-list-alt'></span> " + newTitle);
+    };
+
+    Workflow.prototype.syncNameDisplays = function() {
+      var nameAttr, _ref, _ref1;
+      nameAttr = this.apiAttributes().first(function(e) {
+        return e.key === "name";
+      });
+      nameAttr.value((_ref = (_ref1 = this.data) != null ? _ref1.name : void 0) != null ? _ref : this.constructor.name);
+      return this.name = ko.computed((function(_this) {
+        return function() {
+          return nameAttr.value();
+        };
+      })(this));
     };
 
     Workflow.prototype.dragEnter = function() {
@@ -282,11 +295,11 @@
     function Activities(data) {
       this.toOption = __bind(this.toOption, this);
       this.dragEnter = __bind(this.dragEnter, this);
-      var childActivitiesData, d, nameAttr, newTitle, uniqTitle, _ref;
+      var childActivitiesData, d, isSequential, nameAttr, newTitle, uniqTitle, _ref;
       Activities.__super__.constructor.call(this, data);
-      this.isSequential = data != null ? data.sequential : true;
+      isSequential = data != null ? data.sequential : true;
       if (!(data != null ? data.name : void 0)) {
-        newTitle = this.isSequential ? "List" : "Parallel List";
+        newTitle = isSequential ? "List" : "Parallel List";
         uniqTitle = getUniqKey(newTitle);
         nameAttr = this.apiAttributes().first(function(e) {
           return e.key === "name";
@@ -307,7 +320,7 @@
       } else {
         this.children = [];
       }
-      this.addAttr("sequential", "Is Sequential", true, "checkbox");
+      this.addAttr("sequential", "Is Sequential", true, "checkbox").value(isSequential);
       this.addAttr("mergeCondition", "Merge Condition", true);
     }
 

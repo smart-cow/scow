@@ -36,9 +36,11 @@
       this.save = __bind(this.save, this);
       this.prettyPrint = __bind(this.prettyPrint, this);
       this.configTree = __bind(this.configTree, this);
+      this.deleteRunningInstances = __bind(this.deleteRunningInstances, this);
       this.createNewWorkflow = __bind(this.createNewWorkflow, this);
       this.loadWorkflow = __bind(this.loadWorkflow, this);
       this.workflow = ko.observable();
+      this.conflictingInstances = ko.observableArray();
       this.selectedActivity = ko.observable();
       this.workflowComponents = ACT_FACTORY.draggableActivities();
       if (window.location.hash === "") {
@@ -60,6 +62,13 @@
     WorkflowBuilderViewModel.prototype.createNewWorkflow = function() {
       this.workflow(ACT_FACTORY.createWorkflow());
       return this.configTree(this.workflow());
+    };
+
+    WorkflowBuilderViewModel.prototype.deleteRunningInstances = function() {
+      return COW.deleteRunningInstances(this.workflow().name()).done(function() {
+        $("#conflicts-modal").modal("hide");
+        return $("#confirm-save-modal").modal("show");
+      });
     };
 
     WorkflowBuilderViewModel.prototype.configTree = function(workflow) {
@@ -87,8 +96,32 @@
       var converter, xml;
       converter = new WorkflowXmlConverter(this.tree);
       xml = converter.getXml();
-      window.xml = xml;
-      return console.log(xml);
+      console.log(xml);
+      if (!converter.hasAtLeaskOneTask) {
+        alert("Workflow must have at least one task to save it");
+        return;
+      }
+      return COW.xmlRequest("processes/" + converter.name, "put", xml).always(function() {
+        return $("#confirm-save-modal").modal("hide");
+      }).done(function() {
+        return alert("Workflow saved");
+      }).fail((function(_this) {
+        return function() {
+          var errorType, pi, resp, _i, _len, _ref;
+          resp = arguments[0], errorType = arguments[arguments.length - 1];
+          if (errorType !== "Conflict") {
+            alert("Error: " + errorType);
+            return;
+          }
+          _this.conflictingInstances.removeAll();
+          _ref = resp.responseJSON.processInstance;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            pi = _ref[_i];
+            _this.conflictingInstances.push(pi.id);
+          }
+          return $('#conflicts-modal').modal('show');
+        };
+      })(this));
     };
 
     return WorkflowBuilderViewModel;
@@ -112,6 +145,7 @@
       this.visitWorkflow = __bind(this.visitWorkflow, this);
       this.visitChildren = __bind(this.visitChildren, this);
       var workflowRoot;
+      this.hasAtLeaskOneTask = false;
       this.xml = $($.parseXML('<process xmlns="http://www.wiredwidgets.org/cow/server/schema/model-v2"></process>'));
       this.parentXml = this.xml;
       workflowRoot = tree.rootNode.children[0];
@@ -140,7 +174,7 @@
 
     WorkflowXmlConverter.prototype.visitWorkflow = function(node) {
       var process;
-      this.key = node.key;
+      this.name = node.data.act.name();
       process = $(this.parentXml.find("process"));
       this.addAttributesToNode(process, node.data.act.apiAttributes);
       this.createVariablesElement(process, node.data.act.variables);
@@ -148,8 +182,9 @@
     };
 
     WorkflowXmlConverter.prototype.visitActivities = function(node) {
-      var xmlActivities;
+      var xmlActivities, _ref;
       xmlActivities = this.createActivityElement("activities", node);
+      this.hasAtLeaskOneTask = ((_ref = node.children) != null ? _ref.length : void 0) > 0;
       return this.visitChildren(xmlActivities, node.children);
     };
 
@@ -228,7 +263,7 @@
       _results = [];
       for (_i = 0, _len = unwrappedAttributes.length; _i < _len; _i++) {
         attr = unwrappedAttributes[_i];
-        if (attr.value) {
+        if (attr.value != null) {
           if (attr.isXmlAttribute) {
             _results.push(xmlElement.attr(attr.key, attr.value));
           } else {
@@ -304,7 +339,7 @@
     };
 
     PrettyPrintVisitor.prototype.visitWorkflow = function(node) {
-      this.display(node.key);
+      this.display(node.data.act.name());
       return this.visitChildren(node);
     };
 

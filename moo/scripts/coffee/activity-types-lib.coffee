@@ -170,7 +170,7 @@ class Workflow extends Activity
 
     constructor: (@data) ->
         super(@data)
-        @name = @data?.name ? @.constructor.name
+        @syncNameDisplays()
         if @data?
             @children = [ ActivityFactory.create(@data.activity) ]
         else
@@ -184,6 +184,11 @@ class Workflow extends Activity
     setTitle: (newTitle) =>
         super("<span class='glyphicon glyphicon-list-alt'></span> #{newTitle}")
 
+    syncNameDisplays: =>
+        nameAttr = @apiAttributes().first (e) -> e.key == "name"
+        nameAttr.value(@data?.name ? @.constructor.name)
+        @name = ko.computed =>
+            nameAttr.value()
 
     dragEnter: -> false
 
@@ -204,9 +209,9 @@ class Activities extends Activity
 
     constructor: (data) ->
         super(data)
-        @isSequential = if data? then data.sequential else true
+        isSequential = if data? then data.sequential else true
         if not data?.name
-            newTitle = if @isSequential then "List" else "Parallel List"
+            newTitle = if isSequential then "List" else "Parallel List"
             uniqTitle = getUniqKey(newTitle)
             nameAttr = @apiAttributes().first (e) -> e.key == "name"
             nameAttr.value(uniqTitle)
@@ -218,7 +223,7 @@ class Activities extends Activity
         else
             @children = []
 
-        @addAttr("sequential", "Is Sequential", true,  "checkbox")
+        @addAttr("sequential", "Is Sequential", true,  "checkbox").value(isSequential)
         @addAttr("mergeCondition", "Merge Condition", true)
 
 

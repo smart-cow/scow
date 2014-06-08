@@ -37,7 +37,7 @@
     <li class="active"><a href="#">Workflow Builder</a></li>
 </ul>
 
-<div data-bind="with: workflow()">
+<div data-bind="with: workflow">
     <h1 data-bind=" text: name"></h1>
 </div>
 
@@ -47,7 +47,13 @@
     <form data-bind="foreach: apiAttributes">
         <div class="form-group" data-bind="if: label">
             <label data-bind="text: label"></label>
-            <input data-bind="attr: { type: inputType }, value: value" />
+            <span data-bind="ifnot: inputType == 'checkbox'">
+                <input data-bind="attr: { type: inputType }, value: value, valueUpdate: 'input'" />
+            </span>
+            <!-- Need to use checked instead of value databind -->
+            <span data-bind="if: inputType == 'checkbox'">
+                <input data-bind="attr: { type: inputType }, checked: value" />
+            </span>
         </div>
     </form>
  <!-- Variable edit section -->
@@ -90,7 +96,55 @@
     <span class="glyphicon glyphicon-trash"></span> Delete
 </div>
 
-<p id="debug"></p>
+
+
+
+<!-- Conflicting Workflow Instances Modal -->
+<div class="modal fade" id="conflicts-modal" tabindex="-1" role="dialog"
+     aria-labelledby="conflicts-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="conflicts-label"> Conflicts </h4>
+            </div>
+            <div class="modal-body">
+                <p> Workflows can not be edited while their are instances running </p>
+                <p data-bind="with: workflow"> Running instances of <b data-bind="text: name"></b>: </p>
+                <ul data-bind="foreach: conflictingInstances">
+                    <li data-bind="text: $data"></li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" data-bind="click: deleteRunningInstances">
+                    Delete All Running Instances
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Confirm Save Modal -->
+<div class="modal fade" id="confirm-save-modal" tabindex="-1" role="dialog"
+     aria-labelledby="confirm-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="confirm-label">Confirm Save</h4>
+            </div>
+            <div class="modal-body" data-bind="with: workflow">
+                Would you like to save your changes to <b data-bind="text: name"></b>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary"data-bind="click: save">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
