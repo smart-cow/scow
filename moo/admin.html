@@ -29,6 +29,21 @@
         <li><a href="workflows.html"> Workflows </a></li>
         <li><a href="workflowbuilder.html"> Workflow Builder </a></li>
     </ul>
-    <button data-bind="click: adminFunction">Admin Function</button>
+    <select data-bind="options: runningWorkflows, value: selectedRunningWorkflow"></select>
+    <button data-bind="click: deleteWorkflow">Delete Workflow</button>
+    <br />
+    <br />
+
+    <select data-bind="options: runningTypes, value: selectedType"></select>
+    <button data-bind="click: deleteWorkflowType">Delete All Of Workflow Type</button>
+
+    <br />
+    <br />
+
+    <b>Running Workflows</b>
+    <ul data-bind="foreach: runningWorkflows">
+       <li data-bind="text: $data"></li>
+    </ul>
+    <button data-bind="click: deleteAll">Delete All Workflows</button>
 </body>
 </html>

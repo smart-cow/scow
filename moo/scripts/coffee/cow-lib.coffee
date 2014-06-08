@@ -4,10 +4,18 @@
     String::rightOf = (char) ->
         @substr(@lastIndexOf(char) + 1)
 
+    String::leftOf = (char) ->
+        @substr(0, @indexOf(char))
+
     Array::first = (predicate) ->
         for e in @
             return e if predicate(e)
         return null
+
+    Array::unique = ->
+        output = {}
+        output[@[key]] = @[key] for key in [0...@length]
+        value for key, value of output
 )()
 
 class CowUtil
@@ -43,8 +51,16 @@ class CowUtil
 
 
     activeWorkflowIds: (callBack) =>
+        @activeWorkflows (fullIds) =>
+            callBack(id.rightOf(".") for id in fullIds)
+
+#        COW.cowRequest("processInstances").done (data) ->
+#            callBack (+pi.id.rightOf('.') for pi in data.processInstance)
+
+    activeWorkflows: (callback) =>
         COW.cowRequest("processInstances").done (data) ->
-            callBack (+pi.id.rightOf('.') for pi in data.processInstance)
+            callback(pi.id for pi in data.processInstance)
+
 
     # Find out if any variable names have been duplicated
     hasVariableConflicts: (variables) => ko.computed =>
