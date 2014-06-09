@@ -25,21 +25,76 @@ prVarValues =
         { name: "activityType", value: "Monitoring" }
     ]
 
+prZVarValues =
+    "Notification of Isolated Personnel" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "PRMS Simulator" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "PRMS Simulator" }
+    ]
+    "Use UAVs to locate isolated personnel" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "UAS" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "UAS" }
+    ]
+    "Locate Isolated Personnel" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "AMCITS" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "AMCITS" }
+    ]
+    "Confirm and Authenticate Personnel" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "PRMS Simulator" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "PRMS Simulator" }
+    ]
+    "Get Area Population" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "Oregon Population" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "Oregon Population" }
+    ]
+    "Generate Possible COAs" : [
+        { name: "activityType", value: " " }
+        { name: "dataSource", value: "none" }
+    ]
+    "Select Course of Action" : [
+        { name: "Additional Info 1", value: "Deciding" }
+        { name: "Additional Info 2", value: "Decision Spaces Local" }
+        { name: "activityType", value: "Deciding" }
+        { name: "dataSource", value: "Decision Spaces Local" }
+    ]
+    "Execute Recovery" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "Rescuer" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "Rescuers" }
+    ]
+    "Monitor Recovery" : [
+        { name: "Additional Info 1", value: "Monitoring" }
+        { name: "Additional Info 2", value: "Dash KML Merge" }
+        { name: "activityType", value: "Monitoring" }
+        { name: "dataSource", value: "Dash KML Merge" }
+    ]
 
-
-needToUseHack = (mappingOptions) ->
-    # Only need to fix Personnel_Recovery
-    workflowName = mappingOptions.parent.processInstanceId().split(".")[0]
-    return workflowName is "Personnel_Recovery"
 
 hack = (mappingOptions) ->
-    return unless needToUseHack(mappingOptions)
+    workflowName = mappingOptions.parent.processInstanceId().split(".")[0]
+    if workflowName is "Personnel_Recovery"
+        hackVariablesMap = prVarValues
+    else if workflowName is "A2C2-PR-Z"
+        hackVariablesMap = prZVarValues
+
+    return unless hackVariablesMap?
     actualVariables = mappingOptions.data.variable ? mappingOptions.data.variables
     actualVariables.splice(0, actualVariables.length)
-    hackVariables = prVarValues[mappingOptions.parent.name()]
-    unless hackVariables?
+    taskName = mappingOptions.parent.name()
+    hackTaskVars = hackVariablesMap[taskName]
+    unless hackTaskVars?
         console.log("Null hack vars")
-    for variable in hackVariables
+    for variable in hackTaskVars
         actualVariables.push(variable)
 
 
