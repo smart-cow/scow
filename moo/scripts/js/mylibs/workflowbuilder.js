@@ -6,13 +6,20 @@
 
   $(function() {
     ko.applyBindings(new WorkflowBuilderViewModel());
-    return $(".draggable").draggable({
+    $(".draggable").draggable({
       helper: "clone",
       cursorAt: {
         top: -5,
         left: -5
       },
       connectToFancytree: true
+    });
+    return $("#trash").droppable({
+      drop: function(event, ui) {
+        var sourceNode;
+        sourceNode = $(ui.helper).data("ftSourceNode");
+        return sourceNode.remove();
+      }
     });
   });
 

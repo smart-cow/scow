@@ -7,6 +7,10 @@ $ ->
         cursorAt: {top: -5, left: -5}
         connectToFancytree: true
 
+    $("#trash").droppable
+        drop: (event, ui) ->
+            sourceNode = $(ui.helper).data("ftSourceNode")
+            sourceNode.remove()
 
 #getWorkflows = ->
 #  $.getJSON("data/workflows.json")
@@ -29,11 +33,6 @@ dndOptions =
     # Called when the drop occurs
     dragDrop: (target, data) ->
         target.data.act.dragDrop(data)
-
-
-
-
-
 
 
 class WorkflowBuilderViewModel
