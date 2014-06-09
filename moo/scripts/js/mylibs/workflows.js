@@ -13,6 +13,7 @@
       this.addVariable = __bind(this.addVariable, this);
       this.removeVariable = __bind(this.removeVariable, this);
       this.loadWorkflows = __bind(this.loadWorkflows, this);
+      this.showWorkflowTree = __bind(this.showWorkflowTree, this);
       this.workflowSelected = __bind(this.workflowSelected, this);
       this.loadWorkflowVars = __bind(this.loadWorkflowVars, this);
       this.insertVariables = __bind(this.insertVariables, this);
@@ -21,6 +22,27 @@
       this.lastLoadedWorkflow = ko.observable();
       this.selectedWorkflow = ko.observable();
       this.selectedWorkflowVariables = ko.observableArray();
+      this.selectedActivity = ko.observable();
+      this.activityApiAttrs = ko.computed((function(_this) {
+        return function() {
+          var attr, _i, _len, _ref, _results;
+          if (!_this.selectedActivity()) {
+            return [];
+          }
+          _ref = _this.selectedActivity().apiAttributes();
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            attr = _ref[_i];
+            if (attr.value() != null) {
+              _results.push({
+                label: attr.label,
+                value: attr.value()
+              });
+            }
+          }
+          return _results;
+        };
+      })(this));
       this.hasVariableConflicts = COW.hasVariableConflicts(this.selectedWorkflowVariables);
       this.variableHasConflict = COW.variableHasConflict(this.selectedWorkflowVariables);
       this.loadWorkflows();
@@ -85,10 +107,32 @@
           _this.selectedWorkflowVariables.removeAll();
           vars = (_ref = data.variables) != null ? _ref.variable : void 0;
           if ((vars != null ? vars.length : void 0) > 0) {
-            return _this.loadWorkflowVars(vars);
+            _this.loadWorkflowVars(vars);
           }
+          return _this.showWorkflowTree(data);
         };
       })(this));
+    };
+
+    WorkflowsViewModel.prototype.showWorkflowTree = function(workflowJson) {
+      var wflowObject;
+      wflowObject = ACT_FACTORY.createWorkflow(workflowJson);
+      if (this.tree != null) {
+        this.tree.reload([wflowObject]);
+      } else {
+        $("#tree").fancytree({
+          source: [wflowObject],
+          imagePath: "images/",
+          icons: false,
+          click: (function(_this) {
+            return function(event, treeData) {
+              return _this.selectedActivity(treeData.node.data.act);
+            };
+          })(this)
+        });
+        this.tree = $("#tree").fancytree("getTree");
+      }
+      return this.selectedActivity(wflowObject);
     };
 
     WorkflowsViewModel.prototype.loadWorkflows = function() {

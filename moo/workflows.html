@@ -6,9 +6,13 @@
 
 
     <script src="scripts/js/libs/jquery-1.11.0.js"></script>
+    <script src="scripts/js/libs/jquery-ui-fancy-tree.js"></script>
 
     <link href="css/bootstrap.css" rel="stylesheet" />
     <script src="scripts/js/libs/bootstrap.js"></script>
+
+    <link href="css/ui.fancytree.css" rel="stylesheet" />
+    <script src="scripts/js/libs/jquery.fancytree-all.js"></script>
 
     <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
     <script src="scripts/js/libs/knockout.mapping.js"></script>
@@ -18,6 +22,7 @@
 
     <script src="scripts/config.js"></script>
     <script src="scripts/js/mylibs/cow-lib.js"></script>
+    <script src="scripts/js/mylibs/activity-types-lib.js"></script>
     <script src="scripts/js/mylibs/workflows.js"></script>
 </head>
 <body>
@@ -68,6 +73,9 @@
 </table>
 
 
+<!--<div id="tree"></div>-->
+
+
 <!-- Modal to allow the user to enter process variables -->
 <div id="variables-modal" class="modal fade">
   <div class="modal-dialog">
@@ -77,6 +85,16 @@
         <h4 class="modal-title" data-bind="text: selectedWorkflow"></h4>
       </div>
       <div class="modal-body">
+          <div id="workflow-details">
+              <div id="tree"></div>
+
+              <span data-bind="if: selectedActivity">
+                  <ul data-bind="foreach: activityApiAttrs">
+                      <li> <b data-bind="text: label"></b>: <span data-bind="text: value"></span> </li>
+                  </ul>
+              </span>
+          </div>
+
          <strong>Variables</strong>
           <ul class="form-inline" data-bind="foreach: selectedWorkflowVariables">
               <li class="form-group"
@@ -103,6 +121,9 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
+
 
 </body>
 </html>

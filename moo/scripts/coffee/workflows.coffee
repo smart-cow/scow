@@ -10,6 +10,12 @@ class WorkflowsViewModel
         @selectedWorkflow = ko.observable()
         @selectedWorkflowVariables = ko.observableArray()
 
+
+        @selectedActivity = ko.observable()
+        @activityApiAttrs = ko.computed =>
+            return [] unless @selectedActivity()
+            label: attr.label, value: attr.value() for attr in @selectedActivity().apiAttributes() when attr.value()?
+
         # Find out if any variable names have been duplicated
         @hasVariableConflicts = COW.hasVariableConflicts(@selectedWorkflowVariables)
         # Find out if a specific variable"s name has been duplicated
@@ -54,6 +60,20 @@ class WorkflowsViewModel
             # Null checks to account for serializer
             vars = data.variables?.variable
             @loadWorkflowVars(vars) if vars?.length > 0
+            @showWorkflowTree(data)
+
+    showWorkflowTree: (workflowJson) =>
+        wflowObject = ACT_FACTORY.createWorkflow(workflowJson)
+        if @tree?
+            @tree.reload([wflowObject])
+        else
+            $("#tree").fancytree
+                source: [wflowObject]
+                imagePath: "images/" # Icon directory
+                icons: false # Disable default node icons
+                click: (event, treeData) => @selectedActivity(treeData.node.data.act)
+            @tree = $("#tree").fancytree("getTree")
+        @selectedActivity(wflowObject)
 
 
     loadWorkflows: =>
