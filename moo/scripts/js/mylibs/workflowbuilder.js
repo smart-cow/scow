@@ -7,7 +7,7 @@
   $(function() {
     ko.applyBindings(new WorkflowBuilderViewModel());
     return $(".draggable").draggable({
-      revert: true,
+      helper: "clone",
       cursorAt: {
         top: -5,
         left: -5

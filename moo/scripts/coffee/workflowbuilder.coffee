@@ -3,7 +3,7 @@ $ ->
     ko.applyBindings(new WorkflowBuilderViewModel())
     # TODO: Set proper dragable behavior
     $(".draggable").draggable
-        revert: true
+        helper: "clone"
         cursorAt: {top: -5, left: -5}
         connectToFancytree: true
 
