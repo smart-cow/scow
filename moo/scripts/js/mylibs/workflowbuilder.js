@@ -43,39 +43,135 @@
       this.save = __bind(this.save, this);
       this.prettyPrint = __bind(this.prettyPrint, this);
       this.configTree = __bind(this.configTree, this);
+      this.onConflictsListReceive = __bind(this.onConflictsListReceive, this);
+      this.initiateChangeConflictsList = __bind(this.initiateChangeConflictsList, this);
+      this.scheduleConflictsListUpdate = __bind(this.scheduleConflictsListUpdate, this);
       this.deleteRunningInstances = __bind(this.deleteRunningInstances, this);
+      this.deleteConflictsFromPageBtn = __bind(this.deleteConflictsFromPageBtn, this);
+      this.deleteConflictsFromModal = __bind(this.deleteConflictsFromModal, this);
+      this.afterWorkflowLoad = __bind(this.afterWorkflowLoad, this);
       this.createNewWorkflow = __bind(this.createNewWorkflow, this);
       this.loadWorkflow = __bind(this.loadWorkflow, this);
+      this.getWFName = __bind(this.getWFName, this);
       this.workflow = ko.observable();
       this.conflictingInstances = ko.observableArray();
       this.selectedActivity = ko.observable();
       this.workflowComponents = ACT_FACTORY.draggableActivities();
+      this.conflictListWFName = ko.observable();
+      this.conflictsList = ko.observableArray();
+      this.conflictsUpdateScheduled = false;
       if (window.location.hash === "") {
-        this.createNewWorkflow();
+        this.createNewWorkflow("Workflow");
       } else {
         this.loadWorkflow(window.location.hash.substring(1));
       }
     }
 
+    WorkflowBuilderViewModel.prototype.getWFName = function() {
+      var _ref;
+      return (_ref = this.workflow()) != null ? _ref.act.name() : void 0;
+    };
+
     WorkflowBuilderViewModel.prototype.loadWorkflow = function(workflowName) {
       return COW.cowRequest("processes/" + workflowName).done((function(_this) {
         return function(data) {
           _this.workflow(ACT_FACTORY.createWorkflow(data));
-          return _this.configTree(_this.workflow());
+          return _this.afterWorkflowLoad();
+        };
+      })(this)).fail((function(_this) {
+        return function() {
+          var errorType;
+          errorType = arguments[arguments.length - 1];
+          if (errorType === "Not Found") {
+            return _this.createNewWorkflow(workflowName);
+          } else {
+            return alert("Error!! " + errorType);
+          }
         };
       })(this));
     };
 
-    WorkflowBuilderViewModel.prototype.createNewWorkflow = function() {
-      this.workflow(ACT_FACTORY.createWorkflow());
-      return this.configTree(this.workflow());
+    WorkflowBuilderViewModel.prototype.createNewWorkflow = function(wflowName) {
+      this.workflow(ACT_FACTORY.createEmptyWorkflow(wflowName));
+      return this.afterWorkflowLoad();
     };
 
-    WorkflowBuilderViewModel.prototype.deleteRunningInstances = function() {
-      return COW.deleteRunningInstances(this.workflow().name()).done(function() {
-        $("#conflicts-modal").modal("hide");
-        return $("#confirm-save-modal").modal("show");
-      });
+    WorkflowBuilderViewModel.prototype.afterWorkflowLoad = function() {
+      this.configTree(this.workflow());
+      this.initiateChangeConflictsList();
+      return this.workflow().name.subscribe(this.scheduleConflictsListUpdate);
+    };
+
+    WorkflowBuilderViewModel.prototype.deleteConflictsFromModal = function() {
+      return this.deleteRunningInstances((function(_this) {
+        return function() {
+          $("#conflicts-modal").modal("hide");
+          return $("#confirm-save-modal").modal("show");
+        };
+      })(this));
+    };
+
+    WorkflowBuilderViewModel.prototype.deleteConflictsFromPageBtn = function() {
+      return this.deleteRunningInstances();
+    };
+
+    WorkflowBuilderViewModel.prototype.deleteRunningInstances = function(callBack) {
+      if (callBack == null) {
+        callBack = null;
+      }
+      return COW.deleteRunningInstances(this.workflow().name()).done((function(_this) {
+        return function(jsonData) {
+          if (typeof callBack === "function") {
+            callBack(jsonData);
+          }
+          return _this.scheduleConflictsListUpdate();
+        };
+      })(this));
+    };
+
+    WorkflowBuilderViewModel.prototype.scheduleConflictsListUpdate = function() {
+      if (this.conflictsUpdateScheduled) {
+        return;
+      }
+      this.conflictsUpdateScheduled = true;
+      console.log("Scheduling update");
+      return setTimeout(this.initiateChangeConflictsList, 1000);
+    };
+
+    WorkflowBuilderViewModel.prototype.initiateChangeConflictsList = function() {
+      var requestedWFName;
+      requestedWFName = this.getWFName();
+      return COW.cowRequest("processes/" + requestedWFName + "/processInstances").done((function(_this) {
+        return function(jsonData) {
+          return _this.onConflictsListReceive(requestedWFName, jsonData);
+        };
+      })(this)).fail((function(_this) {
+        return function() {
+          return _this.onConflictsListReceive(requestedWFName);
+        };
+      })(this));
+    };
+
+    WorkflowBuilderViewModel.prototype.onConflictsListReceive = function(requestedWFName, jsonData) {
+      var pi, _i, _len, _ref;
+      if (jsonData == null) {
+        jsonData = null;
+      }
+      this.conflictListWFName(requestedWFName);
+      this.conflictsUpdateScheduled = false;
+      console.log("change conflicts list");
+      this.conflictsList.removeAll();
+      if (jsonData != null) {
+        _ref = jsonData.processInstance;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          pi = _ref[_i];
+          this.conflictsList.push(pi.id);
+        }
+      }
+      console.log("Old name: " + requestedWFName + " \t New name: " + (this.getWFName()));
+      if (requestedWFName !== this.getWFName()) {
+        return this.scheduleConflictsListUpdate();
+      }
     };
 
     WorkflowBuilderViewModel.prototype.configTree = function(workflow) {

@@ -99,7 +99,22 @@
 </div>
 
 
+<div id="conflicting-instances">
+    <p>
+        <b data-bind="visible: conflictsList().length < 1">No</b>
+        Running instances of
+        <b data-bind="text: conflictListWFName"></b>
+    </p>
 
+    <span data-bind="visible: conflictsList().length > 0">
+        <ul data-bind="foreach: conflictsList">
+            <li data-bind="text: $data"></li>
+        </ul>
+        <button class="btn btn-danger" data-bind="click: deleteConflictsFromPageBtn">
+            Stop All Running Instances
+        </button>
+    </span>
+</div>
 
 <!-- Conflicting Workflow Instances Modal -->
 <div class="modal fade" id="conflicts-modal" tabindex="-1" role="dialog"
@@ -119,8 +134,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" data-bind="click: deleteRunningInstances">
-                    Delete All Running Instances
+                <button type="button" class="btn btn-danger" data-bind="click: deleteConflictsFromModal">
+                    Stop All Running Instances
                 </button>
             </div>
         </div>

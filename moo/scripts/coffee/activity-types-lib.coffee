@@ -59,7 +59,7 @@ class Activity
         nameAttr = @addAttr("name", "Name", true)
         unless nameAttr.value()
             nameAttr.value(@title)
-        nameAttr = nameAttr.value.subscribe (newVal) =>
+        nameAttr.value.subscribe (newVal) =>
             @setTitle(newVal)
 
         @addAttr("description", "Description")
@@ -173,9 +173,9 @@ class Workflow extends Activity
     displayName: "Workflow"
     folder: true
 
-    constructor: (@data) ->
+    constructor: (@data, requestedName = null) ->
         super(@data)
-        @syncNameDisplays()
+        @syncNameDisplays(requestedName)
         if @data?
             @children = [ ActivityFactory.create(@data.activity) ]
         else
@@ -189,9 +189,9 @@ class Workflow extends Activity
     setTitle: (newTitle) =>
         super("<span class='glyphicon glyphicon-list-alt'></span> #{newTitle}")
 
-    syncNameDisplays: =>
+    syncNameDisplays: (requestedName) =>
         nameAttr = @apiAttributes().first (e) -> e.key == "name"
-        nameAttr.value(@data?.name ? @.constructor.name)
+        nameAttr.value(@data?.name ? requestedName ? @.constructor.name)
         @name = ko.computed =>
             nameAttr.value()
 
@@ -492,6 +492,9 @@ class ActivityFactory
 
     @createWorkflow: (cowData = null) ->
         new Workflow(cowData)
+
+    @createEmptyWorkflow: (name = "Workflow") ->
+        new Workflow(null, name)
 
 
 window.ACT_FACTORY = ActivityFactory
