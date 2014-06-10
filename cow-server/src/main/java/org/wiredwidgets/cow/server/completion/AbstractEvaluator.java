@@ -16,36 +16,47 @@
 
 package org.wiredwidgets.cow.server.completion;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
+import org.wiredwidgets.cow.server.transform.graph.builder.BypassGraphBuilder;
 
 public abstract class AbstractEvaluator<T extends Activity> implements Evaluator<T> {
+	
+	private final Logger log = LoggerFactory.getLogger(AbstractEvaluator.class);
 
     @Autowired
     private EvaluatorFactory factory;
     
     protected T activity;
     protected ProcessInstanceInfo info;
-    protected int percentComplete;
-    protected CompletionState completionState;
+    protected CompletionState completionState = null;
     protected String processInstanceId;
-    protected CompletionState branchState;
-    protected boolean inLoop = false;
+    // protected CompletionState branchState;
+    // protected boolean inLoop = false;
     
     protected abstract Class<T> getActivityClass();   
 
     @Override
     public final void evaluate() {
-//    	if (branchState.equals(PRECLUDED) || branchState.equals(CONTINGENT)) {
-//    		// everything below this point is the same, 
-//    		activity.setCompletionState(branchState.getName());		
-//    	}
-//    	else {
-	        evaluateInternal();
-	        // activity.setPercentComplete(BigInteger.valueOf((long) percentComplete));
-	        activity.setCompletionState(completionState);
-//    	}
+    	
+    		evaluateInternal();
+    		
+    		if (activity.isBypassable()) {
+    			Activity converging = getGraphActivity(BypassGraphBuilder.getBypassConvergingGatewayName(activity));
+    			// if the bypass task is completed then the converging gateway will have been completed
+    			if (converging.getCompletionState() != null && converging.getCompletionState() == CompletionState.COMPLETED) {
+    				// either the activity itself was completed, or the bypass was invoked
+    				// either way it's COMPLETED
+    				completionState = CompletionState.COMPLETED;
+    			}
+    		}
+    	
+	        if (completionState != null) {
+	        	activity.setCompletionState(completionState);
+	        }
     }
 
     /*
@@ -55,7 +66,7 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
     protected abstract void evaluateInternal();
 
     protected final void evaluate(Activity activity) {
-        factory.getEvaluator(processInstanceId, activity, info, branchState, inLoop).evaluate();
+        factory.getEvaluator(processInstanceId, activity, info).evaluate();
     }
 
     protected final void setCompletionState(CompletionState state) {
@@ -77,17 +88,27 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
         this.processInstanceId = processInstanceId;
     }
     
-    @Override
-    public void setBranchState(CompletionState branchState) {
-    	this.branchState = branchState;
-    }
+//    @Override
+//    public void setBranchState(CompletionState branchState) {
+//    	this.branchState = branchState;
+//    }
     
-    public void setInLoop(boolean inLoop) {
-    	this.inLoop = inLoop;
-    }
+//    public void setInLoop(boolean inLoop) {
+//    	this.inLoop = inLoop;
+//    }
+//    
+//    public boolean isInLoop() {
+//    	return inLoop;
+//    }
     
-    public boolean isInLoop() {
-    	return inLoop;
+    protected Activity getGraphActivity(String name) {
+    	for (Activity activity : info.getGraph().vertexSet()) {
+    		if (activity.getName().equals(name)) {
+    			return activity;
+    		}
+    	}
+    	log.error("Activity not found in graph: " + name);
+    	return null;
     }
     
     

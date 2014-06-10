@@ -21,11 +21,15 @@
 
 package org.wiredwidgets.cow.server.completion;
 
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.COMPLETED;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.OPEN;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
-import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.*;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
+import org.wiredwidgets.cow.server.transform.graph.builder.LoopGraphBuilder;
 
 /**
  *
@@ -37,44 +41,41 @@ public class LoopEvaluator extends AbstractEvaluator<Loop> {
 
     @Override
     protected void evaluateInternal() {
-        evaluate(this.activity.getLoopTask());
+        // evaluate(this.activity.getLoopTask());
         evaluate(this.activity.getActivity().getValue());
         
         CompletionState loopTaskCompletionState = this.activity.getLoopTask().getCompletionState();
         
-        switch (loopTaskCompletionState) {
-        	case OPEN:
-        		// waiting on the loop decision
-        		completionState = OPEN;
-        		break;
-        	case COMPLETED:
-        		// are we done or are we repeating the loop again?
-        		completionState = isRepeat() ? OPEN : COMPLETED;
-        		break;
-        	case PLANNED:
-        		completionState = this.activity.getActivity().getValue().getCompletionState();
-        		
-        		if (completionState.equals(COMPLETED)) {
-        			// this is not realistic but code for it anyway
-        			// the activity is COMPLETED but decision task not yet OPEN for some reason?
-        			completionState = OPEN;
-        		}
-        		break;
-        	default:
-        		completionState = branchState;
-        		break;
-        				
+        Activity diverging = getGraphActivity(LoopGraphBuilder.getDivergingGatewayName(activity));
+        Activity converging = getGraphActivity(LoopGraphBuilder.getConvergingGatewayName(activity));
+        
+        if (converging.getCompletionState() != COMPLETED) {
+        	// we have not yet reached the start of the loop
+        	completionState = converging.getCompletionState();
         }
-
-
+        else if (diverging.getCompletionState() != COMPLETED) {
+        	// we are in the loop for the first time but have not finished
+        	// we could be in the middle of the loop activity or we could be
+        	// waiting for a decision.  Either way the loop is OPEN
+        	completionState = OPEN;
+        }
+        else {
+        	// we have completed at least one full pass; we may have exited
+        	// or we may be back in the loop for another pass.
+        	
+        	if (loopTaskCompletionState == OPEN) {
+        		// we are waiting for a decision
+        		completionState = OPEN;
+        	}
+        	else {
+        		// Set the completion state to that of the loop activity
+        		// this should be either OPEN or COMPLETE
+        		completionState = this.activity.getActivity().getValue().getCompletionState();
+        	}
+        }
+        
     }
     
-    private boolean isRepeat() {
-    	String varName = activity.getLoopTask().getKey() + "_decision";
-    	String decision = info.getVariables().get(varName);
-    	return decision == null ? false : decision.equals(activity.getRepeatName());
-    }
-
 	@Override
 	protected Class<Loop> getActivityClass() {
 		return Loop.class;

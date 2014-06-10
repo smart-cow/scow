@@ -45,7 +45,7 @@ public class ExitNodeBuilder extends AbstractFlowNodeBuilder<Exit, TScriptTask> 
 	protected void buildInternal(TScriptTask node, Exit exit,
 			Bpmn20ProcessContext context) {
 		
-        node.setName("exit " + exit.getState());
+        node.setName(getExitScriptName(exit));
         
         Script script = new Script();         
         String scriptText = "kcontext.getKnowledgeRuntime().signalEvent(\"exit\", \"" 
@@ -53,6 +53,10 @@ public class ExitNodeBuilder extends AbstractFlowNodeBuilder<Exit, TScriptTask> 
         script.getContent().add(scriptText);
         node.setScript(script);		
 		
+	}
+	
+	public static String getExitScriptName(Exit exit) {
+		return "exit:" + exit.getState();
 	}
 	
 	

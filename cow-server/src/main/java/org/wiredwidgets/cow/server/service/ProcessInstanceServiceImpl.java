@@ -51,6 +51,7 @@ import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
 import org.wiredwidgets.cow.server.completion.ProcessInstanceInfo;
 import org.wiredwidgets.cow.server.completion.graph.GraphCompletionEvaluator;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
+import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 
 
@@ -224,16 +225,13 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
 		String instanceId = process.getKey() + "." + processInstanceId;
 		
-		ProcessInstanceInfo info = new ProcessInstanceInfo(
-				taskService.getHistoryActivities(processInstanceId), 
-				pil.getStatus(), 
-				getProcessInstanceVariables(processInstanceId), 
-				getNodeMap(processInstanceId));
-		
-		
 		// execute the graph based evaluator.  this will populate the completion status
 		// for activity nodes based on the NodeInstanceLog
-		graphEvaluator.evaluate(process, processInstanceId);
+		List<NodeInstanceLog> nodes = JPAProcessInstanceDbLog.findNodeInstances(processInstanceId);
+		ActivityGraph graph = graphEvaluator.evaluate(process, nodes);
+		
+		
+		ProcessInstanceInfo info = new ProcessInstanceInfo(pil.getStatus(), graph);
 
 		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(instanceId, process, info);
 		evaluator.evaluate();
@@ -322,30 +320,5 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     	}
     	return vars;
     }
-    
-    private Map<String, Set<NodeInstanceLog>> getNodeMap(Long processInstanceId) {
-    	// get all node instances for the process instance Id and put them into a map
-    	// where the map key is the unique node name and the value is a sorted set in descending date/time order
-    	List<NodeInstanceLog> nodes = JPAProcessInstanceDbLog.findNodeInstances(processInstanceId);
-    	Map<String, Set<NodeInstanceLog>> nodeMap = new HashMap<String, Set<NodeInstanceLog>>();
-    	
-    	for (NodeInstanceLog nil : nodes) {
-    		String nodeName = nil.getNodeName();
-    		if (nodeMap.get(nodeName) == null) {
-    			// create a sorted set based on the Date
-    			Set<NodeInstanceLog> nodeSet = new TreeSet<NodeInstanceLog>(
-    					new Comparator<NodeInstanceLog>() {
-    						@Override
-    						public int compare(NodeInstanceLog o1, NodeInstanceLog o2) {
-    							// descending order so most recent date/time is always first
-    							return o2.getDate().compareTo(o1.getDate());
-    						}
-    					});
-    			nodeMap.put(nodeName, nodeSet);
-    		}
-    		nodeMap.get(nodeName).add(nil);	
-    	}
-    	return nodeMap;
-    }
-    
+     
 }

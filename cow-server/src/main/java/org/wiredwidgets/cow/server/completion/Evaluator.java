@@ -28,8 +28,8 @@ public interface Evaluator<T extends Activity> {
 
     void setProcessInstanceId(String processInstanceId);
     
-    void setBranchState(CompletionState state);
+    // void setBranchState(CompletionState state);
     
-    void setInLoop(boolean inLoop);
+    // void setInLoop(boolean inLoop);
 	
 }

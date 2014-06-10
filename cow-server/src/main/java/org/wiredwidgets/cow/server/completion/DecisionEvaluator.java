@@ -17,17 +17,28 @@
 package org.wiredwidgets.cow.server.completion;
 
 
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.COMPLETED;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.CONTINGENT;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.OPEN;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.PLANNED;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.PRECLUDED;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
-import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.*;
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Option;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
+import org.wiredwidgets.cow.server.transform.graph.builder.DecisionGraphBuilder;
 
 @Component
 @Scope("prototype")
 public class DecisionEvaluator extends AbstractEvaluator<Decision> {
+	
+	private final Logger log = LoggerFactory.getLogger(DecisionEvaluator.class);
 
     @Override
     protected void evaluateInternal() {
@@ -35,50 +46,31 @@ public class DecisionEvaluator extends AbstractEvaluator<Decision> {
     	Task decisionTask = activity.getTask();
     	   	
         // first, evaluate the decision task
-        evaluate(this.activity.getTask());      
+    	// already done during graph evaluation
+        // evaluate(this.activity.getTask());      
         CompletionState decisionTaskCompletionState = decisionTask.getCompletionState();
-          
-        switch(decisionTaskCompletionState) {
-        	case PLANNED :
-        		completionState = PLANNED;
-        		branchState = CONTINGENT;
-        		evaluateBranches();
-        		break;
-        	case PRECLUDED :
-        		completionState = PRECLUDED;
-        		evaluateBranches();
-        		break;
-        	case OPEN :
-        		completionState = OPEN;
-        		branchState = CONTINGENT;
-        		evaluateBranches();
-        		break;
-        	case CONTINGENT :
-        		completionState = CONTINGENT;
-        		branchState = CONTINGENT;
-        		evaluateBranches();
-        		break;
-        	case COMPLETED :
-        		String choice = getChosenOption();
-        		boolean isCompleted = true; // until we discover otherwise
-                for (Option option : activity.getOptions()) {
-                	if (option.getName().equals(choice)) {
-                		branchState = PLANNED;
-                	}
-                	else {
-                		branchState = PRECLUDED;
-                	}
-                    evaluate(option.getActivity().getValue());
-                    
-                    if (option.getActivity().getValue().getCompletionState() == OPEN) {
-                        isCompleted = false;
-                    }
-
-                }
-                completionState = (isCompleted ? CompletionState.COMPLETED : OPEN);
-                break;
+        
+        if (decisionTaskCompletionState != COMPLETED) {
+        	completionState = decisionTaskCompletionState;
         }
-	
+        else {	
+        	// get the converging gateway that closes the decision structure
+        	Activity converging = getGraphActivity(DecisionGraphBuilder.getConvergingGatewayName(activity));
+        	if (activity == null) {
+        		log.error("No converging gateway found for decision!!!");
+        		return;
+        	}
+        	
+        	if (converging.getCompletionState() == COMPLETED) {
+        		// we have moved through the entire decision
+        		completionState = COMPLETED;
+        	}
+        	else {
+        		// we are somewhere in between the task and final completion
+        		completionState = OPEN;
+        	}
+        }
+        evaluateBranches();
     }
     
     private void evaluateBranches() {
@@ -87,11 +79,6 @@ public class DecisionEvaluator extends AbstractEvaluator<Decision> {
         }
     }
     
-    private String getChosenOption() {
-    	String varName = activity.getTask().getKey() + "_decision";
-    	return info.getVariables().get(varName);
-    }
-
 	@Override
 	protected Class<Decision> getActivityClass() {
 		return Decision.class;

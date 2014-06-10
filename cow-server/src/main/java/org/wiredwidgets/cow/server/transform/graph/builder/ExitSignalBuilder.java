@@ -17,6 +17,7 @@
 package org.wiredwidgets.cow.server.transform.graph.builder;
 
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Loop;
 import org.wiredwidgets.cow.server.api.model.v2.Signal;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
@@ -42,6 +43,7 @@ public class ExitSignalBuilder extends AbstractGraphBuilder<EndActivity> {
 	protected void buildInternal(EndActivity end, ActivityGraph graph, Process process) {
 		ExclusiveGatewayActivity ega = new ExclusiveGatewayActivity();
 		ega.setDirection(GatewayActivity.CONVERGING);
+		ega.setName(getConvergingGatewayName(end));
 		graph.addVertex(ega);
 		moveIncomingEdges(graph, end, ega);
 		graph.addEdge(ega, end);
@@ -50,6 +52,10 @@ public class ExitSignalBuilder extends AbstractGraphBuilder<EndActivity> {
 		signal.setSignalId("_exit");
 		graph.addVertex(signal);
 		graph.addEdge(signal, ega);	
+	}
+	
+	public static String getConvergingGatewayName(EndActivity end) {
+		return end.getName() + ":converging";
 	}
 
 }

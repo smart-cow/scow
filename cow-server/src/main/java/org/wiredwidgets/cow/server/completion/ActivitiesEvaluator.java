@@ -16,14 +16,16 @@
 
 package org.wiredwidgets.cow.server.completion;
 
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.COMPLETED;
+import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.OPEN;
+
 import javax.xml.bind.JAXBElement;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
-import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
-import static org.wiredwidgets.cow.server.api.model.v2.CompletionState.*;
+import org.wiredwidgets.cow.server.transform.graph.builder.ParallelActivitiesGraphBuilder;
 
 @Component
 @Scope("prototype")
@@ -31,41 +33,51 @@ public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
     
     @Override
     public void evaluateInternal() {
-
-        int completedCount = 0;
-        int openCount = 0;
-        
-        for (JAXBElement<? extends Activity> jbe : activity.getActivities()) {
-            Activity act = jbe.getValue();
-            
-            evaluate(act);
-            CompletionState state = act.getCompletionState();
-            if (state == COMPLETED) {
-                completedCount++;
-            } else if (state == OPEN) {
-                openCount++;    
-            }
-        }
-        
-        if (completedCount == 0 && openCount == 0) {
-        	// have not yet reached this activity
-            completionState = branchState;
-        }
-        else if (activity.getMergeCondition() != null && activity.getMergeCondition().equals("1") && completedCount > 0 ) {
-            // special case for 'race condition' sets where completion of of at least one
-            // task will complete the set
-            completionState = CompletionState.COMPLETED;
-        }
-        else if (completedCount < activity.getActivities().size()) {
-            completionState = CompletionState.OPEN;
-        }
-        else {
-            completionState = CompletionState.COMPLETED;    
-        }
+    	
+    	for (JAXBElement<? extends Activity> jbe : activity.getActivities()) {
+            evaluate(jbe.getValue());
+    	}
+    	
+    	if (activity.isSequential()) {
+    		evaluateSequential();
+    	}
+    	else {
+    		evaluateParallel();
+    	}
     }
 
 	@Override
 	protected Class<Activities> getActivityClass() {
 		return Activities.class;
+	}
+	
+	private void evaluateSequential() {
+		Activity first = activity.getActivities().get(0).getValue();
+		Activity last = activity.getActivities().get(activity.getActivities().size() - 1).getValue();
+		if (last.getCompletionState() == COMPLETED) {
+			completionState = COMPLETED;
+		}
+		else if (first.getCompletionState() == COMPLETED) {
+			completionState = OPEN;
+		}
+		else {
+			completionState = first.getCompletionState();
+		}
+		
+	}
+	
+	private void evaluateParallel() {
+		Activity diverging = getGraphActivity(ParallelActivitiesGraphBuilder.getDivergingGatewayName(activity));
+		Activity converging = getGraphActivity(ParallelActivitiesGraphBuilder.getConvergingGatewayName(activity));
+		if (converging.getCompletionState() == COMPLETED) {
+			completionState = COMPLETED;
+		}
+		else if (diverging.getCompletionState() == COMPLETED) {
+			completionState = OPEN;
+		}
+		else {
+			completionState = diverging.getCompletionState();
+		}
+		
 	}
 }

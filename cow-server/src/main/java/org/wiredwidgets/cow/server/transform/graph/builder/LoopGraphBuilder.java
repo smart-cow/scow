@@ -19,6 +19,7 @@ package org.wiredwidgets.cow.server.transform.graph.builder;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
@@ -43,7 +44,7 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 		
 		GatewayActivity converging = new ExclusiveGatewayActivity();
 		converging.setDirection(GatewayActivity.CONVERGING);
-		converging.setName("converging");
+		converging.setName(getConvergingGatewayName(loop));
 		graph.addVertex(converging);
 		moveIncomingEdges(graph, loop, converging);
 		
@@ -52,6 +53,8 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 		graph.addEdge(converging, loopActivity);
 		
 		DecisionTask dt = new DecisionTask(loop.getLoopTask());
+		// replace the original task with the DecisionTask
+		loop.setLoopTask(dt);
 		dt.addOption(loop.getDoneName());
 		dt.addOption(loop.getRepeatName());
 		
@@ -60,7 +63,7 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 		
 		GatewayActivity diverging = new ExclusiveGatewayActivity();
 		diverging.setDirection(GatewayActivity.DIVERGING);
-		diverging.setName("diverging");
+		diverging.setName(getDivergingGatewayName(loop));
 		graph.addVertex(diverging);
 		graph.addEdge(dt, diverging);
 		
@@ -85,6 +88,14 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 	@Override
 	public Class<Loop> getType() {
 		return Loop.class;
+	}
+	
+	public static String getDivergingGatewayName(Loop loop) {
+		return loop.getName() + ":diverging";
+	}
+	
+	public static String getConvergingGatewayName(Loop loop) {
+		return loop.getName() + ":converging";
 	}
 
 }

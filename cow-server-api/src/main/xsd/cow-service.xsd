@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 
     Approved for Public Release: 10-4800. Distribution Unlimited.
@@ -15,18 +15,9 @@
 
     See the License for the specific language governing permissions and limitations under the License.
 
--->
+--><schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:model="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:tns="http://www.wiredwidgets.org/cow/server/schema/service" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.wiredwidgets.org/cow/server/schema/service" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
 
-<schema attributeFormDefault="unqualified" elementFormDefault="qualified"
-    targetNamespace="http://www.wiredwidgets.org/cow/server/schema/service"
-    xmlns="http://www.w3.org/2001/XMLSchema"
-    xmlns:tns="http://www.wiredwidgets.org/cow/server/schema/service"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:model="http://www.wiredwidgets.org/cow/server/schema/model-v2"
-    xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
-
-    <import namespace="http://www.wiredwidgets.org/cow/server/schema/model-v2"
-        schemaLocation="cow-model.xsd"/>
+    <import namespace="http://www.wiredwidgets.org/cow/server/schema/model-v2" schemaLocation="cow-model.xsd"/>
 
     <!-- Global Elements -->
 
@@ -81,7 +72,7 @@
 
     <complexType name="Tasks">
         <sequence>
-            <element minOccurs="0" maxOccurs="unbounded" ref="tns:task"/>
+            <element maxOccurs="unbounded" minOccurs="0" ref="tns:task"/>
         </sequence>
     </complexType>
 
@@ -90,35 +81,35 @@
             <documentation>A workflow Human Task</documentation>
         </annotation>
         <sequence>
-            <element name="assignee" type="string" minOccurs="0"/>
-            <element name="createTime" type="dateTime" minOccurs="0"/>
-            <element name="state" type="string" minOccurs="0"/>
-            <element name="activityName" type="string" minOccurs="0">
+            <element minOccurs="0" name="assignee" type="string"/>
+            <element minOccurs="0" name="createTime" type="dateTime"/>
+            <element minOccurs="0" name="state" type="string"/>
+            <element minOccurs="0" name="activityName" type="string">
                 <annotation>
                     <documentation>The task name taken directly from the underlying process engine.  This may be a system generated value and is intended for programmatic use rather than display to users.</documentation>
                 </annotation>
             </element>
-            <element name="priority" nillable="false" type="int" minOccurs="0"/>
-            <element name="name" type="string" minOccurs="0">
+            <element minOccurs="0" name="priority" nillable="false" type="int"/>
+            <element minOccurs="0" name="name" type="string">
                 <annotation>
                     <documentation>A short name suitable for display in the user interface.  Not necessarily the same as the task name in the underlying process engine.</documentation>
                 </annotation>
             </element>
-            <element name="dueDate" type="dateTime" minOccurs="0"/>
-            <element name="description" type="string" minOccurs="0">
+            <element minOccurs="0" name="dueDate" type="dateTime"/>
+            <element minOccurs="0" name="description" type="string">
                 <annotation>
                     <documentation>A longer description of the task.  For workflows converted fom COW XML, this is taken from the 'documentation' element.</documentation>
                 </annotation>
             </element>
-            <element name="duration" type="long" minOccurs="0"/>
-            <element name="endTime" type="dateTime" minOccurs="0"/>
-            <element name="outcome" type="string" minOccurs="0" maxOccurs="unbounded"/>
-            <element name="processInstanceId" type="string" minOccurs="0">
+            <element minOccurs="0" name="duration" type="long"/>
+            <element minOccurs="0" name="endTime" type="dateTime"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="outcome" type="string"/>
+            <element minOccurs="0" name="processInstanceId" type="string">
                 <annotation>
                     <documentation>The id of the process instance within which this task is running.  This process instance may be a subprocess within another process.</documentation>
                 </annotation>
             </element>
-            <element name="processInstanceUrl" type="string" minOccurs="0"/>
+            <element minOccurs="0" name="processInstanceUrl" type="string"/>
             <element minOccurs="0" name="progress" type="int"/>
             <element minOccurs="0" name="variables" type="tns:Variables"/>
         </sequence>
@@ -130,13 +121,13 @@
             <documentation>A runtime instance of a workflow process.</documentation>
         </annotation>
         <sequence>
-            <element name="priority" type="int" minOccurs="0"/>
-            <element name="name" type="string" minOccurs="0"/>
-            <element name="processDefinitionId" type="string" minOccurs="0"/>
-            <element name="startTime" type="dateTime" minOccurs="0"/>
-            <element name="endTime" type="dateTime" minOccurs="0"/>
-            <element name="duration" type="long" minOccurs="0"/>
-            <element name="state" type="string" minOccurs="0"/>
+            <element minOccurs="0" name="priority" type="int"/>
+            <element minOccurs="0" name="name" type="string"/>
+            <element minOccurs="0" name="processDefinitionId" type="string"/>
+            <element minOccurs="0" name="startTime" type="dateTime"/>
+            <element minOccurs="0" name="endTime" type="dateTime"/>
+            <element minOccurs="0" name="duration" type="long"/>
+            <element minOccurs="0" name="state" type="string"/>
             <element minOccurs="0" name="key" type="string"/>
             <element minOccurs="0" name="id" type="string"/>
             <element minOccurs="0" name="parentId" type="string">
@@ -146,9 +137,9 @@
             </element>
             <element maxOccurs="1" minOccurs="0" name="variables" type="tns:Variables"/>
             <element name="processDefinitionKey" type="string"/>
-            <element minOccurs="0" maxOccurs="unbounded" name="task" type="tns:Task"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="task" type="tns:Task"/>
             <element minOccurs="0" name="process" type="model:Process"/>
-            <element name="statusSummary" type="tns:StatusSummary" maxOccurs="unbounded" minOccurs="0"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="statusSummary" type="tns:StatusSummary"/>
         </sequence>
     </complexType>
 
@@ -157,7 +148,7 @@
             <documentation>A set of ProcessInstance objects</documentation>
         </annotation>
         <sequence>
-            <element minOccurs="0" maxOccurs="unbounded" ref="tns:processInstance"/>
+            <element maxOccurs="unbounded" minOccurs="0" ref="tns:processInstance"/>
         </sequence>
     </complexType>
 
@@ -177,13 +168,13 @@
             <documentation>A set of Deployment objects</documentation>
         </annotation>
         <sequence>
-            <element minOccurs="0" maxOccurs="unbounded" ref="tns:deployment"/>
+            <element maxOccurs="unbounded" minOccurs="0" ref="tns:deployment"/>
         </sequence>
     </complexType>
 
     <complexType name="ResourceNames">
         <sequence>
-            <element minOccurs="0" maxOccurs="unbounded" name="name" type="string"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="name" type="string"/>
         </sequence>
     </complexType>
    
@@ -193,15 +184,15 @@
         </annotation>
         <attribute name="name" type="string"/>
         <attribute name="value" type="string"/>
-        <attribute name="type" type="string" />
-        <attribute name="required" type="boolean" default="false">
+        <attribute name="type" type="string"/>
+        <attribute default="false" name="required" type="boolean">
         	<annotation>
 	            <documentation>
 	            	Indicates that a value MUST be provided for this variable.  Applies only where output=true.
 	            </documentation>
 	        </annotation>          
         </attribute>        
-        <attribute name="modifiable" type="boolean" default="true" >
+        <attribute default="true" name="modifiable" type="boolean">
         	<annotation>
 	            <documentation>
 	            	Indicates whether this variable can be modified or should be treated as read-only.
@@ -301,8 +292,7 @@
 
     <complexType name="Participations">
         <sequence>
-            <element maxOccurs="unbounded" minOccurs="0" name="participation"
-                type="tns:Participation"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="participation" type="tns:Participation"/>
         </sequence>
     </complexType>
 
@@ -354,7 +344,7 @@
 
     <complexType name="HistoryActivities">
         <sequence>
-            <element ref="tns:historyActivity" maxOccurs="unbounded" minOccurs="0"/>
+            <element maxOccurs="unbounded" minOccurs="0" ref="tns:historyActivity"/>
         </sequence>
     </complexType>
 
@@ -362,8 +352,8 @@
         <sequence>
             <element maxOccurs="unbounded" minOccurs="0" ref="model:task"/>
         </sequence>
-        <attribute name="type" type="string" />
-        <attribute name="name" type="string" />
+        <attribute name="type" type="string"/>
+        <attribute name="name" type="string"/>
         <attribute name="status" type="model:CompletionState"/>
         <attribute name="count" type="int"/>
     </complexType>

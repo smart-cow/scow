@@ -28,13 +28,12 @@ import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 import org.wiredwidgets.cow.server.api.service.StatusSummary;
+import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 
 public class ProcessInstanceInfo {
 	
 	private Map<String, List<HistoryActivity>> activitiesMap = new HashMap<String, List<HistoryActivity>>();
 	
-	private Map<String, Set<NodeInstanceLog>> nodeMap;
-
 	private int processIntanceState;
 	
 	private Map<String, String> variables;
@@ -43,23 +42,18 @@ public class ProcessInstanceInfo {
 	
 	private Map<String, Map<CompletionState, List<Task>>> groupSummary = new HashMap<String, Map<CompletionState, List<Task>>>();
 	
+	private ActivityGraph graph;
+	
         
     /**
      * Constructor
      * @param activities
      * @param processState 
      */
-	public ProcessInstanceInfo(List<HistoryActivity> activities, int processState, 
-			Map<String, String> variables, Map<String, Set<NodeInstanceLog>> nodeMap) {
-		setActivities(activities);
+	public ProcessInstanceInfo(int processState, ActivityGraph graph) {
+		//setActivities(activities);
         this.processIntanceState = processState;
-        if (variables == null) {
-        	this.variables = new HashMap<String, String>();
-        }
-        else {
-        	this.variables = variables;
-        }
-        this.nodeMap = nodeMap;
+        this.graph = graph;
 	}
 	
 	/**
@@ -69,33 +63,33 @@ public class ProcessInstanceInfo {
 	 * @param key
 	 * @return list of HistoryActivity objects
 	 */
-	public List<HistoryActivity> getActivities(String key) {
-            if (activitiesMap.get(key) == null) {
-                // return empty list
-                return new ArrayList<HistoryActivity>();
-            }
-            else {
-		return activitiesMap.get(key);
-            }
-	}
+//	public List<HistoryActivity> getActivities(String key) {
+//            if (activitiesMap.get(key) == null) {
+//                // return empty list
+//                return new ArrayList<HistoryActivity>();
+//            }
+//            else {
+//		return activitiesMap.get(key);
+//            }
+//	}
 	
-	private void setActivities(List<HistoryActivity> activities) {
-		for (HistoryActivity hi : activities) {
-			String key = hi.getActivityName();
-			if (activitiesMap.get(key) == null) {
-				activitiesMap.put(key, new ArrayList<HistoryActivity>());
-			}
-			activitiesMap.get(key).add(hi);
-		}
-	}
+//	private void setActivities(List<HistoryActivity> activities) {
+//		for (HistoryActivity hi : activities) {
+//			String key = hi.getActivityName();
+//			if (activitiesMap.get(key) == null) {
+//				activitiesMap.put(key, new ArrayList<HistoryActivity>());
+//			}
+//			activitiesMap.get(key).add(hi);
+//		}
+//	}
 
     public int getProcessInstanceState() {
         return processIntanceState;
     }
 
-	public Map<String, String> getVariables() {
-		return variables;
-	}
+//	public Map<String, String> getVariables() {
+//		return variables;
+//	}
 	
 	private void updateSummary(String name, Task task, Map<String, Map<CompletionState, List<Task>>> map) {
 		Map<CompletionState, List<Task>> summary = map.get(name);
@@ -129,6 +123,14 @@ public class ProcessInstanceInfo {
 		return summaryList;
 	}
 	
+	public ActivityGraph getGraph() {
+		return graph;
+	}
+
+	public void setGraph(ActivityGraph graph) {
+		this.graph = graph;
+	}
+
 	private List<StatusSummary> getStatusSummary(String type, Map<String, Map<CompletionState, List<Task>>> map) {
 		List<StatusSummary> summaryList = new ArrayList<StatusSummary>();
 		

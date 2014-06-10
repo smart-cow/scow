@@ -38,13 +38,13 @@ public class EvaluatorFactory implements ApplicationContextAware {
 	
     private ApplicationContext applicationContext;
 
-    public Evaluator<? extends Activity> getEvaluator(String processInstanceId, Activity activity, ProcessInstanceInfo history, 
-    		CompletionState branchState, boolean inLoop) {
+    public Evaluator<? extends Activity> getEvaluator(String processInstanceId, Activity activity, ProcessInstanceInfo history) {
         Evaluator eval = null;
-        if (activity.isBypassable() && !activity.isWrapped()) {
-            eval = applicationContext.getBean(BypassableActivityEvaluator.class);
-            activity = new BypassableActivity(activity);
-        } else if (activity instanceof Activities) {
+//        if (activity.isBypassable() && !activity.isWrapped()) {
+//            eval = applicationContext.getBean(BypassableActivityEvaluator.class);
+//            activity = new BypassableActivity(activity);
+//        } else 
+        if (activity instanceof Activities) {
             // parallel and sequential use the same evaluator
             eval = applicationContext.getBean(ActivitiesEvaluator.class);
         } else if (activity instanceof Task) {
@@ -79,8 +79,8 @@ public class EvaluatorFactory implements ApplicationContextAware {
         eval.setProcessInstanceId(processInstanceId);
         eval.setActivity(activity);
         eval.setHistory(history);
-        eval.setBranchState(branchState);
-        eval.setInLoop(inLoop);
+        // eval.setBranchState(branchState);
+        // eval.setInLoop(inLoop);
 
         return eval;
     }
@@ -90,7 +90,7 @@ public class EvaluatorFactory implements ApplicationContextAware {
         eval.setProcessInstanceId(processInstanceId);
         eval.setActivity(process.getActivity().getValue());
         eval.setHistory(history);
-        eval.setBranchState(CompletionState.PLANNED);
+        // eval.setBranchState(CompletionState.PLANNED);
         return eval;
     }
 

@@ -37,6 +37,11 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 	protected void buildInternal(Decision decision, ActivityGraph graph, Process process) {
 		
 		DecisionTask dt = new DecisionTask(decision.getTask());
+		
+		// replace the Decision's existing task with the new DecisionTask
+		// this is needed when we do completion evaluation
+		decision.setTask(dt);
+
 		graph.addVertex(dt);
 		moveIncomingEdges(graph, decision, dt);
 		
@@ -61,13 +66,13 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 		
 			GatewayActivity diverging = new ExclusiveGatewayActivity();
 			diverging.setDirection(GatewayActivity.DIVERGING);
-			diverging.setName("diverging");
+			diverging.setName(getDivergingGatewayName(decision));
 			graph.addVertex(diverging);
 			graph.addEdge(dt, diverging);
 			
 			GatewayActivity converging = new ExclusiveGatewayActivity();
 			converging.setDirection(GatewayActivity.CONVERGING);
-			converging.setName("converging");
+			converging.setName(getConvergingGatewayName(decision));
 			graph.addVertex(converging);
 			
 			moveOutgoingEdges(graph, decision, converging);
@@ -105,6 +110,14 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 	@Override
 	public Class<Decision> getType() {
 		return Decision.class;
+	}
+	
+	public static String getDivergingGatewayName(Decision decision) {
+		return decision.getName() + ":diverging";
+	}
+	
+	public static String getConvergingGatewayName(Decision decision) {
+		return decision.getName() + ":converging";
 	}
 
 }

@@ -32,26 +32,27 @@ public class ServiceTaskEvaluator extends AbstractEvaluator<ServiceTask> {
 
     @Override
     protected void evaluateInternal() {
-        this.historyActivities = info.getActivities(activity.getKey());
-        this.completionState = getCompletionState();
+    	// should be handled by graph evaluator
+		//        this.historyActivities = info.getActivities(activity.getKey());
+		//        this.completionState = getCompletionState();
     }
 
-    private CompletionState getCompletionState() {
-
-        // Because of possible looping structures, there may be more than once instance of a task activity
-        if (historyActivities.isEmpty()) {
-            return branchState;
-        }
-        else {
-            boolean isCompleted =  true;
-            for (HistoryActivity historyActivity : historyActivities) {
-                if (historyActivity.getEndTime() == null) {
-                    isCompleted = false;
-                }
-            }
-            return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
-        }
-    }
+//    private CompletionState getCompletionState() {
+//
+//        // Because of possible looping structures, there may be more than once instance of a task activity
+//        if (historyActivities.isEmpty()) {
+//            return branchState;
+//        }
+//        else {
+//            boolean isCompleted =  true;
+//            for (HistoryActivity historyActivity : historyActivities) {
+//                if (historyActivity.getEndTime() == null) {
+//                    isCompleted = false;
+//                }
+//            }
+//            return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
+//        }
+//    }
 
 	@Override
 	protected Class<ServiceTask> getActivityClass() {

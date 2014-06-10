@@ -16,6 +16,9 @@
 
 package org.wiredwidgets.cow.server.transform.graph;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.graph.ClassBasedEdgeFactory;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -30,6 +33,11 @@ public class ActivityGraph extends DefaultDirectedGraph<Activity, ActivityEdge> 
 	
 	private static EdgeFactory<Activity, ActivityEdge> ef = new ClassBasedEdgeFactory<Activity, ActivityEdge>(ActivityEdge.class);
 	
+	// keep a list of all activities, including those that don't end up
+	// as vertices in the graph.  this gives us a way to iterate through all
+	// the activities
+	private List<Activity> activities = new ArrayList<Activity>();
+	
 	public ActivityGraph() {
 		super(ef);		
 	}
@@ -41,5 +49,10 @@ public class ActivityGraph extends DefaultDirectedGraph<Activity, ActivityEdge> 
 	public StartActivity getStart() {
 		return this.start;
 	}
+
+	public List<Activity> getActivities() {
+		return activities;
+	}
+
 
 }

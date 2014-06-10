@@ -72,5 +72,5 @@ public class SequentialActivitiesGraphBuilder extends AbstractGraphBuilder<Activ
 	public Class<Activities> getType() {
 		return Activities.class;
 	}
-
+	
 }

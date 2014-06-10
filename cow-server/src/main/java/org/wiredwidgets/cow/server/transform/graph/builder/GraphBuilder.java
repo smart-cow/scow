@@ -42,9 +42,9 @@ public class GraphBuilder {
 	
 		// create the starting graph, consisting of start, Activities, and end
 		StartActivity start = new StartActivity();
-		start.setName("Start");
+		start.setName("start");
 		EndActivity end = new EndActivity();
-		end.setName("End");
+		end.setName("end");
 		
 		Activity main = process.getActivity().getValue();
 		

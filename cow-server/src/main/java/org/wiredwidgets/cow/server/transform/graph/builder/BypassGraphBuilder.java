@@ -49,9 +49,9 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 	
 		GatewayActivity diverging = new ParallelGatewayActivity();
 		diverging.setDirection(GatewayActivity.DIVERGING);
-		diverging.setName("diverging");
+		diverging.setName(getBypassDivergingGatewayName(activity));
 		GatewayActivity converging = new ExclusiveGatewayActivity();
-		converging.setName("converging");
+		converging.setName(getBypassConvergingGatewayName(activity));
 		converging.setDirection(GatewayActivity.CONVERGING);
 		graph.addVertex(diverging);
 		graph.addVertex(converging);
@@ -59,7 +59,7 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 		moveOutgoingEdges(graph, activity, converging);
 	
 		Task bypassTask = new Task();
-		bypassTask.setName("Bypass Task");
+		bypassTask.setName(getBypassTaskName(activity));
 		bypassTask.setAssignee(process.getBypassAssignee());
 		bypassTask.setCandidateGroups(process.getBypassCandidateGroups());
 		bypassTask.setCandidateUsers(process.getBypassCandidateUsers());
@@ -71,7 +71,8 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 		graph.addEdge(activity, converging);
 		
 		// set to false so on the next pass we won't do this again.
-		activity.setBypassable(false);
+		// activity.setBypassable(false);
+		activity.setWrapped(true);
 		
 		factory.buildGraph(activity, graph, process);
 
@@ -84,5 +85,17 @@ public class BypassGraphBuilder extends AbstractGraphBuilder<Activity> {
 	@Override
 	public Class<Activity> getType() {
 		return null;
+	}
+	
+	public static String getBypassTaskName(Activity activity) {
+		return "bypass:" + activity.getName();
+	}
+	
+	public static String getBypassDivergingGatewayName(Activity activity) {
+		return "diverging:bypass:" + activity.getName();
+	}
+	
+	public static String getBypassConvergingGatewayName(Activity activity) {
+		return "converging:bypass:" + activity.getName();
 	}
 }

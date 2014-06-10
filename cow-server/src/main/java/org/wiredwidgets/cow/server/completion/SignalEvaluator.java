@@ -30,13 +30,13 @@ public class SignalEvaluator extends AbstractEvaluator<Signal> {
     @Override
     protected void evaluateInternal() {
     	
-    	String signalVar = info.getVariables().get(SignalNodeBuilder.getVarName(activity));
-    	if (signalVar != null) {	
-    		this.completionState = CompletionState.COMPLETED;
-    	}
-    	else {
-    		this.completionState = branchState;
-    	}
+//    	String signalVar = info.getVariables().get(SignalNodeBuilder.getVarName(activity));
+//    	if (signalVar != null) {	
+//    		this.completionState = CompletionState.COMPLETED;
+//    	}
+//    	else {
+//    		this.completionState = branchState;
+//    	}
     }
 
 	@Override

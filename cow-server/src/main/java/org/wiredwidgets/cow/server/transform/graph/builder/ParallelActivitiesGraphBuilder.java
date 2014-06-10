@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.ExclusiveGatewayActivity;
@@ -48,9 +49,20 @@ public class ParallelActivitiesGraphBuilder extends AbstractGraphBuilder<Activit
 			// two or more activities.  Use gateways
 			GatewayActivity diverging = new ParallelGatewayActivity();
 			diverging.setDirection(GatewayActivity.DIVERGING);
-			diverging.setName("diverging");
-			GatewayActivity converging = new ParallelGatewayActivity();
-			converging.setName("converging");
+			diverging.setName(getDivergingGatewayName(activity));
+			
+			GatewayActivity converging = null;
+			
+			// special case for a "race condition" parallel set
+			// in this case the first path to complete triggers the gateway
+			if (activity.getMergeCondition() != null && activity.getMergeCondition().equals("1")) {
+				converging = new ExclusiveGatewayActivity();
+			}
+			else {
+				converging = new ParallelGatewayActivity();
+			}
+			
+			converging.setName(getConvergingGatewayName(activity));
 			converging.setDirection(GatewayActivity.CONVERGING);
 			graph.addVertex(diverging);
 			graph.addVertex(converging);
@@ -77,6 +89,14 @@ public class ParallelActivitiesGraphBuilder extends AbstractGraphBuilder<Activit
 	@Override
 	public Class<Activities> getType() {
 		return Activities.class;
+	}
+	
+	public static String getDivergingGatewayName(Activities activities) {
+		return activities.getName() + ":diverging";
+	}
+	
+	public static String getConvergingGatewayName(Activities activities) {
+		return activities.getName() + ":converging";
 	}
 
 }
