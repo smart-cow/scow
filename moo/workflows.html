@@ -6,9 +6,13 @@
 
 
     <script src="scripts/js/libs/jquery-1.11.0.js"></script>
+    <script src="scripts/js/libs/jquery-ui-fancy-tree.js"></script>
 
     <link href="css/bootstrap.css" rel="stylesheet" />
     <script src="scripts/js/libs/bootstrap.js"></script>
+
+    <link href="css/ui.fancytree.css" rel="stylesheet" />
+    <script src="scripts/js/libs/jquery.fancytree-all.js"></script>
 
     <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
     <script src="scripts/js/libs/knockout.mapping.js"></script>
@@ -18,9 +22,17 @@
 
     <script src="scripts/config.js"></script>
     <script src="scripts/js/mylibs/cow-lib.js"></script>
+    <script src="scripts/js/mylibs/activity-types-lib.js"></script>
     <script src="scripts/js/mylibs/workflows.js"></script>
 </head>
 <body>
+<ul class="nav nav-tabs">
+    <li><a href="activeworkflows.html"> Active Workflows </a></li>
+    <li><a href="admin.html">Admin</a></li>
+    <li><a href="tasks.html"> Tasks </a></li>
+    <li class="active"><a href="#"> Workflows </a></li>
+    <li><a href="workflowbuilder.html"> Workflow Builder </a></li>
+</ul>
 
 
 <div class="well-sm container">
@@ -41,19 +53,27 @@
         <tr>
             <th>Workflow</th>
             <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody data-bind="foreach: workflows">
-        <tr >
+        <tr>
             <td data-bind="text: $data"></td>
             <td>
                 <button class="btn btn-primary" data-bind="click: $root.workflowSelected">
                     Start Workflow
                 </button>
             </td>
+            <td>
+                <a data-bind="attr: { href: 'workflowbuilder.html#' + $data }">Edit</a>
+            </td>
+
         </tr>
     </tbody>
 </table>
+
+
+<!--<div id="tree"></div>-->
 
 
 <!-- Modal to allow the user to enter process variables -->
@@ -65,6 +85,16 @@
         <h4 class="modal-title" data-bind="text: selectedWorkflow"></h4>
       </div>
       <div class="modal-body">
+          <div id="workflow-details">
+              <div id="tree"></div>
+
+              <span data-bind="if: selectedActivity">
+                  <ul data-bind="foreach: activityApiAttrs">
+                      <li> <b data-bind="text: label"></b>: <span data-bind="text: value"></span> </li>
+                  </ul>
+              </span>
+          </div>
+
          <strong>Variables</strong>
           <ul class="form-inline" data-bind="foreach: selectedWorkflowVariables">
               <li class="form-group"
@@ -91,6 +121,9 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
+
 
 </body>
 </html>

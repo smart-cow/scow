@@ -7,7 +7,10 @@
     String.prototype.rightOf = function(char) {
       return this.substr(this.lastIndexOf(char) + 1);
     };
-    return Array.prototype.first = function(predicate) {
+    String.prototype.leftOf = function(char) {
+      return this.substr(0, this.indexOf(char));
+    };
+    Array.prototype.first = function(predicate) {
       var e, _i, _len;
       for (_i = 0, _len = this.length; _i < _len; _i++) {
         e = this[_i];
@@ -16,6 +19,19 @@
         }
       }
       return null;
+    };
+    return Array.prototype.unique = function() {
+      var key, output, value, _i, _ref, _results;
+      output = {};
+      for (key = _i = 0, _ref = this.length; 0 <= _ref ? _i < _ref : _i > _ref; key = 0 <= _ref ? ++_i : --_i) {
+        output[this[key]] = this[key];
+      }
+      _results = [];
+      for (key in output) {
+        value = output[key];
+        _results.push(value);
+      }
+      return _results;
     };
   })();
 
@@ -27,7 +43,9 @@
       this.amqpSubscribe = __bind(this.amqpSubscribe, this);
       this.variableHasConflict = __bind(this.variableHasConflict, this);
       this.hasVariableConflicts = __bind(this.hasVariableConflicts, this);
+      this.activeWorkflows = __bind(this.activeWorkflows, this);
       this.activeWorkflowIds = __bind(this.activeWorkflowIds, this);
+      this.deleteRunningInstances = __bind(this.deleteRunningInstances, this);
       this.cowRequest = __bind(this.cowRequest, this);
     }
 
@@ -56,23 +74,44 @@
         data: new XMLSerializer().serializeToString(xml),
         type: httpMethod,
         contentType: "application/xml",
-        dataType: "xml",
+        dataType: "json",
         xhrFields: {
           withCredentials: true
         }
       });
     };
 
+    CowUtil.prototype.deleteRunningInstances = function(workflowName) {
+      return this.cowRequest("processes/" + workflowName + "/processInstances", "delete");
+    };
+
     CowUtil.prototype.activeWorkflowIds = function(callBack) {
+      return this.activeWorkflows((function(_this) {
+        return function(fullIds) {
+          var id;
+          return callBack((function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = fullIds.length; _i < _len; _i++) {
+              id = fullIds[_i];
+              _results.push(id.rightOf("."));
+            }
+            return _results;
+          })());
+        };
+      })(this));
+    };
+
+    CowUtil.prototype.activeWorkflows = function(callback) {
       return COW.cowRequest("processInstances").done(function(data) {
         var pi;
-        return callBack((function() {
+        return callback((function() {
           var _i, _len, _ref, _results;
           _ref = data.processInstance;
           _results = [];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             pi = _ref[_i];
-            _results.push(+pi.id.rightOf('.'));
+            _results.push(pi.id);
           }
           return _results;
         })());

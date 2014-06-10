@@ -1,123 +1,138 @@
 ﻿
 
 /** Chiclet chart colors **/
-#chiclet-chart  tr:nth-child(odd) td.empty,
-#chiclet-chart  tr:nth-child(odd) td.workflow-name {
+.chiclet-chart  tr:nth-child(odd) td.empty,
+.chiclet-chart  tr:nth-child(odd) td.workflow-name {
     background-color: #fdfcf5;
 }
 
-#chiclet-chart tr td{
+.chiclet-chart tr td{
     border-bottom:none;
 	border-top:none;
 
 }
 
-#chiclet-chart td.workflow-name {
+.chiclet-chart td.workflow-name {
     font-weight: bold;
 }
 
 
-#chiclet-chart > tr.selected:nth-child(odd) > td{
+.chiclet-chart > tr.selected:nth-child(odd) > td{
     background-color: #cbb765;
-	border-top: 2px solid #000000;
-    border-bottom: 2px solid #000000;
+	border-top: 3px solid #000000;
+    border-bottom: 3px solid #000000;
 
 }
 
-#chiclet-chart > tr.selected:nth-child(even) > td{
+.chiclet-chart > tr.selected:nth-child(even) > td{
     background-color: #DED29E;
-	border-top: 2px solid #000000;
-    border-bottom: 2px solid #000000;
+	border-top: 3px solid #000000;
+    border-bottom: 3px solid #000000;
 
 }
 
-#chiclet-chart tr.selected:hover td{
-    border-top: 1px dashed #000000;
-    border-bottom: 1px dashed #000000;
+.chiclet-chart tr.selected:hover td{
+    border-top: 3px dashed #000000;
+    border-bottom: 3px dashed #000000;
 	background-color: #e7de8c;
 
 }
 
-#chiclet-chart tr:hover td{
-    border-top: 1px dashed #000000;
-    border-bottom: 1px dashed #000000;
+.chiclet-chart tr:hover td{
+    border-top: 3px dashed #000000; 
+    border-bottom: 3px dashed #000000;
 	background-color: #e7de8c;
 
 }
 
 
-#chiclet-chart td.completed {
+.chiclet-chart tr.selected:nth-child(odd):hover td{
+    border-top: 3px dashed #000000;
+    border-bottom: 3px dashed #000000;
+    background-color: #e7de8c;
+
+}
+
+.chiclet-chart tr:nth-child(odd):hover td{
+    border-top: 3px dashed #000000;
+    border-bottom: 3px dashed #000000;
+    background-color: #e7de8c;
+
+}
+
+
+.chiclet-chart td.completed {
     background-color: #BFFEBF;
 
 }
-#chiclet-chart tr:hover td.completed {
+.chiclet-chart tr:hover td.completed {
     background-color: #80FE80;
 
 }
-#chiclet-chart tr.selected td.completed{
+.chiclet-chart tr.selected td.completed{
     background-color: #00CC00;
 }
-#chiclet-chart tr.selected:hover td.completed{
+.chiclet-chart tr.selected:hover td.completed{
     background-color: #008E00;
 }
 
-#chiclet-chart td.open {
+.chiclet-chart td.open {
     background-color: #fdff8c;
 }
-#chiclet-chart tr:hover td.open {
+.chiclet-chart tr:hover td.open {
     background-color: #fdff73;
 
 }
-#chiclet-chart tr.selected td.open{
+.chiclet-chart tr.selected td.open{
     background-color: #FFFF00;
 }
-#chiclet-chart tr.selected:hover td.open{
+.chiclet-chart tr.selected:hover td.open{
     background-color: #B2B300;
 }
 
-#chiclet-chart td.planned {
+.chiclet-chart td.planned {
     background-color: #BFCFFE;
 
 }
-#chiclet-chart tr:hover td.planned {
+.chiclet-chart tr:hover td.planned {
     background-color: #809FFE;
 
 }
-#chiclet-chart tr.selected td.planned{
+.chiclet-chart tr.selected td.planned{
     background-color: #0033CC;
 }
-#chiclet-chart tr.selected:hover td.planned{
+.chiclet-chart tr.selected:hover td.planned{
     background-color: #00248E;
 }
 
 
-#chiclet-chart td.precluded {
-    background-color: #BFCFFE;
-
-}
-#chiclet-chart tr:hover td.precluded {
+.chiclet-chart td.precluded {
     background-color: #000000;
 
 }
-#chiclet-chart tr.selected td.precluded{
+.chiclet-chart tr:hover td.precluded {
+    background-color: #000000;
+
+}
+.chiclet-chart tr.selected td.precluded{
     background-color: #000000;
 }
-#chiclet-chart tr.selected:hover td.precluded{
+.chiclet-chart tr.selected:hover td.precluded{
     background-color: #000000;
 }
 
-#chiclet-chart td.contingent{
+.chiclet-chart td.contingent{
     background-color: #bbbbbb;
 }
 
-#chiclet-chart tr:hover td.contingent {
+.chiclet-chart tr:hover td.contingent {
     background-color: #949494;
 
 }
-#chiclet-chart tr.selected td.contingent{
+.chiclet-chart tr.selected td.contingent{
     background-color: #808080;
 }
-#chiclet-chart tr.selected:hover td.contingent{
+.chiclet-chart tr.selected:hover td.contingent{
     background-color: #595959;
 }
 
@@ -196,3 +211,11 @@ caption {
     position: relative;
 }
 
+#legend{
+    table { table-layout: fixed; }
+
+}
+
+#legend td{
+     width: 20%;
+}
