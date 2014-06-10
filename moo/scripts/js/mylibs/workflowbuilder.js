@@ -106,7 +106,29 @@
       console.log(xml);
       if (!converter.hasAtLeaskOneTask) {
         alert("Workflow must have at least one task to save it");
+        return;
       }
+      return COW.xmlRequest("processes/" + converter.name, "put", xml).always(function() {
+        return $("#confirm-save-modal").modal("hide");
+      }).done(function() {
+        return alert("Workflow saved");
+      }).fail((function(_this) {
+        return function() {
+          var errorType, pi, resp, _i, _len, _ref;
+          resp = arguments[0], errorType = arguments[arguments.length - 1];
+          if (errorType !== "Conflict") {
+            alert("Error: " + errorType);
+            return;
+          }
+          _this.conflictingInstances.removeAll();
+          _ref = resp.responseJSON.processInstance;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            pi = _ref[_i];
+            _this.conflictingInstances.push(pi.id);
+          }
+          return $('#conflicts-modal').modal('show');
+        };
+      })(this));
     };
 
     return WorkflowBuilderViewModel;
