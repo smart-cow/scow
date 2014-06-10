@@ -57,6 +57,8 @@
     function Activity(data) {
       var nameAttr, _ref, _ref1;
       this.data = data;
+      this.removeVariable = __bind(this.removeVariable, this);
+      this.addVariable = __bind(this.addVariable, this);
       this.readVariables = __bind(this.readVariables, this);
       this.addInvisibleAttr = __bind(this.addInvisibleAttr, this);
       this.addAttr = __bind(this.addAttr, this);
@@ -211,14 +213,25 @@
       return _results;
     };
 
+    Activity.prototype.addVariable = function() {
+      return this.variables.push(this.createObservableVar());
+    };
+
+    Activity.prototype.removeVariable = function(variable) {
+      var matchingVar;
+      matchingVar = this.variables().first(function(v) {
+        return v.name() === variable.name();
+      });
+      return this.variables.remove(matchingVar);
+    };
+
     Activity.prototype.createObservableVar = function(variable) {
       var _ref, _ref1;
       return {
-        name: ko.observable(variable.name),
-        value: ko.observable(variable.value),
-        type: ko.observable(variable.type),
-        required: ko.observable((_ref = variable.required) != null ? _ref : false),
-        output: ko.observable((_ref1 = variable.output) != null ? _ref1 : false)
+        name: ko.observable(variable != null ? variable.name : void 0),
+        value: ko.observable(variable != null ? variable.value : void 0),
+        required: ko.observable((_ref = variable != null ? variable.required : void 0) != null ? _ref : false),
+        output: ko.observable((_ref1 = variable != null ? variable.output : void 0) != null ? _ref1 : true)
       };
     };
 

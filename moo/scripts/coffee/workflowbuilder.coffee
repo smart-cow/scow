@@ -94,18 +94,18 @@ class WorkflowBuilderViewModel
         unless converter.hasAtLeaskOneTask
             alert("Workflow must have at least one task to save it")
             return
-        COW.xmlRequest("processes/#{converter.name}", "put", xml)
-            .always ->
-                $("#confirm-save-modal").modal("hide")
-            .done ->
-                alert("Workflow saved")
-            .fail (resp, ..., errorType) =>
-                unless errorType is "Conflict"
-                    alert("Error: #{errorType}")
-                    return
-                @conflictingInstances.removeAll()
-                @conflictingInstances.push(pi.id) for pi in resp.responseJSON.processInstance
-                $('#conflicts-modal').modal('show')
+#        COW.xmlRequest("processes/#{converter.name}", "put", xml)
+#            .always ->
+#                $("#confirm-save-modal").modal("hide")
+#            .done ->
+#                alert("Workflow saved")
+#            .fail (resp, ..., errorType) =>
+#                unless errorType is "Conflict"
+#                    alert("Error: #{errorType}")
+#                    return
+#                @conflictingInstances.removeAll()
+#                @conflictingInstances.push(pi.id) for pi in resp.responseJSON.processInstance
+#                $('#conflicts-modal').modal('show')
 
 
 

@@ -64,15 +64,17 @@
             <li class="form-group">
                 Name: <input class="form-control" data-bind="value: name"/>
                 Value: <input class="form-control" data-bind="value: value"/>
+                Required: <input type="checkbox" data-bind="checked: required"/>
+                Output: <input type="checkbox" data-bind="checked: output"/>
                 <button data-bind="click: $parent.removeVariable">
                     <span class="glyphicon glyphicon-trash"></span>
                 </button>
             </li>
             </br>
         </ul>
-        <!--<button data-bind="click: addVariable">-->
-            <!--<span class="glyphicon glyphicon-plus"></span>-->
-        <!--</button>-->
+        <button data-bind="click: addVariable">
+            <span class="glyphicon glyphicon-plus"></span> Add Variable
+        </button>
     </div>
 </span>
 

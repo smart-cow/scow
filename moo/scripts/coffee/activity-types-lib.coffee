@@ -152,13 +152,18 @@ class Activity
         return unless varList?
         @variables.push(@createObservableVar(v)) for v in varList
 
+    addVariable: =>
+        @variables.push(@createObservableVar())
+
+    removeVariable:(variable) =>
+        matchingVar = @variables().first (v) -> v.name() is variable.name()
+        @variables.remove(matchingVar)
 
     createObservableVar: (variable) ->
-        name: ko.observable(variable.name)
-        value: ko.observable(variable.value)
-        type: ko.observable(variable.type)
-        required: ko.observable(variable.required ? false)
-        output: ko.observable(variable.output ? false)
+        name: ko.observable(variable?.name)
+        value: ko.observable(variable?.value)
+        required: ko.observable(variable?.required ? false)
+        output: ko.observable(variable?.output ? true)
 
 
 
