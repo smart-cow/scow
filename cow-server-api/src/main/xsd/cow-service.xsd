@@ -103,6 +103,8 @@
             </element>
             <element minOccurs="0" name="duration" type="long"/>
             <element minOccurs="0" name="endTime" type="dateTime"/>
+            <element minOccurs="0" name="question"  type="string" />
+            <element minOccurs="0" name="responseVarName" type="string" />
             <element maxOccurs="unbounded" minOccurs="0" name="outcome" type="string"/>
             <element minOccurs="0" name="processInstanceId" type="string">
                 <annotation>

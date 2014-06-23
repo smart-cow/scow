@@ -127,7 +127,19 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
 	        target.getOutcomes().addAll(Arrays.asList(options));
         }
         
-        // get variables info
+        // Decision question
+        String question = (String) map.get(DecisionTaskNodeBuilder.DECISION_QUESTION);
+        if (question != null) {
+        	target.setQuestion(question);
+        }
+        
+        // Decision response var
+        String responseVar = (String) map.get(DecisionTaskNodeBuilder.DECISION_VAR_NAME);
+        if (responseVar != null) {
+        	target.setResponseVarName(responseVar);
+        }
+        
+        // get other variables info
         
         Map<String, Map<String, Boolean>> varsInfoMap = new HashMap<String, Map<String, Boolean>>();
         String varsJson = (String)map.get(AbstractUserTaskNodeBuilder.TASK_VARIABLES_INFO);

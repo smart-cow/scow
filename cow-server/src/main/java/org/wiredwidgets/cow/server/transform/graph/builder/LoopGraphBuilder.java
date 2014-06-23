@@ -16,12 +16,10 @@
 
 package org.wiredwidgets.cow.server.transform.graph.builder;
 
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
-import org.wiredwidgets.cow.server.api.model.v2.Decision;
-import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.graph.ActivityEdge;
 import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.activity.DecisionTask;
@@ -31,7 +29,7 @@ import org.wiredwidgets.cow.server.transform.graph.activity.GatewayActivity;
 @Component
 public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 	
-	private static Logger log = Logger.getLogger(LoopGraphBuilder.class);
+	// private static Logger log = LoggerFactory.getLogger(LoopGraphBuilder.class);
 
 	@Override
 	protected void buildInternal(Loop loop, ActivityGraph graph, Process process) {
@@ -55,6 +53,7 @@ public class LoopGraphBuilder extends AbstractGraphBuilder<Loop> {
 		DecisionTask dt = new DecisionTask(loop.getLoopTask());
 		// replace the original task with the DecisionTask
 		loop.setLoopTask(dt);
+		dt.setQuestion(loop.getQuestion());
 		dt.addOption(loop.getDoneName());
 		dt.addOption(loop.getRepeatName());
 		

@@ -18,12 +18,14 @@ package org.wiredwidgets.cow.server.transform.graph.bpmn20;
 
 import org.omg.spec.bpmn._20100524.model.TUserTask;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Variable;
 import org.wiredwidgets.cow.server.transform.graph.activity.DecisionTask;
 
 @Component
 public class DecisionTaskNodeBuilder extends AbstractUserTaskNodeBuilder<DecisionTask> {
 	
 	public static final String DECISION_VAR_NAME = "DecisionVarName";
+	public static final String DECISION_QUESTION = "DecisionQuestion";
 	public static final String OPTIONS = "Options";
 	
 	@Override
@@ -32,16 +34,22 @@ public class DecisionTaskNodeBuilder extends AbstractUserTaskNodeBuilder<Decisio
 		
 		super.buildInternal(t, source, context);
 		
+        String questionText = null;
+        if (source.getQuestion() == null) {
+        	questionText = source.getName();
+        }
+        else {
+        	questionText = source.getQuestion();
+        }
+        
+        addDataInputFromExpression(DECISION_QUESTION, questionText, t);
         addDataInputFromExpression(OPTIONS, getOptionsString(source), t);
-        String decisionVar = getDecisionVarName(t.getId());
-        addDataOutputFromProperty(decisionVar, decisionVar, t, context);
-        
+	
         // We need to be able to know the name of the decision variable
-        addDataInputFromExpression(DECISION_VAR_NAME, decisionVar, t);
-        
-        // this is picked up in GatewayDecisionActivityBuilder
-        // setBuildProperty("decisionVar", decisionVar);		
-
+		String decisionVarName = getDecisionVarName(t.getId());
+		addDataInputFromExpression(DECISION_VAR_NAME, decisionVarName, t);
+        addDataOutputFromProperty(decisionVarName, decisionVarName, t, context);
+         		
 	}	
 
 	@Override

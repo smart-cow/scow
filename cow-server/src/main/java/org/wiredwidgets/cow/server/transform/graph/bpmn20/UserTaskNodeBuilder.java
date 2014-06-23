@@ -47,6 +47,8 @@ public class UserTaskNodeBuilder extends AbstractUserTaskNodeBuilder<Task> {
     	varNames.add("TaskName");    	
     	varNames.add("ActorId");   
     	varNames.add("GroupId"); 
+    	varNames.add(DecisionTaskNodeBuilder.DECISION_QUESTION);
+    	varNames.add(DecisionTaskNodeBuilder.DECISION_VAR_NAME);
     	return varNames;
     }	
 

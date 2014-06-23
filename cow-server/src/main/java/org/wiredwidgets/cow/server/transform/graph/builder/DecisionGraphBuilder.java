@@ -16,7 +16,6 @@
 
 package org.wiredwidgets.cow.server.transform.graph.builder;
 
-import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
@@ -31,7 +30,7 @@ import org.wiredwidgets.cow.server.transform.graph.activity.GatewayActivity;
 @Component
 public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 	
-	private static Logger log = Logger.getLogger(DecisionGraphBuilder.class);
+	// private static Logger log = LoggerFactory.getLogger(DecisionGraphBuilder.class);
 
 	@Override
 	protected void buildInternal(Decision decision, ActivityGraph graph, Process process) {
@@ -41,6 +40,9 @@ public class DecisionGraphBuilder extends AbstractGraphBuilder<Decision> {
 		// replace the Decision's existing task with the new DecisionTask
 		// this is needed when we do completion evaluation
 		decision.setTask(dt);
+		
+		// set the question
+		dt.setQuestion(decision.getQuestion());
 
 		graph.addVertex(dt);
 		moveIncomingEdges(graph, decision, dt);

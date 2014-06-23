@@ -319,6 +319,7 @@
             <extension base="tns:Activity">
                 <sequence maxOccurs="1">
                     <element ref="tns:task"/>
+                    <element name="question" type="string" />
                     <element maxOccurs="unbounded" minOccurs="2" ref="tns:option"/>
                 </sequence>
             </extension>
@@ -381,6 +382,7 @@
                 <sequence>
                     <element ref="tns:activity"/>
                     <element name="loopTask" type="tns:Task"/>
+                    <element name="question" type="string" />
                 </sequence>
                 <attribute default="Done" name="doneName" type="string"/>
                 <attribute default="Repeat" name="repeatName" type="string"/>
