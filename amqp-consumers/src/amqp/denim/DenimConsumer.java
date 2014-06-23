@@ -46,17 +46,19 @@ public class DenimConsumer extends SimpleAmqpConsumer{
 	
 	@Override
 	public void handleAmqpMessage(AmqpMessage amqpMessage) {
-		if ((lastMessage != null) && lastMessage.equals(amqpMessage.toString())){
+		if ((lastMessage != null) && lastMessage.equals(amqpMessage.getMessageBody().toString())){
 			System.out.println("----------------Duplicate Message Received----------------------");
 			System.out.println(lastMessage);
 			System.out.println("----------------------------------------------------------------");
 			return;
 		}
 		//Don't consider duplicate messages
-		lastMessage = amqpMessage.toString();
+		lastMessage = amqpMessage.getMessageBody().toString();
 		System.out.println("----------------New Message Received----------------------");
+		System.out.println(amqpMessage.toString());
+		System.out.println("             --------------------------------------         ");
 		if ((amqpMessage != null) && 
-				(("lisa").equals(amqpMessage.getUser()))	&& 
+				(("mhowansky").equals(amqpMessage.getUser()))	&& 
 				(amqpMessage.getWorkflowName().contains("denim_test"))				
 				){
 			
@@ -81,14 +83,14 @@ public class DenimConsumer extends SimpleAmqpConsumer{
 					System.out.println("A decision has been made");
 					CredentialsProvider credsProvider = new BasicCredentialsProvider();
 				    credsProvider.setCredentials(
-				        new AuthScope("scout2.mitre.org", AuthScope.ANY_PORT), 
+				        new AuthScope("scout3.mitre.org", AuthScope.ANY_PORT), 
 				        new UsernamePasswordCredentials("mhowansky", "matt"));
 	
 	
 				    DefaultHttpClient client = new DefaultHttpClient();
 				    client.setCredentialsProvider(credsProvider);
 	
-				    String completTaskUrl = "http://scout2.mitre.org:8080/cow-server/tasks/" + result.get("id");
+				    String completTaskUrl = "http://scout3.mitre.org:8080/cow-server/tasks/" + result.get("id");
 				    System.out.println("DELETE call to " + completTaskUrl + " in .5 seconds");
 				    HttpDelete completeTask = new HttpDelete(completTaskUrl);
 				    
@@ -98,7 +100,7 @@ public class DenimConsumer extends SimpleAmqpConsumer{
 				    System.out.println("Response from DELETE: " + resp);
 				    
 				    
-				    String startWfUrl = "http://scout2.mitre.org:8080/cow-server/processInstances";
+				    String startWfUrl = "http://scout3.mitre.org:8080/cow-server/processInstances";
 				    System.out.println("Post call to " + startWfUrl + " in .5 seconds");
 				    HttpPost startWf = new HttpPost(startWfUrl);
 				    
@@ -134,18 +136,18 @@ public class DenimConsumer extends SimpleAmqpConsumer{
 				    System.out.println("Response to Start WF: " + startWfResp);
 					
 				  //Commented out because its annoying for dev work, but it works
-				    /*
+				    
 				    String workflow = ((String)result.get("processInstanceId")).split("\\.")[0];
-				    String deleteWorkflowUrl = "http://scout2.mitre.org:8080/cow-server/processes/" + workflow;
+				    String deleteWorkflowUrl = "http://scout3.mitre.org:8080/cow-server/processes/" + workflow;
 				    HttpDelete deleteWorkflow = new HttpDelete(deleteWorkflowUrl);
 				    System.out.println("rest call to " + deleteWorkflowUrl + " in 2 seconds");
 				    Thread.sleep(2000);				    
 				    String deleteWorkflowResp = client.execute(deleteWorkflow, handler);
 				    System.out.println(deleteWorkflowResp);
-				    */
+				    
 				    
 
-				    HttpGet groups = new HttpGet("http://scout2.mitre.org:8080/cow-server/groups");
+				    HttpGet groups = new HttpGet("http://scout3.mitre.org:8080/cow-server/groups");
 				    System.out.println("GET call to " + groups + " in 2 seconds");
 				    Thread.sleep(2000);				    
 				    String groupsResp = client.execute(groups, handler);
