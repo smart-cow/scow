@@ -80,7 +80,7 @@
       if (!nameAttr.value()) {
         nameAttr.value(this.title);
       }
-      nameAttr = nameAttr.value.subscribe((function(_this) {
+      nameAttr.value.subscribe((function(_this) {
         return function(newVal) {
           return _this.setTitle(newVal);
         };
@@ -246,12 +246,15 @@
 
     Workflow.prototype.folder = true;
 
-    function Workflow(data) {
+    function Workflow(data, requestedName) {
       this.data = data;
+      if (requestedName == null) {
+        requestedName = null;
+      }
       this.syncNameDisplays = __bind(this.syncNameDisplays, this);
       this.setTitle = __bind(this.setTitle, this);
       Workflow.__super__.constructor.call(this, this.data);
-      this.syncNameDisplays();
+      this.syncNameDisplays(requestedName);
       if (this.data != null) {
         this.children = [ActivityFactory.create(this.data.activity)];
       } else {
@@ -267,12 +270,12 @@
       return Workflow.__super__.setTitle.call(this, "<span class='glyphicon glyphicon-list-alt'></span> " + newTitle);
     };
 
-    Workflow.prototype.syncNameDisplays = function() {
-      var nameAttr, _ref, _ref1;
+    Workflow.prototype.syncNameDisplays = function(requestedName) {
+      var nameAttr, _ref, _ref1, _ref2;
       nameAttr = this.apiAttributes().first(function(e) {
         return e.key === "name";
       });
-      nameAttr.value((_ref = (_ref1 = this.data) != null ? _ref1.name : void 0) != null ? _ref : this.constructor.name);
+      nameAttr.value((_ref = (_ref1 = (_ref2 = this.data) != null ? _ref2.name : void 0) != null ? _ref1 : requestedName) != null ? _ref : this.constructor.name);
       return this.name = ko.computed((function(_this) {
         return function() {
           return nameAttr.value();
@@ -724,6 +727,13 @@
         cowData = null;
       }
       return new Workflow(cowData);
+    };
+
+    ActivityFactory.createEmptyWorkflow = function(name) {
+      if (name == null) {
+        name = "Workflow";
+      }
+      return new Workflow(null, name);
     };
 
     return ActivityFactory;

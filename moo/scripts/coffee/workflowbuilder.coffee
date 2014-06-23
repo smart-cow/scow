@@ -41,33 +41,89 @@ class WorkflowBuilderViewModel
         @conflictingInstances = ko.observableArray() # Holds list of running work flows preventing update
         @selectedActivity = ko.observable() # The last clicked on activity
         @workflowComponents = ACT_FACTORY.draggableActivities() # The list of draggables to display
+
+        @conflictListWFName = ko.observable()
+        @conflictsList = ko.observableArray()
+        # Keep track if a timeout is set, delaying the conflict list update
+        @conflictsUpdateScheduled = false
+
         if window.location.hash is ""
-            @createNewWorkflow()
+            @createNewWorkflow("Workflow")
         else
             @loadWorkflow(window.location.hash.substring(1))
-#        @createNewWorkflow()
 
-#        @loadWorkflow("BrianTempSvc")
-#        @loadWorkflow("v2-simple")
-#        @loadWorkflow("complicated")
-#        @loadWorkflow("Denim_Decision")
-#        @loadWorkflow("LoopTest")
-#        @loadWorkflow("vars-test")
+
+    getWFName: =>
+        @workflow()?.act.name()
 
 
     loadWorkflow: (workflowName) =>
-        COW.cowRequest("processes/#{workflowName}").done (data) =>
-            @workflow(ACT_FACTORY.createWorkflow(data))
-            @configTree(@workflow())
+        COW.cowRequest("processes/#{workflowName}")
+            .done (data) =>
+                @workflow(ACT_FACTORY.createWorkflow(data))
+                @afterWorkflowLoad()
+            .fail (..., errorType) =>
+                if errorType is "Not Found"
+                    @createNewWorkflow(workflowName)
+                else
+                    alert("Error!! #{errorType}")
 
-    createNewWorkflow: =>
-        @workflow(ACT_FACTORY.createWorkflow())
+
+    createNewWorkflow: (wflowName) =>
+        @workflow(ACT_FACTORY.createEmptyWorkflow(wflowName))
+        @afterWorkflowLoad()
+
+
+    afterWorkflowLoad: =>
         @configTree(@workflow())
+        @initiateChangeConflictsList()
+        @workflow().name.subscribe(@scheduleConflictsListUpdate)
 
-    deleteRunningInstances: =>
-        COW.deleteRunningInstances(@workflow().name()).done ->
+
+    deleteConflictsFromModal: =>
+        @deleteRunningInstances =>
             $("#conflicts-modal").modal("hide")
             $("#confirm-save-modal").modal("show")
+
+    deleteConflictsFromPageBtn: =>
+        @deleteRunningInstances()
+
+    deleteRunningInstances: (callBack = null) =>
+        COW.deleteRunningInstances(@workflow().name()).done (jsonData) =>
+            callBack?(jsonData)
+            @scheduleConflictsListUpdate()
+
+
+    # Don't want to make an AJAX request with key press. Only update the list every n ms
+    scheduleConflictsListUpdate: =>
+        return if @conflictsUpdateScheduled
+        @conflictsUpdateScheduled = true
+        console.log("Scheduling update")
+        setTimeout(@initiateChangeConflictsList, 1000)
+
+
+    initiateChangeConflictsList: =>
+        # Save current workflow name, since it might be different by the time the ajax request finishes
+        requestedWFName = @getWFName()
+        COW.cowRequest("processes/#{requestedWFName}/processInstances")
+            .done (jsonData) =>
+                @onConflictsListReceive(requestedWFName, jsonData)
+            .fail =>
+                @onConflictsListReceive(requestedWFName)
+
+
+    onConflictsListReceive: (requestedWFName, jsonData = null) =>
+        # Allow additional updates to be scheduled
+        @conflictListWFName(requestedWFName)
+        @conflictsUpdateScheduled = false
+        console.log("change conflicts list")
+        @conflictsList.removeAll()
+        if jsonData?
+            @conflictsList.push(pi.id) for pi in jsonData.processInstance
+        # If the name has changed since before the ajax request started, schedule another update
+        console.log("Old name: #{requestedWFName} \t New name: #{@getWFName()}")
+        unless requestedWFName is @getWFName()
+            @scheduleConflictsListUpdate()
 
 
 
@@ -94,18 +150,18 @@ class WorkflowBuilderViewModel
         unless converter.hasAtLeaskOneTask
             alert("Workflow must have at least one task to save it")
             return
-#        COW.xmlRequest("processes/#{converter.name}", "put", xml)
-#            .always ->
-#                $("#confirm-save-modal").modal("hide")
-#            .done ->
-#                alert("Workflow saved")
-#            .fail (resp, ..., errorType) =>
-#                unless errorType is "Conflict"
-#                    alert("Error: #{errorType}")
-#                    return
-#                @conflictingInstances.removeAll()
-#                @conflictingInstances.push(pi.id) for pi in resp.responseJSON.processInstance
-#                $('#conflicts-modal').modal('show')
+        COW.xmlRequest("processes/#{converter.name}", "put", xml)
+            .always ->
+                $("#confirm-save-modal").modal("hide")
+            .done ->
+                alert("Workflow saved")
+            .fail (resp, ..., errorType) =>
+                unless errorType is "Conflict"
+                    alert("Error: #{errorType}")
+                    return
+                @conflictingInstances.removeAll()
+                @conflictingInstances.push(pi.id) for pi in resp.responseJSON.processInstance
+                $('#conflicts-modal').modal('show')
 
 
 
