@@ -22,6 +22,7 @@ import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TTask;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.ServiceTask;
+import org.wiredwidgets.cow.server.api.model.v2.Variable;
 
 @Component
 public class ServiceTaskNodeBuilder extends AbstractFlowNodeBuilder<ServiceTask, TTask> {
@@ -51,14 +52,31 @@ public class ServiceTaskNodeBuilder extends AbstractFlowNodeBuilder<ServiceTask,
         addOtherAttribute("taskName", "RestService", t);
         
         Property varsProperty = context.getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
-        addDataInputFromProperty(UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty, t);
-        addDataOutputFromProperty(UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, varsProperty, t);
+        
+        // don't use generic map??
+        // addDataInputFromProperty(UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty, t);
+        
+        // declared inputs
+        if (st.getVariables() != null) {
+	        for (Variable var : st.getVariables().getVariables()) {
+	        	addDataInputFromProperty(var.getName(), var.getName(), t, context);
+	        }
+        }
+        
+        // addDataOutputFromProperty(UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, varsProperty, t);
         
         addDataInputFromExpression("method", st.getMethod(), t);
         addDataInputFromExpression("url", st.getUrl(), t);
         addDataInputFromExpression("content", st.getContent(), t);
         addDataInputFromExpression("contentType", st.getContentType(), t);
-        addDataInputFromExpression("var", st.getVar(), t);	
+        
+        // this is not really needed as the mapping is defined below.
+        // addDataInputFromExpression("var", st.getVar(), t);	
+        
+        // declare an output mapping for the result to a process level variable
+        // the process variable may be new or may be something declared previously, e.g. from a task.
+        addDataOutputFromProperty("result", st.getVar(), t, context);
+        
         addDataInputFromExpression("resultSelectorXPath", st.getResultSelectorXPath(), t);
 	}
 	

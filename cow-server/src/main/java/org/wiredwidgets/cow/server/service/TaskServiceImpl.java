@@ -20,8 +20,8 @@
  */
 package org.wiredwidgets.cow.server.service;
 
-import static org.wiredwidgets.cow.server.transform.graph.bpmn20.DecisionTaskNodeBuilder.DECISION_VAR_NAME;
 import static org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder.VARIABLES_PROPERTY;
+import static org.wiredwidgets.cow.server.transform.graph.bpmn20.DecisionTaskNodeBuilder.DECISION_VAR_NAME;
 import static org.wiredwidgets.cow.server.transform.graph.bpmn20.UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME;
 
 import java.util.ArrayList;
@@ -30,11 +30,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.persistence.EntityNotFoundException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.log4j.Logger;
 import org.drools.runtime.process.WorkflowProcessInstance;
 import org.jbpm.task.Content;
 import org.jbpm.task.Deadline;
@@ -47,8 +47,9 @@ import org.jbpm.task.TaskData;
 import org.jbpm.task.User;
 import org.jbpm.task.query.TaskSummary;
 import org.jbpm.task.service.ContentData;
-//import org.jbpm.task.service.local.LocalTaskService;
 import org.jbpm.task.utils.ContentMarshallerHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -59,6 +60,9 @@ import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.repo.TaskRepository;
+import org.wiredwidgets.cow.server.transform.graph.bpmn20.AbstractUserTaskNodeBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -77,16 +81,15 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 	@Autowired
 	org.jbpm.task.TaskService taskClient;
 	
-	private static Logger log = Logger.getLogger(TaskServiceImpl.class);
-
-    //private static TypeDescriptor JBPM_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.task.Participation.class));
-    private static TypeDescriptor COW_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Participation.class));
+	@Autowired
+	ObjectMapper objectMapper;
+	
+	private final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
+	
     private static TypeDescriptor JBPM_TASK_SUMMARY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.query.TaskSummary.class));
     private static TypeDescriptor JBPM_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.Task.class));
     private static TypeDescriptor COW_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Task.class));
-    //private static TypeDescriptor JBPM_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryTask.class));
     private static TypeDescriptor COW_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(HistoryTask.class));
-    // private static TypeDescriptor JBPM_HISTORY_ACTIVITY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryActivityInstance.class));
     private static TypeDescriptor COW_HISTORY_ACTIVITY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(HistoryActivity.class));
 
     @Transactional(readOnly = true)
@@ -102,7 +105,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	return new ArrayList<Task>();
         }
 
-        //tempTasks.addAll(jbpmTaskService.getTasksAssignedAsPotentialOwner(assignee, "en-UK"));
         tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwner(assignee, "en-UK"));
         
        for (TaskSummary task : tempTasks){
@@ -123,7 +125,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasks() {
-    	//List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>) jbpmTaskService.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
         List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>) taskClient.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
         return this.convertTasks(tasks);
     }
@@ -136,7 +137,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     		return converter.convert(task, Task.class);
     	}
     	catch (EntityNotFoundException e) {
-    		log.error("Task with id: " + id + " not found.");
+    		log.error("Task with id: {} not found.", id);
     		return null;
     	}
     }
@@ -152,9 +153,18 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     public void completeTask(Long id, String assignee, String outcome, Map<String, ?> variables) {
     	// should be handled upstream in controller
     	assert(assignee != null);
-    	
-        log.debug(assignee + " starting task with ID: " + id);
-        //org.jbpm.task.Task task = jbpmTaskService.getTask(id);
+    	   
+        if (log.isDebugEnabled()) {
+            log.debug("{} completing task with ID: {}", assignee, id);
+            if (outcome != null) {
+            	log.debug("Outcome: {}", outcome);
+            }
+        	log.debug("Variables passed in: ");
+        	for (Entry<String, ?> entry : variables.entrySet()) {
+        		log.debug("{}={}", entry.getKey(), entry.getValue());
+        	}
+        }
+          
         org.jbpm.task.Task task = taskClient.getTask(id);
         
         // convert to COW task so we can verify the decision
@@ -170,13 +180,15 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	}
         }
         
-        //Content inputContent = jbpmTaskService.getContent(task.getTaskData().getDocumentContentId());
         Content inputContent = taskClient.getContent(task.getTaskData().getDocumentContentId());
         
         Map<String, Object> inputMap = (Map<String, Object>) ContentMarshallerHelper.unmarshall(inputContent.getContent(), null);
         
-        for (Map.Entry<String, Object> entry : inputMap.entrySet()){
-            log.debug(entry.getKey() + " = " + entry.getValue());
+        if (log.isDebugEnabled()) {
+        	log.debug("Variables from the task content:");
+	        for (Map.Entry<String, Object> entry : inputMap.entrySet()){
+	            log.debug("{}={}",  entry.getKey(), entry.getValue());
+	        }
         }
         
         Map<String, Object> outputMap = new HashMap<String, Object>();
@@ -184,7 +196,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         // put Outcome into the outputMap 
         // The InputMap contains a variable that tells us what key to use
         if (inputMap.get(DECISION_VAR_NAME) != null) {
-        	log.debug("Decision outcome: " + outcome);
+        	log.debug("Decision outcome: {}", outcome);
         	outputMap.put((String)inputMap.get(DECISION_VAR_NAME), outcome);
         }        
                
@@ -198,66 +210,83 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         // So, instead, we get the current values directly from the process instance, rather than the values copied into the task
         
         Long processInstanceId = task.getTaskData().getProcessInstanceId();
-        Map<String, Object> inputVarsMap = null;
+        Map<String, Object> currentProcessVarsMap = null;
         
         WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(processInstanceId);
-        if (pi != null) {
-        	inputVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
-        }
-        else {
-        	log.error("ProcessInstance not found: " + processInstanceId);
+        if (pi == null) {
+        	log.error("ProcessInstance not found: {}", processInstanceId);
+        	return;
         }
         
-        if (inputVarsMap != null) {
-        	// initialize the output map with the input values
-        	log.debug("Copying input map: " + inputVarsMap);
-        	outputVarsMap.putAll(inputVarsMap);
-        }
+        // initialize in case it's null or empty
+        Map<String, Map<String, Boolean>> varsInfoMap = new HashMap<String, Map<String, Boolean>>();
         
-        
-        //Copy variables from cow task to output variables
-        org.wiredwidgets.cow.server.api.service.Variables cowVariables = cowTask.getVariables();
-        if (cowVariables != null) {
-	        for(org.wiredwidgets.cow.server.api.service.Variable var : 
-	        		cowVariables.getVariables()) {
-	        	String varName = var.getName();
-	        	if (inputMap.containsKey(varName)) {
-	        		outputVarsMap.put(varName, inputMap.get(varName));
-	        	}
-	        	else {
-	        		outputVarsMap.put(varName, var.getValue());
-	        	}
+        String varsJson = (String)inputMap.get(AbstractUserTaskNodeBuilder.TASK_VARIABLES_INFO);
+        if (varsJson != null && !varsJson.isEmpty()) {
+	        try {
+	        	varsInfoMap = objectMapper.readValue(varsJson, Map.class);
+	        }
+	        catch (Exception e) {
+	        	log.error("Json parsing exception", e);
 	        }
         }
+
+        // if any required variables were not provided, throw an exception
+        verifyRequiredVariables(variables, varsInfoMap);
         
-        if (variables != null && variables.size() > 0) {
-        	log.debug("Adding variables: " + variables);
+        currentProcessVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
+        
+        if (currentProcessVarsMap != null) {
+        	// initialize the output map with the input values
+        	log.debug("Initializing current values of generic map: {}", currentProcessVarsMap);
+        	outputVarsMap.putAll(currentProcessVarsMap);
+        }
+        
+        if (variables != null && !variables.isEmpty()) {
+        	log.debug("Adding variables: {}", variables);
         	// update with any new or modified values
-        	outputVarsMap.putAll(variables);
+        	for (Entry<String, ?> entry : variables.entrySet()) {
+        		if (varsInfoMap.containsKey(entry.getKey()) && varsInfoMap.get(entry.getKey()).get("output").equals(Boolean.TRUE)) {
+        			// this is a declared output variable so it goes directly into the process
+        			// rather than into the generic map.
+        			log.debug("Adding declared variable {}={}", entry.getKey(), entry.getValue());
+        			outputMap.put(entry.getKey(), entry.getValue());
+        		}
+        		else {
+        			// TODO: should we check to see whether it was modified?  Otherwise we may be
+        			// overwriting a more recently modified value.
+        			log.debug("Adding variable {}={} to generic map", entry.getKey(), entry.getValue());
+        			outputVarsMap.put(entry.getKey(),  entry.getValue());
+        		}
+        	}
     	}
         
         if (outputVarsMap.size() > 0) {
-        	log.debug("Adding map to output");
+        	log.debug("Adding map to output: {}", outputVarsMap);
         	outputMap.put(TASK_OUTPUT_VARIABLES_NAME, outputVarsMap);   
         }
        
-        // start the task
+        // The task must be started before we complete it.
         if (task.getTaskData().getStatus().equals(org.jbpm.task.Status.Reserved)) {
             // change status to InProgress
             log.debug("Starting task...");
-            //jbpmTaskService.start(id, assignee); 
             taskClient.start(id, assignee); 
-        }        
+        }    
+        
+        log.debug("Final output map: {}", outputMap);
+        if (outputMap.size() == 0) {
+        	// pass null rather than an empty map
+        	outputMap = null;
+        }
         
         // TODO: since we're passing the variables map further down, maybe we don't need to pass it here?  Test this.
-        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);
+        // ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);
         log.debug("Completing task...");
-        //jbpmTaskService.complete(id, assignee, contentData);
-        taskClient.complete(id, assignee, contentData);
+        taskClient.completeWithResults(id, assignee, outputMap);
         
         // note that we have to pass the variables again.        
         kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), outputMap);
-    
+        
     }
 
     @Transactional(readOnly = true)
@@ -266,7 +295,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         List<TaskSummary> tempTasks;
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
-        //tempTasks = jbpmTaskService.getTasksAssignedAsPotentialOwner("Administrator", "en-UK");
         tempTasks = taskClient.getTasksAssignedAsPotentialOwner("Administrator", "en-UK");
         
         for (TaskSummary task : tempTasks){
@@ -292,7 +320,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
-        //tempTasks.addAll(jbpmTaskService.getTasksAssignedAsPotentialOwner(user, "en-UK"));
         tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwner(user, "en-UK"));
         
         for (TaskSummary task : tempTasks){
@@ -306,7 +333,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Override
     public void takeTask(Long taskId, String userId) {
-    	//jbpmTaskService.claim(taskId, userId);
         taskClient.claim(taskId, userId);
     }
     
@@ -320,7 +346,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     public List<Task> findAllTasksByProcessInstance(Long id) {
         //List<Status> status = Arrays.asList(Status.Completed, Status.Created, Status.Error, Status.Exited, Status.Failed, Status.InProgress, Status.Obsolete, Status.Ready, Status.Reserved, Status.Suspended);
     	List<Status> status = Arrays.asList(Status.Ready);
-        //return this.convertTaskSummarys(jbpmTaskService.getTasksByStatusByProcessId(id, status, "en-UK"));
         return this.convertTaskSummarys(taskClient.getTasksByStatusByProcessId(id, status, "en-UK"));
     }
 
@@ -434,8 +459,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
             newTask = true;
             target = new org.jbpm.task.Task();
         } else {
-        	//target = jbpmTaskService.getTask(Long.valueOf(source.getId()));
-                target = taskClient.getTask(Long.valueOf(source.getId()));
+        	target = taskClient.getTask(Long.valueOf(source.getId()));
         }
         if (target == null) {
             return null;
@@ -494,10 +518,24 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         if (newTask) {
             //BlockingAddTaskResponseHandler addTaskResponseHandler = new BlockingAddTaskResponseHandler();
             //taskClient.addTask(target, null, addTaskResponseHandler);
-        	//jbpmTaskService.addTask(target, null);
-                taskClient.addTask(target, null);
+            taskClient.addTask(target, null);
         }
 
         return target;
+    }
+    
+    /*
+     * Determines whether all required variables have been provided
+     */
+    private void verifyRequiredVariables(Map<String, ?> variables, Map<String, Map<String, Boolean>> varsInfoMap) {
+    	log.debug("Checking for required variables...");
+    	if (varsInfoMap != null) {
+	    	for (String varName : varsInfoMap.keySet()) {
+	    		log.debug("{}:{}", varName, varsInfoMap.get(varName).get("required"));
+	    		if (varsInfoMap.get(varName).get("required").equals(Boolean.TRUE) && !variables.containsKey(varName)) {
+	    			throw new RuntimeException("Required variable " + varName + " was not provided");
+	    		}
+	    	}
+    	}
     }
 }

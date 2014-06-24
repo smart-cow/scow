@@ -23,6 +23,7 @@ import javax.xml.datatype.DatatypeConstants;
 import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 
@@ -36,11 +37,12 @@ public class TaskEvaluator extends AbstractEvaluator<Task> {
 
     @Override
     protected void evaluateInternal() {
-        this.historyActivities = info.getActivities(activity.getKey());
-        this.completionState = getCompletionState();
+        // this.historyActivities = info.getActivities(activity.getKey());
+    	// should be handled by graph evaluator
+        /// this.completionState = getCompletionState();
         
         // needed for the summary
-        activity.setCompletionState(this.completionState.getName());
+        // activity.setCompletionState(this.completionState);
         
         if  (activity.getAssignee() != null) {
         	info.updateUserSummary(activity.getAssignee(), activity);
@@ -51,40 +53,40 @@ public class TaskEvaluator extends AbstractEvaluator<Task> {
         
     }
 
-    private CompletionState getCompletionState() {
-
-        // Because of possible looping structures, there may be more than once instance of a task activity
-        
-        if (historyActivities.isEmpty()) {
-        	log.debug("No history for task, returning branch state: " + branchState.getName());
-            return branchState;
-        } else {
-            boolean isCompleted = true;
-            for (HistoryActivity historyActivity : historyActivities) {
-                if (historyActivity.getEndTime() == null) {
-                    activity.setCreateTime(historyActivity.getStartTime());
-                    activity.setEndTime(null);
-                    isCompleted = false;
-                } else {
-                    if (activity.getCreateTime() == null) {
-                        // this is the first history instance -- set activity properties to match
-                        activity.setCreateTime(historyActivity.getStartTime());
-                        activity.setEndTime(historyActivity.getEndTime());
-                    } else {
-                        // not the first. Determine whether this new history instance is later than
-                        // the current values set for the activity.
-                        int result = activity.getCreateTime().compare(historyActivity.getStartTime());
-                        if (result == DatatypeConstants.LESSER) {
-                            activity.setCreateTime(historyActivity.getStartTime());
-                            activity.setEndTime(historyActivity.getEndTime());
-                        }
-                    }
-                }
-            }
-            
-            return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
-        }
-    }
+//    private CompletionState getCompletionState() {
+//
+//        // Because of possible looping structures, there may be more than once instance of a task activity
+//        
+//        if (historyActivities.isEmpty()) {
+//        	log.debug("No history for task, returning branch state: " + branchState);
+//            return branchState;
+//        } else {
+//            boolean isCompleted = true;
+//            for (HistoryActivity historyActivity : historyActivities) {
+//                if (historyActivity.getEndTime() == null) {
+//                    activity.setCreateTime(historyActivity.getStartTime());
+//                    activity.setEndTime(null);
+//                    isCompleted = false;
+//                } else {
+//                    if (activity.getCreateTime() == null) {
+//                        // this is the first history instance -- set activity properties to match
+//                        activity.setCreateTime(historyActivity.getStartTime());
+//                        activity.setEndTime(historyActivity.getEndTime());
+//                    } else {
+//                        // not the first. Determine whether this new history instance is later than
+//                        // the current values set for the activity.
+//                        int result = activity.getCreateTime().compare(historyActivity.getStartTime());
+//                        if (result == DatatypeConstants.LESSER) {
+//                            activity.setCreateTime(historyActivity.getStartTime());
+//                            activity.setEndTime(historyActivity.getEndTime());
+//                        }
+//                    }
+//                }
+//            }
+//            
+//            return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
+//        }
+//    }
 
 	@Override
 	protected Class<Task> getActivityClass() {

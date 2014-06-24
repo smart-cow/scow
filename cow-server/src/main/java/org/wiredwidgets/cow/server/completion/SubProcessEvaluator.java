@@ -22,12 +22,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 import org.wiredwidgets.cow.server.api.model.v2.SubProcess;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 
-@Component
-@Scope("prototype")
+//@Component
+//@Scope("prototype")
 public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
     
     @Autowired
@@ -38,35 +39,35 @@ public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
 
     @Override
     protected void evaluateInternal() {
-        this.completionState = getCompletionState();
+        // this.completionState = getCompletionState();
     }
 
-    private CompletionState getCompletionState() {
-        
-        // First, check for open instances of the subprocess linked to its parent
-        List<ProcessInstance> openProcessInstances = processInstanceService.findProcessInstancesByKey(activity.getSubProcessKey());
-              
-        for (ProcessInstance processInstance : openProcessInstances) {
-        	if (processInstance.getParentId() != null 
-        			&& processInstance.getParentId().equals(processInstanceId)) {
-                return CompletionState.OPEN;
-            }
-        }        
-        
-        // Next, check the completion state variable
-        // see JbpmSubProcessNodeBuilder for how this var is created
-        // String completed = (String) executionService.getVariable(processInstanceId, "_" + activity.getSubProcessKey() + "_complete");
-        
-        // TODO: implement this!
-        String completed = "xxx";
-        
-        if (completed != null && completed.equals("true")) {
-            return CompletionState.COMPLETED;
-        }
-        
-        // not completed, not open, must be not started
-        return branchState;
-    }
+//    private CompletionState getCompletionState() {
+//        
+//        // First, check for open instances of the subprocess linked to its parent
+//        List<ProcessInstance> openProcessInstances = processInstanceService.findProcessInstancesByKey(activity.getSubProcessKey());
+//              
+//        for (ProcessInstance processInstance : openProcessInstances) {
+//        	if (processInstance.getParentId() != null 
+//        			&& processInstance.getParentId().equals(processInstanceId)) {
+//                return CompletionState.OPEN;
+//            }
+//        }        
+//        
+//        // Next, check the completion state variable
+//        // see JbpmSubProcessNodeBuilder for how this var is created
+//        // String completed = (String) executionService.getVariable(processInstanceId, "_" + activity.getSubProcessKey() + "_complete");
+//        
+//        // TODO: implement this!
+//        String completed = "xxx";
+//        
+//        if (completed != null && completed.equals("true")) {
+//            return CompletionState.COMPLETED;
+//        }
+//        
+//        // not completed, not open, must be not started
+//        return branchState;
+//    }
 
 	@Override
 	protected Class<SubProcess> getActivityClass() {

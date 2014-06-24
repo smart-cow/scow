@@ -14,19 +14,26 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-/*
- * CUSTOM package-info to replace the generated default in order to eliminate the namespace prefix
- * for the JPDL XML output, in order to work around JBPM bug https://issues.jboss.org/browse/JBPM-3392
- * See http://hwellmann.blogspot.com/2011/03/jaxb-marshalling-with-custom-namespace.html
- * 
- */
+package org.wiredwidgets.cow.server.completion;
 
-@XmlSchema(namespace = "http://jbpm.org/4.4/jpdl", 
-        xmlns = {@XmlNs(namespaceURI = "http://jbpm.org/4.4/jpdl", prefix = "")},
-        elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
-package org.jbpm._4_4.jpdl;
+public class DefaultEvaluator<T extends Activity> extends AbstractEvaluator<T> {
+	
+	private Class<T> activityClass;
+	
+	public DefaultEvaluator(Class<T> activityClass) {
+		this.activityClass = activityClass;
+	}
 
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlSchema;
+	@Override
+	protected Class<T> getActivityClass() {
+		return activityClass;
+	}
 
+	@Override
+	protected void evaluateInternal() {
+		// do nothing
+	}
+
+}

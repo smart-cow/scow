@@ -75,15 +75,19 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 		// load variables
 		String contentPattern = (String) item.getParameter("content");
 		String contentType = (String) item.getParameter("contentType");
-		String var = (String) item.getParameter("var");
+		//String var = (String) item.getParameter("var");
 		String urlPattern = (String) item.getParameter("url");
 		String method = (String) item.getParameter("method"); 
 		String xpath = (String) item.getParameter("resultSelectorXPath");
 
-		Map<String, Object> variables = convertVarMap(item.getParameter("Variables"));
+		// Map<String, Object> variables = convertVarMap(item.getParameter("Variables"));
 		
+		// note that parameters above (content, contentType, etc) are also eligible for 
+		// variable substitution.  Could there be any probem with that???  If so we could
+		// strip them out...
+		Map<String, Object> variables = item.getParameters();
 		
-		
+
 		//do request
 		String result = null;
 		String url = replaceVariables(urlPattern, variables);	
@@ -111,12 +115,16 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 		
 		// Copy variables
 		Map<String, Object> outputMap = new HashMap<String, Object>();
-		outputMap.put("Variables", variables);
+		// outputMap.put("Variables", variables);
 		// update the result variable, if specified
 		
-		if (var != null && !var.trim().equals("")) {  	
-			variables.put(var, result);
-		}   
+//		if (var != null && !var.trim().equals("")) {  	
+//			variables.put(var, result);
+//		}   
+		
+		// put the result into the standard "result" output
+		// this will be assigned to the variable named by getVar();
+		outputMap.put("result", result);
 	
 		
 		manager.completeWorkItem(item.getId(), outputMap);		

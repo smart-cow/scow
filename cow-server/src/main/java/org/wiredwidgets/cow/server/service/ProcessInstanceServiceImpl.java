@@ -23,15 +23,21 @@ package org.wiredwidgets.cow.server.service;
 import static org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
+import org.drools.KnowledgeBase;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
+import org.jbpm.process.audit.NodeInstanceLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
 import org.jbpm.process.audit.VariableInstanceLog;
+import org.jbpm.ruleflow.core.RuleFlowProcess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -43,7 +49,9 @@ import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.completion.Evaluator;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
 import org.wiredwidgets.cow.server.completion.ProcessInstanceInfo;
+import org.wiredwidgets.cow.server.completion.graph.GraphCompletionEvaluator;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
+import org.wiredwidgets.cow.server.transform.graph.ActivityGraph;
 import org.wiredwidgets.cow.server.transform.graph.bpmn20.Bpmn20ProcessBuilder;
 
 
@@ -59,6 +67,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 	ProcessInstanceLogRepository processInstanceLogRepo;
     
     @Autowired
+    GraphCompletionEvaluator graphEvaluator;
+    
+    @Autowired
     ProcessService processService;
     
     @Autowired
@@ -66,6 +77,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     
     @Autowired
     EvaluatorFactory evaluatorFactory;
+    
+    @Autowired
+    KnowledgeBase kbase;
        
     public static Logger log = Logger.getLogger(ProcessInstanceServiceImpl.class);
     private static TypeDescriptor JBPM_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.drools.runtime.process.ProcessInstance.class));
@@ -77,10 +91,17 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Override
     public String executeProcess(ProcessInstance instance) {
     	
+    	// get a reference to the process object
+    	RuleFlowProcess process = (RuleFlowProcess)kbase.getProcess(instance.getProcessDefinitionKey());
+    	
         Map<String, Object> vars = new HashMap<String, Object>();
+        
+        // map of variables that will be used to initialize the process instance
         Map<String, Object> processVars = new HashMap<String, Object>();
         
-        //content.put("content", new HashMap<String,Object>());
+        // generic map of non declared variables
+        Map<String, Object> genericVars = new HashMap<String, Object>();
+        
         if (instance.getVariables() != null) {
             for (Variable variable : instance.getVariables().getVariables()) {
                 vars.put(variable.getName(), variable.getValue());
@@ -89,9 +110,23 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         // COW-65 save history for all variables
         // org.jbpm.api.ProcessInstance pi = executionService.startProcessInstanceByKey(instance.getProcessDefinitionKey(), vars);
         
-        processVars.put(Bpmn20ProcessBuilder.VARIABLES_PROPERTY, vars);
+        // determine which variables are declared at the process level and which go into the generic map
+        for (String key : vars.keySet()) {
+        	if (process.getVariableScope().findVariable(key) != null) {
+        		// this is a declared variable for the process definition
+        		processVars.put(key, vars.get(key));
+        	}
+        	else {
+        		// not declared, so it goes into the generic map
+        		genericVars.put(key, vars.get(key));
+        	}
+        }
+        
+        // add the generic map into our input map, using a standard variable name declared in all COW processes
+        processVars.put(Bpmn20ProcessBuilder.VARIABLES_PROPERTY, genericVars);
         
         if (instance.getName() != null) {
+        	// standard variable declared for all COW processes to store the instance name
         	processVars.put(Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY, instance.getName());
         }
                 
@@ -184,14 +219,20 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Override
     public ProcessInstance getProcessInstanceStatus(Long processInstanceId) {
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
+		
 		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
 		org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pil.getProcessId());
 
 		String instanceId = process.getKey() + "." + processInstanceId;
 		
-		ProcessInstanceInfo info = new ProcessInstanceInfo(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), 
-				getProcessInstanceVariables(processInstanceId));
+		// execute the graph based evaluator.  this will populate the completion status
+		// for activity nodes based on the NodeInstanceLog
+		List<NodeInstanceLog> nodes = JPAProcessInstanceDbLog.findNodeInstances(processInstanceId);
+		ActivityGraph graph = graphEvaluator.evaluate(process, nodes);
 		
+		
+		ProcessInstanceInfo info = new ProcessInstanceInfo(pil.getStatus(), graph);
+
 		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(instanceId, process, info);
 		evaluator.evaluate();
 		
@@ -279,5 +320,5 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     	}
     	return vars;
     }
-    
+     
 }

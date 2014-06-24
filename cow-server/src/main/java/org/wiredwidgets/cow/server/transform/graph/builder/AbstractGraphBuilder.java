@@ -56,6 +56,9 @@ public abstract class AbstractGraphBuilder<T extends Activity> implements Activi
 	@Override
 	public void buildGraph(Activity activity, ActivityGraph graph, Process process) {
 		
+		// add the activity to the list
+		graph.getActivities().add(activity);
+		
 		// replace any non GUID keys
 		if (activity.getKey() != null && !activity.getKey().contains("-")) {
 			activity.setKey(null);

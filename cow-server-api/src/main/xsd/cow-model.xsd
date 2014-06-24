@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 
     Approved for Public Release: 10-4800. Distribution Unlimited.
@@ -15,18 +15,11 @@
 
     See the License for the specific language governing permissions and limitations under the License.
 
--->
-
-<schema attributeFormDefault="unqualified" elementFormDefault="qualified"
-    targetNamespace="http://www.wiredwidgets.org/cow/server/schema/model-v2"
-    xmlns="http://www.w3.org/2001/XMLSchema"
-    xmlns:tns="http://www.wiredwidgets.org/cow/server/schema/model-v2"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
+--><schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.wiredwidgets.org/cow/server/schema/model-v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.wiredwidgets.org/cow/server/schema/model-v2" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd">
 
     <!-- Global Elements -->
     <element name="process" type="tns:Process"/>
-    <element name="activity" type="tns:Activity" abstract="true" nillable="false">
+    <element abstract="true" name="activity" nillable="false" type="tns:Activity">
         <annotation>
             <documentation>
             	<![CDATA[
@@ -42,11 +35,11 @@
     <element name="exit" substitutionGroup="tns:activity" type="tns:Exit"/>
     <element name="loop" substitutionGroup="tns:activity" type="tns:Loop"/>
     <element name="option" type="tns:Option"/>
-    <element name="script" substitutionGroup="tns:activity" type="tns:Script" />
+    <element name="script" substitutionGroup="tns:activity" type="tns:Script"/>
     <element name="serviceTask" substitutionGroup="tns:activity" type="tns:ServiceTask"/>
-    <element name="signal" substitutionGroup="tns:activity" type="tns:Signal" />
+    <element name="signal" substitutionGroup="tns:activity" type="tns:Signal"/>
     <element name="subProcess" substitutionGroup="tns:activity" type="tns:SubProcess"/>
-    <element name="task" substitutionGroup="tns:activity" type="tns:Task" />
+    <element name="task" substitutionGroup="tns:activity" type="tns:Task"/>
 
     <!-- Type definitions -->
 
@@ -94,8 +87,8 @@
 	            </documentation>
 	        </annotation>         
         </attribute>
-        <attribute name="type" type="string" />
-        <attribute name="required" type="boolean" default="false">
+        <attribute name="type" type="string"/>
+        <attribute default="false" name="required" type="boolean">
         	<annotation>
 	            <documentation>
 	            	<![CDATA[
@@ -104,7 +97,7 @@
 	            </documentation>
 	        </annotation>          
         </attribute>
-        <attribute name="output" type="boolean" default="false" />
+        <attribute default="false" name="output" type="boolean"/>
     </complexType>
 
     <complexType name="Variables">
@@ -119,10 +112,10 @@
         </annotation>
         <sequence>
             <element ref="tns:activity"/>
-            <element name="variables" type="tns:Variables" minOccurs="0"/>
-            <element name="bypassAssignee" type="string" minOccurs="0"/>
-            <element name="bypassCandidateUsers" type="string" minOccurs="0"/>
-            <element name="bypassCandidateGroups" type="string" minOccurs="0"/>
+            <element minOccurs="0" name="variables" type="tns:Variables"/>
+            <element minOccurs="0" name="bypassAssignee" type="string"/>
+            <element minOccurs="0" name="bypassCandidateUsers" type="string"/>
+            <element minOccurs="0" name="bypassCandidateGroups" type="string"/>
         </sequence>
         <attribute name="name">
 	        <annotation>
@@ -147,7 +140,7 @@
 	            </documentation>
 	        </annotation>        
         </attribute>
-        <attribute name="targetFormat" default="bpmn20">
+        <attribute default="bpmn20" name="targetFormat">
         	<annotation>
         		<documentation>
         			<![CDATA[
@@ -159,7 +152,7 @@
         		</documentation>
         	</annotation>        
         </attribute>
-        <attribute name="maxId" type="int" default="0" >
+        <attribute default="0" name="maxId" type="int">
         	<annotation>
         		<documentation>
         			<![CDATA[
@@ -173,12 +166,12 @@
         </attribute>
     </complexType>
 
-    <complexType name="Activity" abstract="true">
+    <complexType abstract="true" name="Activity">
         <annotation>
             <documentation>Abstract type used by all different types of process elements.</documentation>
         </annotation>
         <sequence>
-            <element name="description" type="string" minOccurs="0">
+            <element minOccurs="0" name="description" type="string">
                 <annotation>
                     <documentation>Documentation for the process element.  For example, this could be used to describe a task in detail and could be available from the UI for users needing information on the details of performing a given task.</documentation>
                 </annotation>
@@ -203,12 +196,12 @@
                 </documentation>
             </annotation>
         </attribute>
-        <attribute name="bypassable" type="boolean" default="false">
+        <attribute default="false" name="bypassable" type="boolean">
             <annotation>
                 <documentation>Indicates whether this activity supports the Bypass feature.</documentation>
             </annotation>
         </attribute>
-        <attribute name="wrapped" type="boolean" default="false" use="optional">
+        <attribute default="false" name="wrapped" type="boolean" use="optional">
             <annotation>
                 <documentation>Temporary flag needed for internal processing by java code.  Do not use this attribute in XML documents.</documentation>
             </annotation>
@@ -218,11 +211,12 @@
                 <documentation>Currently unused.</documentation>
             </annotation>        
         </attribute>
-        <attribute fixed="" name="completionState" type="string">
+        <attribute name="completionState" type="tns:CompletionState">
             <annotation>
                 <documentation>Assigned by the server for process instance status reporting.  Not used for workflow definitions.</documentation>
             </annotation>         
         </attribute>
+        <attribute name="completionTime" type="date"/>
 
     </complexType>
 
@@ -233,7 +227,7 @@
         <complexContent>
             <extension base="tns:Activity">
                 <sequence>
-                    <element name="assignee" type="string" minOccurs="0">
+                    <element minOccurs="0" name="assignee" type="string">
 			            <annotation>
 			                <documentation>
 			                	<![CDATA[
@@ -242,7 +236,7 @@
 			                </documentation>
 			            </annotation>                    
                     </element>
-                    <element name="candidateUsers" type="string" minOccurs="0">
+                    <element minOccurs="0" name="candidateUsers" type="string">
 			            <annotation>
 			                <documentation>
 			                	<![CDATA[
@@ -255,7 +249,7 @@
 			                </documentation>
 			            </annotation>
                     </element>
-                    <element name="candidateGroups" type="string" minOccurs="0">
+                    <element minOccurs="0" name="candidateGroups" type="string">
 			            <annotation>
 			                <documentation>
 			                	<![CDATA[
@@ -265,7 +259,7 @@
 			                </documentation>
 			            </annotation>                    
                     </element>
-                    <element name="dueDate" type="string" minOccurs="0">
+                    <element minOccurs="0" name="dueDate" type="string">
 			            <annotation>
 			                <documentation>
 			                	<![CDATA[
@@ -276,10 +270,10 @@
 			                </documentation>
 			            </annotation>                    
                     </element>
-                    <element name="completion" type="string" minOccurs="0"/>
-                    <element name="createTime" type="dateTime" minOccurs="0"/>
-                    <element name="endTime" type="dateTime" minOccurs="0"/> 
-                    <element name="variables" type="tns:Variables" minOccurs="0"/>
+                    <element minOccurs="0" name="completion" type="string"/>
+                    <element minOccurs="0" name="createTime" type="dateTime"/>
+                    <element minOccurs="0" name="endTime" type="dateTime"/> 
+                    <element minOccurs="0" name="variables" type="tns:Variables"/>
                 </sequence>
             </extension>
         </complexContent>
@@ -292,28 +286,26 @@
         <complexContent>
             <extension base="tns:Activity">
                 <sequence>
-                	<element name="method" minOccurs="1">
+                	<element minOccurs="1" name="method">
                 		<simpleType>
                 			<restriction base="string">
-                				<enumeration value="GET" />
-                				<enumeration value="POST" />
+                				<enumeration value="GET"/>
+                				<enumeration value="POST"/>
                 			</restriction>
                 		</simpleType>
                 	</element>
-                	<element name="url" type="string" minOccurs="1" />
-                	<element name="content" type="string" minOccurs="0" />
-                	<element name="contentType" type="string"  maxOccurs="1" minOccurs="0">
+                	<element minOccurs="1" name="url" type="string"/>
+                	<element minOccurs="0" name="content" type="string"/>
+                	<element maxOccurs="1" minOccurs="0" name="contentType" type="string">
                 		<annotation>
                 			<documentation>
                 				Use this to set the HTTP Content-Type header for the request
                 			</documentation>
                 		</annotation>
                 	</element>
-                	<element name="var" type="string" minOccurs="0" />
-                	<element name="variables" type="tns:Variables"
-                		minOccurs="0" />
-                	<element name="resultSelectorXPath" type="string" maxOccurs="1" 
-                		minOccurs="0" />
+                	<element minOccurs="0" name="var" type="string"/>
+                	<element minOccurs="0" name="variables" type="tns:Variables"/>
+                	<element maxOccurs="1" minOccurs="0" name="resultSelectorXPath" type="string"/>
                 </sequence>
             </extension>
         </complexContent>
@@ -327,7 +319,8 @@
             <extension base="tns:Activity">
                 <sequence maxOccurs="1">
                     <element ref="tns:task"/>
-                    <element ref="tns:option" maxOccurs="unbounded" minOccurs="2"/>
+                    <element name="question" type="string" />
+                    <element maxOccurs="unbounded" minOccurs="2" ref="tns:option"/>
                 </sequence>
             </extension>
         </complexContent>
@@ -340,9 +333,9 @@
         <complexContent>
             <extension base="tns:Activity">
                 <sequence>
-                    <element ref="tns:activity" maxOccurs="unbounded"/>
+                    <element maxOccurs="unbounded" ref="tns:activity"/>
                 </sequence>
-                <attribute name="sequential" type="boolean" default="true">
+                <attribute default="true" name="sequential" type="boolean">
                     <annotation>
                         <documentation>Indicates whether this set of activities should be treated as a simple sequence of steps, or as a set of parallel paths using Parallel Gateway semantics.</documentation>
                     </annotation>
@@ -363,7 +356,7 @@
         <complexContent>
             <extension base="tns:Activity">
                 <sequence>
-					<element name="variables" type="tns:Variables" minOccurs="0"/>
+					<element minOccurs="0" name="variables" type="tns:Variables"/>
                 </sequence>
                 <attribute name="sub-process-key"/>
             </extension>
@@ -389,6 +382,7 @@
                 <sequence>
                     <element ref="tns:activity"/>
                     <element name="loopTask" type="tns:Task"/>
+                    <element name="question" type="string" />
                 </sequence>
                 <attribute default="Done" name="doneName" type="string"/>
                 <attribute default="Repeat" name="repeatName" type="string"/>
@@ -422,7 +416,7 @@
             <documentation>This activity waits for an external signal trigger.</documentation>
         </annotation>
         <complexContent>
-            <extension base="tns:Activity" >
+            <extension base="tns:Activity">
             	<attribute name="signalId" type="string">
 			            <annotation>
 			                <documentation>
@@ -442,14 +436,25 @@
             <documentation>This activity executes a script.</documentation>
         </annotation>
         <complexContent>
-            <extension base="tns:Activity" >
+            <extension base="tns:Activity">
             	<sequence>
-            		<element name="import" type="string" minOccurs="0" maxOccurs="unbounded" />
+            		<element maxOccurs="unbounded" minOccurs="0" name="import" type="string"/>
             		<element name="content" type="string"/>
             	</sequence>
-            	<attribute name="scriptFormat" type="string" />
+            	<attribute name="scriptFormat" type="string"/>
             </extension>
         </complexContent>
-    </complexType>       
+    </complexType>    
+    
+    <simpleType name="CompletionState">
+    	<restriction base="string">
+    		<enumeration value="COMPLETED"/>
+    		<enumeration value="OPEN"/>
+    		<enumeration value="PLANNED"/>
+    		<enumeration value="CONTINGENT"/>
+    		<enumeration value="PRECLUDED"/>
+    		<enumeration value="UNKNOWN"/>
+    	</restriction>
+    </simpleType>
      
 </schema>

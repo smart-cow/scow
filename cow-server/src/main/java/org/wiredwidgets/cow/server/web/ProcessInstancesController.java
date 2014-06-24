@@ -106,7 +106,9 @@ public class ProcessInstancesController extends CowServerController{
             if (process.getVariables() != null) {
 	            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : 
 	            		process.getVariables().getVariables()) {
-	                addVariable(pi, var.getName(), var.getValue());
+	            	if (var.getValue() != null) {
+	            		addVariable(pi, var.getName(), var.getValue());
+	            	}
 	            }
             }
         }
