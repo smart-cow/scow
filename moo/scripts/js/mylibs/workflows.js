@@ -14,6 +14,7 @@
       this.removeVariable = __bind(this.removeVariable, this);
       this.loadWorkflows = __bind(this.loadWorkflows, this);
       this.showWorkflowTree = __bind(this.showWorkflowTree, this);
+      this.workflowModal = __bind(this.workflowModal, this);
       this.workflowSelected = __bind(this.workflowSelected, this);
       this.loadWorkflowVars = __bind(this.loadWorkflowVars, this);
       this.insertVariables = __bind(this.insertVariables, this);
@@ -48,7 +49,7 @@
       this.loadWorkflows();
     }
 
-    WorkflowsViewModel.prototype.startWorkflow = function() {
+    WorkflowsViewModel.prototype.startWorkflow = function(workflow) {
       var requestBody;
       requestBody = {
         processDefinitionKey: this.selectedWorkflow()
@@ -100,7 +101,6 @@
 
     WorkflowsViewModel.prototype.workflowSelected = function(workflow) {
       this.selectedWorkflow(workflow);
-      $("#variables-modal").modal("show");
       return COW.cowRequest("processes/" + workflow).done((function(_this) {
         return function(data) {
           var vars, _ref;
@@ -109,9 +109,14 @@
           if ((vars != null ? vars.length : void 0) > 0) {
             _this.loadWorkflowVars(vars);
           }
-          return _this.showWorkflowTree(data);
+          _this.showWorkflowTree(data);
+          return $("#" + workflow).append($("#hidden-row-content"));
         };
       })(this));
+    };
+
+    WorkflowsViewModel.prototype.workflowModal = function() {
+      return $("#variables-modal").modal("show");
     };
 
     WorkflowsViewModel.prototype.showWorkflowTree = function(workflowJson) {
