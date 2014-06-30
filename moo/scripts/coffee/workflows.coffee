@@ -25,7 +25,7 @@ class WorkflowsViewModel
 
 
     # Build and send ajax request to start the workflow
-    startWorkflow: =>
+    startWorkflow: (workflow) =>
         requestBody = processDefinitionKey: @selectedWorkflow()
         @insertVariables(requestBody)
         COW.cowRequest("processInstances", "post", requestBody).done (data) =>
@@ -53,7 +53,7 @@ class WorkflowsViewModel
     workflowSelected: (workflow) =>
         @selectedWorkflow(workflow)
         # Show modal to allow user to enter values for process variables
-        $("#variables-modal").modal("show")
+        # $("#variables-modal").modal("show")
         # Get process level variables for the selected workflow
         COW.cowRequest("processes/#{ workflow }").done (data) =>
             @selectedWorkflowVariables.removeAll()
@@ -62,17 +62,22 @@ class WorkflowsViewModel
             @loadWorkflowVars(vars) if vars?.length > 0
             @showWorkflowTree(data)
 
+    # Show Variable modal
+    workflowModal: =>
+        # Show modal to allow user to enter values for process variables
+        $("#variables-modal").modal("show")
+
     showWorkflowTree: (workflowJson) =>
         wflowObject = ACT_FACTORY.createWorkflow(workflowJson)
-        if @tree?
-            @tree.reload([wflowObject])
-        else
-            $("#tree").fancytree
-                source: [wflowObject]
-                imagePath: "images/" # Icon directory
-                icons: false # Disable default node icons
-                click: (event, treeData) => @selectedActivity(treeData.node.data.act)
-            @tree = $("#tree").fancytree("getTree")
+        #if @tree?
+        #    @tree.reload([wflowObject])
+        #else
+        $("#tree" +  @selectedWorkflow()).fancytree
+            source: [wflowObject]
+            imagePath: "images/" # Icon directory
+            icons: false # Disable default node icons
+            click: (event, treeData) => @selectedActivity(treeData.node.data.act)
+        @tree = $("#tree" +  @selectedWorkflow()).fancytree("getTree")
         @selectedActivity(wflowObject)
 
 
