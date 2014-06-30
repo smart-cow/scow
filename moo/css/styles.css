@@ -211,10 +211,9 @@ caption {
     position: relative;
 }
 
-#legend{
-    table { table-layout: fixed; }
+#legend table { table-layout: fixed; }
 
-}
+
 
 #legend td{
      width: 20%;

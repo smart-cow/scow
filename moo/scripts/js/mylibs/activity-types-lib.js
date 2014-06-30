@@ -458,7 +458,6 @@
 
     function Decision(data) {
       this.dragDrop = __bind(this.dragDrop, this);
-      this.dragEnter = __bind(this.dragEnter, this);
       var opt, optionsData;
       Decision.__super__.constructor.call(this, data);
       optionsData = data != null ? data.option : void 0;
@@ -478,32 +477,30 @@
       this.task = new HumanTask(data != null ? data.task : void 0);
     }
 
-    Decision.prototype.dragEnter = function(treeData) {
-      if (this.otherIsOption(treeData) || this.otherIsActivities(treeData)) {
-        return OVER_HIT_TYPE;
-      } else {
-        return false;
-      }
-    };
-
     Decision.prototype.dragDrop = function(treeData) {
-      var droppedType, otherActivity, _ref;
+      var activities, droppedActivity, droppedType, option, otherActivity, _ref;
       otherActivity = (_ref = treeData.otherNode) != null ? _ref.data.act : void 0;
       if (otherActivity != null) {
         if (otherActivity.isOption) {
           this.dragDropExistingNode(treeData);
         } else if (otherActivity.isActivities) {
-          console.log("list dropped on option");
-          console.log(treeData);
+          option = ActivityFactory.createEmpty(Option.prototype.typeString);
+          option.children[0] = otherActivity;
         }
         return;
       }
       droppedType = ActivityFactory.typeFromTreeData(treeData);
       if (droppedType.prototype.typeString === Option.prototype.typeString) {
-        return console.log("new option");
-      } else if (droppedType.prototype.typeString === Activities.prototype.typeString) {
-        return console.log("new option");
+        this.dragDropNewActivity(treeData);
+        return;
       }
+      option = ActivityFactory.createEmpty(Option.prototype.typeString);
+      if (droppedType.prototype.typeString !== Activities.prototype.typeString) {
+        activities = option.children[0];
+        droppedActivity = ActivityFactory.createEmpty(droppedType.prototype.typeString);
+        activities.children.push(droppedActivity);
+      }
+      return treeData.node.addNode([option], treeData.hitMode);
     };
 
     Decision.prototype.accept = function(visitor, node) {
@@ -536,7 +533,7 @@
       if (childActivitiesData) {
         this.children = [ActivityFactory.create(childActivitiesData)];
       } else {
-        this.children = [];
+        this.children = [ActivityFactory.createEmpty(Activities.prototype.typeString)];
       }
     }
 
