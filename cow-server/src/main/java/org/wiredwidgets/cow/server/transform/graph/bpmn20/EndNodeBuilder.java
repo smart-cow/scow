@@ -46,7 +46,7 @@ public class EndNodeBuilder extends
 	protected void buildInternal(TEndEvent node, EndActivity activity,
 			Bpmn20ProcessContext context) {
 
-		node.setName("end");
+		node.setName(activity.getName());
 
 		// NOTE: See JBPM documentation for the distinction between Terminating
 		// and

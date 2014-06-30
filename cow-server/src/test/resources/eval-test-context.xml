@@ -63,6 +63,28 @@
     
     <!-- scan and load annotated components -->
     <context:component-scan base-package= "org.wiredwidgets.cow.server.completion" /> 
+    
+    <context:component-scan base-package= "org.wiredwidgets.cow.server.transform" /> 
+    
+    <context:component-scan base-package= "org.wiredwidgets.cow.server.convert" /> 
+    
+    <bean id="conversionService"
+		class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
+		
+			<bean id="jacksonTypeFactory" class="com.fasterxml.jackson.databind.type.TypeFactory"
+		factory-method="defaultInstance" />
+
+	<bean id="jaxbAnnotationIntrospector"
+		class="com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector">
+		<!-- Note c: shortcut does not seem to work here... -->
+		<constructor-arg type="com.fasterxml.jackson.databind.type.TypeFactory">
+			<ref bean="jacksonTypeFactory" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="jacksonObjectMapper"
+		class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+		p:annotationIntrospector-ref="jaxbAnnotationIntrospector" />
 
     
 </beans>

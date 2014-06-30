@@ -44,7 +44,7 @@
   <parent>
   	<groupId>org.wiredwidgets</groupId>
   	<artifactId>scow-projects-parent</artifactId>
-  	<version>1.01-SNAPSHOT</version>
+  	<version>1.02-SNAPSHOT</version>
   </parent>
   <dependencies>
   	<dependency>
@@ -62,5 +62,17 @@
   		<artifactId>smackx</artifactId>
   		<version>3.1.0</version>
   	</dependency>
+  	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>4.3.3</version>
+	</dependency>
+	<dependency>
+		<groupId>org.codehaus.jackson</groupId>
+		<artifactId>jackson-mapper-asl</artifactId>
+		<version>1.9.13</version>
+	</dependency>
+	
+
   </dependencies>
 </project>

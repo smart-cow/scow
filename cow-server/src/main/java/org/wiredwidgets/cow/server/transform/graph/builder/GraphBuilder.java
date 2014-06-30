@@ -42,15 +42,16 @@ public class GraphBuilder {
 	
 		// create the starting graph, consisting of start, Activities, and end
 		StartActivity start = new StartActivity();
-		start.setName("Start");
+		start.setName("start");
 		EndActivity end = new EndActivity();
-		end.setName("End");
+		end.setName("end");
 		
 		Activity main = process.getActivity().getValue();
 		
 		// create the graph
 		ActivityGraph graph = new ActivityGraph();
 		graph.addVertex(start);
+		graph.setStart(start);
 		graph.addVertex(main);
 		graph.addVertex(end);
 		

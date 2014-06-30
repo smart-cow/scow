@@ -45,7 +45,7 @@ public class BypassableActivity extends Activity {
         activities.getActivities().add(factory.createActivity(wrappedActivity));
         
         Task bypassTask = new Task();
-        bypassTask.setKey("Bypass " + activity.getKey());
+        bypassTask.setName("bypass:" + activity.getName());
         activities.getActivities().add(factory.createActivity(bypassTask));
     }
 

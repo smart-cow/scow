@@ -27,22 +27,6 @@ public class ScriptEvaluator extends AbstractEvaluator<Script> {
     
     @Override
     protected void evaluateInternal() {
-    	
-    	// See BpmnScriptTaskNodeBuilder
-    	// Assignment of this variable to "true" is appended to the script
-    	// and thus executed as part of the script task
-    	
-    	// Note that this does not handle loops -- this will indicate that
-    	// the script is completed as long as it has been executed at least once
-    	
-    	String completedVarName = activity.getKey() + "_completed";
-    	String completed = info.getVariables().get(completedVarName);
-    	if (completed != null && completed.equalsIgnoreCase("true")) {
-    		this.completionState = CompletionState.COMPLETED;
-    	}
-    	else {
-    		this.completionState = branchState;
-    	}
     }
 
 	@Override

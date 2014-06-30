@@ -33,15 +33,22 @@ public class UserTaskNodeBuilder extends AbstractUserTaskNodeBuilder<Task> {
 		return Task.class;
 	}
 	
+	/**
+	 * Variables used by the system that should not be displayed to users.
+	 * @return
+	 */
     public static Set<String> getSystemVariableNames() {
     	Set<String> varNames = new HashSet<String>();
     	varNames.add(TASK_INPUT_VARIABLES_NAME);
+    	varNames.add(TASK_VARIABLES_INFO);
     	varNames.add("ProcessInstanceName");
     	varNames.add("Options");
     	varNames.add("Comment");
     	varNames.add("TaskName");    	
     	varNames.add("ActorId");   
     	varNames.add("GroupId"); 
+    	varNames.add(DecisionTaskNodeBuilder.DECISION_QUESTION);
+    	varNames.add(DecisionTaskNodeBuilder.DECISION_VAR_NAME);
     	return varNames;
     }	
 

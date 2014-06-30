@@ -48,6 +48,8 @@ public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlo
 	@Override
 	public Bpmn20Node build(Activity activity, Bpmn20ProcessContext context) {
 		U node = newNode();
+		// ensure that the activity has a unique name.  
+		activity.setName(context.getUniqueNodeName(activity.getName()));
 		setId(node, activity, context);
 		
 		buildInternal(node, (T)activity, context);
@@ -71,22 +73,7 @@ public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlo
 	
     private void setId(TFlowNode node, Activity activity, Bpmn20ProcessContext context) {
     	String id = null;
-    	// Legacy workflows created before the new ID system will have keys but the
-    	// maxID will not be set for the process.  So, we handle those as "new" workflows
-    	// the first time they are saved, in order to get the maxID set correctly.
-//    	if (context.isRevised() && activity != null && activity.getKey() != null  && !activity.getKey().isEmpty()) {
-//    		id = activity.getKey();
-//    	}
-//    	else {
-//    		id = context.generateId("_");
-//    	}
-//
-//    	node.setId(id);
-    	
-//    	if (activity != null) {
-//    		activity.setKey(id);  	
-//    	}
-    	
+	
     	if (activity.getKey() != null && !activity.getKey().contains("-")) {
     		// log.info("replacing old style key: " + activity.getKey());
     		activity.setKey(null);
@@ -97,8 +84,6 @@ public abstract class AbstractFlowNodeBuilder<T extends Activity, U extends TFlo
     	}
     	
     	node.setId(activity.getKey());
-    	
-    	
     }	
 	
 	protected final void addDataInputFromExpression(String name, String value, TActivity node) {     

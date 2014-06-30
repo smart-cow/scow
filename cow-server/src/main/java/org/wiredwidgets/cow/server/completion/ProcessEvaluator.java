@@ -20,6 +20,7 @@ import org.drools.runtime.process.ProcessInstance;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.CompletionState;
 
 @Component
 @Scope("prototype")

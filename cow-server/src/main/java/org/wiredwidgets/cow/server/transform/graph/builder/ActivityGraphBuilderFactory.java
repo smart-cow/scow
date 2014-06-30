@@ -48,7 +48,7 @@ public class ActivityGraphBuilderFactory {
 	
 	private ActivityGraphBuilder getBuilder(Activity activity) {
 		// bypass builder is a special case as we have to test the instance
-		if (activity.isBypassable()) {
+		if (activity.isBypassable() && !activity.isWrapped() ) {
 			return bypassBuilder;
 		}
 		

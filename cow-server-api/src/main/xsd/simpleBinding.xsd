@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 
     Approved for Public Release: 10-4800. Distribution Unlimited.
@@ -15,14 +15,7 @@
 
     See the License for the specific language governing permissions and limitations under the License.
 
--->
-
-<!-- See https://jaxb.dev.java.net/2.1.9/docs/vendorCustomizations.html#simple -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="no-such-thing"
-        xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-        xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-        jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
+--><!-- See https://jaxb.dev.java.net/2.1.9/docs/vendorCustomizations.html#simple --><xs:schema xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:xs="http://www.w3.org/2001/XMLSchema" jaxb:extensionBindingPrefixes="xjc" jaxb:version="2.1" targetNamespace="no-such-thing">
     <xs:annotation>
         <xs:appinfo>
             <jaxb:globalBindings>
