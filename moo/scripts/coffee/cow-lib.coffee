@@ -7,6 +7,7 @@
     String::leftOf = (char) ->
         @substr(0, @indexOf(char))
 
+    # Return the first element for which predicate(element) is true
     Array::first = (predicate) ->
         for e in @
             return e if predicate(e)

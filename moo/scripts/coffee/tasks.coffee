@@ -4,7 +4,6 @@ $ -> ko.applyBindings new TasksViewModel()
 
 # Knockout JS to observable mapping options
 TASK_MAPPING =
-    key: (item) -> ko.utils.unwrapObservable(item.id)
     variables:
         create: (options) ->
             if options.data?

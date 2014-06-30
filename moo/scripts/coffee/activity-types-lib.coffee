@@ -326,11 +326,13 @@ class Decision extends Activity
         @task = new HumanTask(data?.task)
 
 
-    dragEnter: (treeData) =>
-        if @otherIsOption(treeData) or @otherIsActivities(treeData)
-            OVER_HIT_TYPE
-        else
-            false
+
+#    dragEnter: (treeData) =>
+#        console.log("drag enter %o", treeData)
+#        if @otherIsOption(treeData) or @otherIsActivities(treeData)
+#            OVER_HIT_TYPE
+#        else
+#            false
 
     dragDrop: (treeData) =>
         otherActivity = treeData.otherNode?.data.act
@@ -338,17 +340,22 @@ class Decision extends Activity
             if otherActivity.isOption
                 @dragDropExistingNode(treeData)
             else if otherActivity.isActivities
-                #convert to option
-                console.log("list dropped on option")
-                console.log(treeData)
+                option = ActivityFactory.createEmpty(Option::typeString)
+                option.children[0] = otherActivity
             return
 
+        # Drop from a draggable
         droppedType = ActivityFactory.typeFromTreeData(treeData)
         if droppedType::typeString is Option::typeString
-            console.log("new option")
-        else if droppedType::typeString is Activities::typeString
-            console.log("new option")
-            #convert
+            @dragDropNewActivity(treeData)
+            return
+        # Wrap dropped in an option
+        option = ActivityFactory.createEmpty(Option::typeString)
+        if droppedType::typeString isnt Activities::typeString
+            activities = option.children[0]
+            droppedActivity = ActivityFactory.createEmpty(droppedType::typeString)
+            activities.children.push(droppedActivity)
+        treeData.node.addNode([option], treeData.hitMode)
 
     accept: (visitor, node) ->
         visitor.visitDecision(node)
@@ -370,7 +377,7 @@ class Option extends Activity
         if (childActivitiesData)
             @children = [ ActivityFactory.create(childActivitiesData) ]
         else
-            @children = []
+            @children = [ActivityFactory.createEmpty(Activities::typeString)]
 
     dragEnter: (treeData) =>
         if @otherIsOption(treeData) or @otherIsActivities(treeData)

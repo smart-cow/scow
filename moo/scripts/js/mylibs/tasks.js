@@ -8,9 +8,6 @@
   });
 
   TASK_MAPPING = {
-    key: function(item) {
-      return ko.utils.unwrapObservable(item.id);
-    },
     variables: {
       create: function(options) {
         var _ref;
