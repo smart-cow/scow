@@ -459,14 +459,15 @@ class Loop extends Activity
 
 class ActivityFactory
     @typeMap: {}
-    @typeMap[Activities::typeString] = Activities
     @typeMap[HumanTask::typeString] = HumanTask
+    @typeMap[Activities::typeString] = Activities 
+    @typeMap[Loop::typeString] = Loop  
+    @typeMap[Decision::typeString] = Decision    
     @typeMap[ServiceTask::typeString] = ServiceTask
     @typeMap[ScriptTask::typeString] = ScriptTask
-    @typeMap[Decision::typeString] = Decision
-    @typeMap[Exit::typeString] = Exit
-    @typeMap[Loop::typeString] = Loop
     @typeMap[Signal::typeString] = Signal
+    @typeMap[Exit::typeString] = Exit   
+    
     @typeMap[Option::typeString] = Option
 
     @create: (cowData) ->
@@ -484,9 +485,11 @@ class ActivityFactory
 
     @draggableActivities: ->
         for key, val of @typeMap
-            type: key
-            name: val::displayName
-            icon: "images/" + val::icon
+            if val::displayName isnt "Option" #An Option Should not be explicitely added
+                type: key
+                name: val::displayName
+                icon: "images/" + val::icon
+            else #Needed to not push a null object
 
     @getType: (typeName) ->
         @typeMap[typeName]

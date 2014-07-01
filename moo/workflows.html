@@ -26,30 +26,38 @@
     <script src="scripts/js/mylibs/activity-types-lib.js"></script>
     <script src="scripts/js/mylibs/workflows.js"></script>
 </head>
-<body>
-<ul class="nav nav-tabs">
-    <li><a href="activeworkflows.html"> Active Workflows </a></li>
-    <li><a href="admin.html">Admin</a></li>
-    <li><a href="tasks.html"> Tasks </a></li>
-    <li class="active"><a href="#"> Workflows </a></li>
-    <li><a href="workflowbuilder.html"> Workflow Builder </a></li>
-</ul>
+<body class="moo-body">
 
 
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+
+       <ul class="nav navbar-nav">
+        <li><a href="activeworkflows.html"> Active Workflows </a></li>
+        <li><a href="admin.html">Admin</a></li>
+        <li><a href="tasks.html"> Tasks </a></li>
+        <li class="active"><a href="#"> Workflows </a></li>
+        <li><a href="workflowbuilder.html"> Workflow Builder </a></li>
+      </ul>
+
+  </div><!-- /.container-fluid -->
+
+
+</nav>
 <div class="well-sm container">
-    <!-- Shows up when a process was successfully started -->
-    <div class="alert alert-success alert-dismissable" data-bind="visible: lastLoadedWorkflow">
-        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
-            &times;
-        </button>
-        Workflow: <strong data-bind="text: lastLoadedWorkflow"></strong> Started
-    </div>
+      <!-- Shows up when a process was successfully started -->
+      <div class="alert alert-success alert-dismissable" data-bind="visible: lastLoadedWorkflow">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+              &times;
+          </button>
+          Workflow: <strong data-bind="text: lastLoadedWorkflow"></strong> Started
+      </div>
 </div>
 
 
 <h1>Workflows</h1>
 
-<table class="table table-hover table-striped">
+<table class="table details-drop" style="border-collapse:collapse;">
     <thead>
         <tr>
             <th>Workflow</th>

@@ -8,6 +8,7 @@
     <script src="scripts/js/libs/jquery-1.11.0.js"></script>
 
     <link href="css/bootstrap.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
     <script src="scripts/js/libs/bootstrap.js"></script>
 
     <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
@@ -23,14 +24,19 @@
 	 <link href="css/styles.css" rel="stylesheet" />
 </head>
 
-<body>
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#"> Active Workflows </a></li>
-        <li><a href="admin.html">Admin</a></li>
-        <li><a href="tasks.html"> Tasks </a></li>
-        <li><a href="workflows.html"> Workflows </a></li>
-        <li><a href="workflowbuilder.html">Workflow Builder</a></li>
-    </ul>
+<body class="moo-body">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+
+           <ul class="nav navbar-nav">
+            <li class="active"><a href="#"> Active Workflows </a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="tasks.html"> Tasks </a></li>
+            <li><a href="workflows.html"> Workflows </a></li>
+            <li><a href="workflowbuilder.html"> Workflow Builder </a></li>
+          </ul>
+      </div><!-- /.container-fluid -->
+    </nav>
 
 <h1>Active Workflows</h1>
 <table id="legend" class="table table-bordered" data-bind="if: workflows().length">

@@ -9,9 +9,12 @@
     <script src="scripts/js/libs/jquery-ui-fancy-tree.js"></script>
 
     <script src="scripts/js/libs/bootstrap.js"></script>
+
     <link href="css/bootstrap.css" rel="stylesheet" />
+    
 
     <link href="css/ui.fancytree.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
     <script src="scripts/js/libs/jquery.fancytree-all.js"></script>
 
     <script src="scripts/js/libs/knockout-3.0.0.debug.js"></script>
@@ -27,56 +30,90 @@
 
 
 </head>
-<body>
+<body class="moo-body">
 
-<ul class="nav nav-tabs">
-    <li><a href="activeworkflows.html"> Active Workflows </a></li>
-    <li><a href="admin.html">Admin</a></li>
-    <li><a href="tasks.html"> Tasks </a></li>
-    <li><a href="workflows.html"> Workflows </a></li>
-    <li class="active"><a href="#">Workflow Builder</a></li>
-</ul>
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+
+       <ul class="nav navbar-nav">
+        <li><a href="activeworkflows.html"> Active Workflows </a></li>
+        <li><a href="admin.html">Admin</a></li>
+        <li><a href="tasks.html"> Tasks </a></li>
+        <li><a href="workflows.html"> Workflows </a></li>
+        <li class="active"><a href="#"> Workflow Builder </a></li>
+      </ul>
+  </div><!-- /.container-fluid -->
+</nav>
 
 <div data-bind="with: workflow">
     <h1 data-bind=" text: name"></h1>
 </div>
+<div data-bind="foreach: workflowComponents">
+    <span class="draggable workflow-component" data-bind="attr: {'data-component-type': type } ">
+        <img data-bind="attr: { src: icon, title: name }" height="25" width="25" />
+        <!--span data-bind="text: name"></span-->
+    </span>
+</div>
 
-<div id="tree"></div>
+<table class="workflowBuilder">
+<thead>
+    <tr>
+        <th>
+            Drag Components Here to Build Workflow
+        </th>
+        <th>
+            Options
+        </th>
+    </tr>
+</thead>
+    <tbody>
 
-<span data-bind="with: selectedActivity">
-    <form data-bind="foreach: apiAttributes">
-        <div class="form-group" data-bind="if: label">
-            <label data-bind="text: label"></label>
-            <span data-bind="ifnot: inputType == 'checkbox'">
-                <input data-bind="attr: { type: inputType }, value: value, valueUpdate: 'input'" />
-            </span>
-            <!-- Need to use checked instead of value databind -->
-            <span data-bind="if: inputType == 'checkbox'">
-                <input data-bind="attr: { type: inputType }, checked: value" />
-            </span>
-        </div>
-    </form>
- <!-- Variable edit section -->
-    <div>
-        <strong>Variables</strong>
-        <!-- Each variable's editors appear in a li -->
-        <ul class="form-inline" data-bind="foreach: variables">
-            <li class="form-group">
-                Name: <input class="form-control" data-bind="value: name"/>
-                Value: <input class="form-control" data-bind="value: value"/>
-                Required: <input type="checkbox" data-bind="checked: required"/>
-                Output: <input type="checkbox" data-bind="checked: output"/>
-                <button data-bind="click: $parent.removeVariable">
-                    <span class="glyphicon glyphicon-trash"></span>
-                </button>
-            </li>
-            </br>
-        </ul>
-        <button data-bind="click: addVariable">
-            <span class="glyphicon glyphicon-plus"></span> Add Variable
-        </button>
-    </div>
-</span>
+        <tr>
+            <td class="tree">
+                <div id="tree"></div>
+            </td>
+            <td>
+                <span data-bind="with: selectedActivity">
+                    <form data-bind="foreach: apiAttributes">
+                        <div class="form-group" data-bind="if: label">
+                            <label data-bind="text: label"></label>
+                            <span data-bind="ifnot: inputType == 'checkbox'">
+                                <input data-bind="attr: { type: inputType }, value: value, valueUpdate: 'input'" />
+                            </span>
+                            <!-- Need to use checked instead of value databind -->
+                            <span data-bind="if: inputType == 'checkbox'">
+                                <input data-bind="attr: { type: inputType }, checked: value" />
+                            </span>
+                        </div>
+                    </form>
+                 <!-- Variable edit section -->
+                    <div>
+                        <strong>Variables</strong>
+                        <!-- Each variable's editors appear in a li -->
+                        <ul class="form-inline" data-bind="foreach: variables">
+                            <li class="form-group">
+                                Name: <input class="form-control" data-bind="value: name"/>
+                                Value: <input class="form-control" data-bind="value: value"/>
+                                Required: <input type="checkbox" data-bind="checked: required"/>
+                                Output: <input type="checkbox" data-bind="checked: output"/>
+                                <button data-bind="click: $parent.removeVariable">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </li>
+                            </br>
+                        </ul>
+                        <button data-bind="click: addVariable">
+                            <span class="glyphicon glyphicon-plus"></span> Add Variable
+                        </button>
+                    </div>
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+
 
 <hr/>
 <button data-bind="click: save"> Save </button>
@@ -84,12 +121,7 @@
 
 <hr/>
 
-<div data-bind="foreach: workflowComponents">
-    <div class="draggable" data-bind="attr: {'data-component-type': type } ">
-        <img data-bind="attr: { src: icon }" height="25" width="25" />
-        <span data-bind="text: name"></span>
-    </div>
-</div>
+
 
 
 <br />

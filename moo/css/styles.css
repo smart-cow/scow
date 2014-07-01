@@ -218,3 +218,38 @@ caption {
 #legend td{
      width: 20%;
 }
+
+table.workflowBuilder  td{
+    padding-left: 10px;
+    vertical-align: top;
+}
+
+table.workflowBuilder {
+
+    width:100%;
+
+}
+
+ul.fancytree-container{
+    border: none;
+}
+
+body.moo-body { padding-top: 55px; }
+
+div.workflow-alert{
+    position:absolute;
+    top:30;
+
+}
+
+td.tree{
+    width: 30%
+
+}
+
+span.workflow-component {
+    padding: 5px;
+
+}
+
+

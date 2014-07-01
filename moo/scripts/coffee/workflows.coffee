@@ -24,6 +24,7 @@ class WorkflowsViewModel
         @loadWorkflows()
 
 
+
     # Build and send ajax request to start the workflow
     startWorkflow: (workflow) =>
         requestBody = processDefinitionKey: @selectedWorkflow()
