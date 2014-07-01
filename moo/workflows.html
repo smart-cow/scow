@@ -88,33 +88,33 @@
         </tr>
         <tr>
           <td class="hiddenRow" colspan="42">
-            <div class="accordian-body collapse" data-bind="attr: {id: $data}">
-              <div>
-                <div id="workflow-details">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td>
-                           <div data-bind="attr: {id: 'tree' + $data}"></div>
-                        </td>
-                        <td>
-                          <span data-bind="if: $root.selectedActivity">
-                              <ul data-bind="foreach: $root.activityApiAttrs">
-                                  <li> <b data-bind="text: label"></b>: <span data-bind="text: value"></span><br> </li>
-                              </ul>
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>           
-                </div>
+              <div class="accordian-body collapse" data-bind="attr: {id: $data}">
               </div>
-            </div>
           </td>
         </tr>
       </tbody>
 </table>
 
+<div id="hidden-row-content">
+    <div>
+        <table>
+            <tbody>
+            <tr>
+                <td>
+                    <div id="tree"></div>
+                </td>
+                <td>
+                    <span data-bind="if: $root.selectedActivity">
+                        <ul data-bind="foreach: $root.activityApiAttrs">
+                            <li> <b data-bind="text: label"></b>: <span data-bind="text: value"></span><br> </li>
+                        </ul>
+                    </span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <div id="variables-modal" class="modal fade">
   <div class="modal-dialog">

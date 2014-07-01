@@ -62,6 +62,7 @@ class WorkflowsViewModel
             vars = data.variables?.variable
             @loadWorkflowVars(vars) if vars?.length > 0
             @showWorkflowTree(data)
+            $("#" + workflow).append($("#hidden-row-content"))
 
     # Show Variable modal
     workflowModal: =>
@@ -70,15 +71,15 @@ class WorkflowsViewModel
 
     showWorkflowTree: (workflowJson) =>
         wflowObject = ACT_FACTORY.createWorkflow(workflowJson)
-        #if @tree?
-        #    @tree.reload([wflowObject])
-        #else
-        $("#tree" +  @selectedWorkflow()).fancytree
-            source: [wflowObject]
-            imagePath: "images/" # Icon directory
-            icons: false # Disable default node icons
-            click: (event, treeData) => @selectedActivity(treeData.node.data.act)
-        @tree = $("#tree" +  @selectedWorkflow()).fancytree("getTree")
+        if @tree?
+            @tree.reload([wflowObject])
+        else
+            $("#tree").fancytree
+                source: [wflowObject]
+                imagePath: "images/" # Icon directory
+                icons: false # Disable default node icons
+                click: (event, treeData) => @selectedActivity(treeData.node.data.act)
+            @tree = $("#tree").fancytree("getTree")
         @selectedActivity(wflowObject)
 
 
