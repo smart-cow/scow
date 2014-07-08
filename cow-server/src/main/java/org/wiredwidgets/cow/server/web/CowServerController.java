@@ -29,8 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.RetryCallback;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
-import org.springframework.retry.policy.AlwaysRetryPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -185,7 +184,8 @@ public abstract class CowServerController {
     
     protected static <T> T doWithRetry(RetryCallback<T> callback) {
 		RetryTemplate template = new RetryTemplate();
-		template.setRetryPolicy(new AlwaysRetryPolicy());
+		// template.setRetryPolicy(new AlwaysRetryPolicy());
+		template.setRetryPolicy(new SimpleRetryPolicy(10, null));
 		try {
 			return template.execute(callback);
 		} catch (Exception e) {
