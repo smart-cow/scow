@@ -5,6 +5,7 @@ Usage: python get-all-workflows.py [host] [output workflow directory]
 from scowclient import ScowClient
 import sys
 import os
+import urllib2
 
 def getBaseUrl():
     host = "scout3" if len(sys.argv) == 1 else sys.argv[1]
@@ -22,7 +23,12 @@ def getProcKeys(scow):
 
 def getProcs(scow):
     procKeys = getProcKeys(scow)
-    return ( (key, scow.processes(key)) for key in procKeys)
+    for key in procKeys:
+        try:
+            yield (key, scow.processes(key))
+        except urllib2.HTTPError:
+            print "Unable to get process:", key
+
 
 
 def saveProc(key, proc, wflowDir):
