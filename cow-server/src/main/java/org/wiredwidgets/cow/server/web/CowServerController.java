@@ -185,7 +185,9 @@ public abstract class CowServerController {
     protected static <T> T doWithRetry(RetryCallback<T> callback) {
 		RetryTemplate template = new RetryTemplate();
 		// template.setRetryPolicy(new AlwaysRetryPolicy());
-		template.setRetryPolicy(new SimpleRetryPolicy(10, null));
+		SimpleRetryPolicy srp = new SimpleRetryPolicy();
+		srp.setMaxAttempts(10);
+		template.setRetryPolicy(srp);
 		try {
 			return template.execute(callback);
 		} catch (Exception e) {

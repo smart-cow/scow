@@ -22,7 +22,7 @@
 		<module>rem2-api</module>
 		<module>cow-server-api</module>
 		<module>cow-server</module>
-		<module>cow-webapp</module>
+<!-- 		<module>cow-webapp</module> -->
 	</modules>
 
 	<build>
