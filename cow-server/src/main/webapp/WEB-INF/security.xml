@@ -33,13 +33,17 @@
                              http://www.springframework.org/schema/security/spring-security-oauth2-1.0.xsd">
     
     <context:property-placeholder location="file:${COW_APPS_HOME}/cow-server/config/cow-server.properties" />
-    
-    <http create-session="stateless" auto-config="false"  >
+
+
+    <http create-session="stateless" auto-config="false" use-expressions="true">
     	<!-- entry-point-ref="http403EntryPoint" -->
-    	<intercept-url pattern="/**" access="IS_AUTHENTICATED_FULLY" />
+        <intercept-url pattern="/**" access="permitAll" method="OPTIONS"/>
+    	<intercept-url pattern="/**" access="isAuthenticated()" />
     	<http-basic />
-    </http>    
-    
+    </http>
+
+
+
     <!-- If pre-authentication fails, there is nothing to do but respond with a 403 -->
     <b:bean id="http403EntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
       
