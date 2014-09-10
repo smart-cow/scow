@@ -36,10 +36,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.log4j.Logger;
 import org.drools.runtime.process.WorkItem;
 import org.drools.runtime.process.WorkItemHandler;
 import org.drools.runtime.process.WorkItemManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +53,7 @@ import org.w3c.dom.NodeList;
 
 public class RestServiceTaskHandler implements WorkItemHandler {
 
-	private static Logger log = Logger.getLogger(RestServiceTaskHandler.class);
+	private static Logger log = LoggerFactory.getLogger(RestServiceTaskHandler.class);
 
 	@Autowired
 	RestTemplate restTemplate; 
@@ -107,6 +108,7 @@ public class RestServiceTaskHandler implements WorkItemHandler {
 		if (xpath != null && !xpath.isEmpty()) {
 			try {
 				result = evalXpath(xpath, result);
+				log.info("Result after xpath: {}", result);
 			} catch (Exception e) {
 				log.info("xpath evaluation failed, returning entire response");
 			}

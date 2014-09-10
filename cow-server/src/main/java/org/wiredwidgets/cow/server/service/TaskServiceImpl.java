@@ -210,7 +210,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         // So, instead, we get the current values directly from the process instance, rather than the values copied into the task
         
         Long processInstanceId = task.getTaskData().getProcessInstanceId();
-        Map<String, Object> currentProcessVarsMap = null;
         
         WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(processInstanceId);
         if (pi == null) {
@@ -234,7 +233,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         // if any required variables were not provided, throw an exception
         verifyRequiredVariables(variables, varsInfoMap);
         
-        currentProcessVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
+        Map<String, Object> currentProcessVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
+        log.debug("Current value of generic map from process instance: {}", currentProcessVarsMap);
         
         if (currentProcessVarsMap != null) {
         	// initialize the output map with the input values
@@ -261,10 +261,12 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	}
     	}
         
-        if (outputVarsMap.size() > 0) {
+        // NOTE: even if empty, we still need to add the map as an output
+        // otherwise we will set the process level generic map to NULL!
+        //if (outputVarsMap.size() > 0) {
         	log.debug("Adding map to output: {}", outputVarsMap);
         	outputMap.put(TASK_OUTPUT_VARIABLES_NAME, outputVarsMap);   
-        }
+        //}
        
         // The task must be started before we complete it.
         if (task.getTaskData().getStatus().equals(org.jbpm.task.Status.Reserved)) {
@@ -284,8 +286,13 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         log.debug("Completing task...");
         taskClient.completeWithResults(id, assignee, outputMap);
         
-        // note that we have to pass the variables again.        
+        // note that we have to pass the variables again. 
+        log.debug("Completing workItem...");
         kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), outputMap);
+        
+        // for debugging
+        currentProcessVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
+        log.debug("Value of generic map after task completed: {}", currentProcessVarsMap);
         
     }
 
